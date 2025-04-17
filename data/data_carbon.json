@@ -1,0 +1,110 @@
+{
+  "name": "Food",
+  "children": [
+    {
+      "name": "Dairy Products",
+      "children": [
+        { "name": "Cheese", "value": 30 },
+        { "name": "Cream", "value": 20 },
+        { "name": "Milk", "value": 50 },
+        { "name": "Yoghurt", "value": 25 },
+        { "name": "Butter", "value": 15 }
+      ]
+    },
+    {
+      "name": "Meat",
+      "children": [
+        {
+          "name": "Beef",
+          "children": [
+            { "name": "Steak", "value": 20 },
+            { "name": "Minced Beef", "value": 25 }
+          ]
+        },
+        { "name": "Chicken", "value": 40 },
+        { "name": "Pork", "value": 35 },
+        { "name": "Lamb", "value": 20 }
+      ]
+    },
+    {
+      "name": "Fish",
+      "children": [
+        { "name": "Salmon", "value": 25 },
+        { "name": "Carp", "value": 10 },
+        { "name": "Tuna", "value": 30 },
+        {
+          "name": "Anchovy",
+          "children": [
+            { "name": "Fresh", "value": 5 },
+            { "name": "Canned", "value": 8 }
+          ]
+        },
+        { "name": "Haddock", "value": 15 }
+      ]
+    },
+    {
+      "name": "Vegetables",
+      "children": [
+        {
+          "name": "Root Vegetables",
+          "children": [
+            { "name": "Carrot", "value": 20 },
+            { "name": "Turnip", "value": 10 }
+          ]
+        },
+        { "name": "Lettuce", "value": 15 },
+        { "name": "Spinach", "value": 12 },
+        { "name": "Tomato", "value": 18 }
+      ]
+    },
+    {
+      "name": "Fruits",
+      "children": [
+        { "name": "Strawberry", "value": 10 },
+        { "name": "Banana", "value": 20 },
+        { "name": "Apple", "value": 30 },
+        { "name": "Kiwi", "value": 15 },
+        { "name": "Cherry", "value": 10 },
+        {
+          "name": "Blueberry",
+          "children": [
+            { "name": "Wild Blueberry", "value": 5 },
+            { "name": "Cultivated Blueberry", "value": 7 }
+          ]
+        },
+        { "name": "Orange", "value": 25 },
+        { "name": "Pineapple", "value": 18 }
+      ]
+    },
+    {
+      "name": "Drinks",
+      "children": [
+        { "name": "Water", "value": 30 },
+        { "name": "Alcohol", "value": 50 },
+        {
+          "name": "Soda",
+          "children": [
+            { "name": "Cola", "value": 20 },
+            { "name": "Lemon-Lime", "value": 15 }
+          ]
+        },
+        { "name": "Juice", "value": 35 }
+      ]
+    },
+    {
+      "name": "Cereals",
+      "children": [
+        { "name": "Wheat", "value": 40 },
+        { "name": "Rice", "value": 35 },
+        {
+          "name": "Oats",
+          "children": [
+            { "name": "Rolled Oats", "value": 10 },
+            { "name": "Steel-cut Oats", "value": 12 }
+          ]
+        },
+        { "name": "Corn", "value": 28 }
+      ]
+    }
+  ]
+}
