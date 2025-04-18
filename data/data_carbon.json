@@ -59,6 +59,10 @@
           "name": "drink",
           "children": [
             {
+              "name": "beer",
+              "value": 0.69
+            },
+            {
               "name": "orange juice",
               "value": 0.46
             },
@@ -67,8 +71,8 @@
               "value": 2.78
             },
             {
-              "name": "soy milk",
-              "value": 0.78
+              "name": "wine",
+              "value": 0.66
             }
           ]
         },
@@ -247,10 +251,6 @@
         {
           "name": "cheese",
           "children": [
-            {
-              "name": "cheese",
-              "value": 8.93
-            },
             {
               "name": "cream",
               "value": 5.45
