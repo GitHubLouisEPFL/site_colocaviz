@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", function () {
     svg.selectAll("*").remove();
 
     const breadcrumbHeight = 20;
-    const breadcrumbWidth = 100;
+    const breadcrumbWidth = 174;
     const nodes = node.children || [];
 
     const values = nodes.map(d => d.value);
