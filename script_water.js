@@ -140,42 +140,45 @@ document.addEventListener("DOMContentLoaded", function () {
       const valueNode = textGroup.select("text.value").node();
       const rectWidth = x(d.x1) - x(d.x0);
       const rectHeight = y(d.y1) - y(d.y0);
-      
-      // Espace disponible pour les deux textes
-      const availableHeight = rectHeight - 10;
-      
-      let fontSize = 14;
+
+      const availableHeight = rectHeight - 0;
+      let fontSize = 17;
+
       textGroup.selectAll("text").style("font-size", fontSize + "px");
-      
-      // Vérifier si les textes sont trop larges
+
       let nameWidth = nameNode.getBBox().width;
       let valueWidth = valueNode.getBBox().width;
       let totalHeight = nameNode.getBBox().height + valueNode.getBBox().height;
-      
-      // Réduire progressivement la taille de police jusqu'à ce que tout rentre
-      while ((Math.max(nameWidth, valueWidth) > rectWidth - 6 || totalHeight > availableHeight) && fontSize > 6) {
+
+      while ((Math.max(nameWidth, valueWidth) > rectWidth - 6 || totalHeight > availableHeight) && fontSize > 3) {
         fontSize -= 1;
         textGroup.selectAll("text").style("font-size", fontSize + "px");
         nameWidth = nameNode.getBBox().width;
         valueWidth = valueNode.getBBox().width;
         totalHeight = nameNode.getBBox().height + valueNode.getBBox().height;
       }
-      
-      // Si le nom est toujours trop long même avec la plus petite police, tronquer
-      if (fontSize === 6 && nameWidth > rectWidth - 6) {
-        let text = d.data.name;
-        let nameElement = textGroup.select("text.name");
-        while (text.length > 0 && nameNode.getBBox().width > rectWidth - 6) {
-          text = text.slice(0, -1);
-          nameElement.text(text + "…");
+
+      // Fonction pour tronquer un texte avec "…" si trop large
+      const truncateText = (text, node, maxWidth) => {
+        let truncated = text;
+        const selection = d3.select(node);
+        while (truncated.length > 0 && node.getBBox().width > maxWidth) {
+          truncated = truncated.slice(0, -1);
+          selection.text(truncated + "…");
         }
+      };
+
+      // Tronquer le nom si nécessaire
+      if (nameNode.getBBox().width > rectWidth - 6) {
+        truncateText(d.data.name, nameNode, rectWidth - 6);
       }
-      
-      // Si le rectangle est trop petit, masquer tout le texte
-      if (fontSize <= 6 || rectWidth < 30 || rectHeight < 25) {
-        textGroup.selectAll("text").text("");
+
+      // Tronquer la valeur si nécessaire
+      if (valueNode.getBBox().width > rectWidth - 6) {
+        truncateText(String(d.value), valueNode, rectWidth - 6);
       }
     });
+
   }
 
   function updateCarbonTreemap(path, source) {
