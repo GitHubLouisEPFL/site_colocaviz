@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Comparateur d'Aliments</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="comparison">
+
+    <header>
+        <nav class="top-nav">
+          <a href="index.html">🏠 Home</a>
+          <a href="inventory.html" class="active">📝 Inventory</a>
+          <a href="comparateur.html">📊 Comparison</a>
+          <a href="#">🌍 Visualizations</a>
+          <a href="basket.html">🛒 Basket</a>
+        </nav>
+    </header>
+
+  <div class="container-comp">
+    <h1>Comparateur d'Aliments</h1>
+
+    <div class="selection-interface-comp">
+      <!-- Sélecteur avec fil d'Ariane à gauche -->
+      <div class="breadcrumb-selector-comp">
+        <h2>Parcourir les catégories</h2>
+        <div class="breadcrumb-comp" id="breadcrumb">
+          <span class="breadcrumb-item active" data-path="root">Accueil</span>
+        </div>
+        <div class="category-list-comp" id="categoryList">
+          <!-- Les catégories/aliments seront générées dynamiquement ici -->
+          <div class="loading-comp">Chargement des données...</div>
+        </div>
+      </div>
+
+      <!-- Panier d'aliments sélectionnés à droite -->
+      <div class="food-basket-comp">
+        <h2>Aliments sélectionnés</h2>
+        <div id="selectedFoods" class="selected-foods-comp">
+          <p class="empty-basket-comp">Aucun aliment sélectionné</p>
+        </div>
+        <button id="compareBtn" disabled>Comparer</button>
+      </div>
+    </div>
+
+    <div class="chart-container-comp">
+      <canvas id="comparisonChart" width="600" height="300"></canvas>
+    </div>
+  </div>
+
+  <script src="assets/js/comparateur.js"></script>
+</body>
+</html>
