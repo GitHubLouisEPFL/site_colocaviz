@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Groceries simulator</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body class="basket-page">
+    
+    <header>
+        <nav class="top-nav">
+          <a href="index.html">🏠 Home</a>
+          <a href="inventory.html" class="active">📝 Inventory</a>
+          <a href="comparateur.html">📊 Comparison</a>
+          <a href="#">🌍 Visualizations</a>
+          <a href="basket.html">🛒 Basket</a>
+        </nav>
+    </header>
+
+    <div class="basket-container">
+        <header class="basket-header">
+            <h1>🛒 Groceries Impact Simulator</h1>
+        </header>
+
+        <nav id="breadcrumb">
+            <span class="breadcrumb-item" data-level="0">food category</span>
+        </nav>
+
+        <main>
+            <section id="category-container"></section>
+            <section id="subcategory-container" class="hidden"></section>
+            <section id="item-container" class="hidden"></section>
+        </main>
+
+        <aside id="cart">
+            <h2>🛒 Basket</h2>
+            <ul id="cart-list"></ul>
+            <div id="totals">
+                <p>Used water 💧 : <span id="water-total">0</span> liters</p>
+                <p>Carbon emissions 🌫️ : <span id="carbon-total">0</span> kg CO₂e</p>
+            </div>
+            <button id="clear-cart">Empty the basket</button>
+        </aside>
+    </div>
+
+    <script src="assets/js/basket.js"></script>
+    <script src="assets/js/fruits.js"></script>
+</body>
+</html>
