@@ -1,5 +1,41 @@
 // Main modular functions for world map visualization
 
+// Global cache for Paris SVG data
+let parisDataCache = null;
+let parisDataPromise = null;
+
+/**
+ * Fetches Paris SVG data with caching
+ * @returns {Promise<Array>} Promise resolving to array of path data
+ */
+function fetch_paris_svg() {
+    // Return cached data if available
+    if (parisDataCache) {
+        return Promise.resolve(parisDataCache);
+    }
+    
+    // Return existing promise if already fetching
+    if (parisDataPromise) {
+        return parisDataPromise;
+    }
+    https://github.com/com-480-data-visualization/com480-project-colocaviz/tree/13a44cb13c2e05ef4871acfcc794aedef8cec6ce/data
+    // Create new fetch promise
+    parisDataPromise = fetch('https://raw.githubusercontent.com/GitHubLouisEPFL/site_colocaviz/bbe178cd7725a4e7fcafb7954e484f83d92838ef/svg_files/paris_border.svg')
+        .then(res => res.text())
+        .then(svg => {
+            const matches = svg.match(/<path[^>]*d="([^"]+)"/g) || [];
+            const dValues = matches.map(m => m.match(/d="([^"]+)"/)[1]);
+            parisDataCache = dValues; // Cache the result
+            return dValues;
+        })
+        .catch(error => {
+            console.error("Error fetching or processing the SVG:", error);
+            parisDataPromise = null; // Reset promise on error to allow retry
+            throw error;
+        });
+    
+    return parisDataPromise;
+}
 
 /**
  * Creates country-wide JSON with styling information
@@ -13,23 +49,21 @@ function createCountryWideJson(countryJson, colorGradient = ['#FADC00', '#FD1D1D
     const defaultMapping = (value, min, max) => {
         return (value - min) / (max - min);
     };
-
     const mappingFn = colorMappingFunction || defaultMapping;
-
+    
     // Extract values for min/max calculation
     const values = Object.values(countryJson).map(country => country.value);
     const minValue = Math.min(...values);
     const maxValue = Math.max(...values);
-
+    
     // Create color scale using D3
     const colorScale = d3.scaleLinear()
         .domain([0, 1])
         .range(colorGradient);
-
+    
     // Create styled country data
     return Object.entries(countryJson).reduce((acc, [countryCode, data]) => {
         const normalizedValue = mappingFn(data.value, minValue, maxValue);
-
         acc[countryCode] = {
             ...data,
             fillColor: colorScale(normalizedValue),
@@ -38,7 +72,6 @@ function createCountryWideJson(countryJson, colorGradient = ['#FADC00', '#FD1D1D
             hoverText: `${data.country_name}: ${data.value} ${data.unit}`,
             normalizedValue
         };
-
         return acc;
     }, {});
 }
@@ -57,13 +90,13 @@ function createWorldMap(width, height, countryWideJson, containerId, onCountrySe
     // Create SVG element
     const container = document.getElementById(containerId);
     container.innerHTML = '';
-
+    
     const svg = d3.select(container)
         .append('svg')
         .attr('width', width)
         .attr('height', height)
         .attr('class', 'world-map');
-
+    
     // Create loader element
     const loader = document.createElement('div');
     loader.textContent = 'Loading map data...';
@@ -72,7 +105,11 @@ function createWorldMap(width, height, countryWideJson, containerId, onCountrySe
     loader.style.left = '50%';
     loader.style.transform = 'translate(-50%, -50%)';
     container.appendChild(loader);
-
+    // Use .then to access the data after loading
+    loadCSVData().then(data => {
+    console.log("random loading", data);
+    });
+    
     // Load world map data
     Promise.all([
         d3.tsv('https://unpkg.com/world-atlas@1.1.4/world/50m.tsv'),
@@ -80,31 +117,31 @@ function createWorldMap(width, height, countryWideJson, containerId, onCountrySe
     ]).then(([tsvData, topoJSONdata]) => {
         // Remove loader
         container.removeChild(loader);
-
+        
         // Create country name lookup
         const countryNames = tsvData.reduce((acc, d) => {
             acc[d.iso_n3] = d.name;
             return acc;
         }, {});
-
+        
         // Convert TopoJSON to GeoJSON
         const countries = topojson.feature(topoJSONdata, topoJSONdata.objects.countries);
-
+        
         // Setup projection and path generator
         const projection = d3.geoNaturalEarth1()
             .fitSize([width, height], countries);
         const pathGenerator = d3.geoPath().projection(projection);
-
+        
         // Create container for zoom
         const g = svg.append('g');
-
+        
         // Add background
         g.append('rect')
             .attr('class', 'background')
             .attr('width', width)
             .attr('height', height)
             .attr('fill', '#ffffff');
-
+        
         // Add countries
         g.selectAll('path')
             .data(countries.features)
@@ -139,7 +176,7 @@ function createWorldMap(width, height, countryWideJson, containerId, onCountrySe
                 }
                 return countryNames[d.id] || 'Unknown';
             });
-
+        
         // Add zoom behavior with better responsiveness
         const zoomHandler = d3.zoom()
             .scaleExtent([0.5, 10]) // Allow zoom out to 0.5x and in to 10x
@@ -151,9 +188,9 @@ function createWorldMap(width, height, countryWideJson, containerId, onCountrySe
                 g.selectAll('.country')
                     .attr('stroke-width', 0.5 / event.transform.k);
             });
-
+        
         svg.call(zoomHandler);
-
+        
         // Call the onDataLoaded callback if provided
         if (onDataLoaded) {
             onDataLoaded({
@@ -164,7 +201,7 @@ function createWorldMap(width, height, countryWideJson, containerId, onCountrySe
             });
         }
     });
-
+    
     // Return control object
     return {
         update: (newCountryWideJson) => {
@@ -186,6 +223,7 @@ function createWorldMap(width, height, countryWideJson, containerId, onCountrySe
         }
     };
 }
+
 /**
  * Creates a small area visualization for a selected country
  * @param {Object} countryData - Data for the selected country
@@ -207,14 +245,46 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
         .attr('width', width)
         .attr('height', height)
         .attr('class', 'small-area-visualization');
-
+    
     const margin = { top: 40, right: 20, bottom: 60, left: 40 };
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
-
+    
     // Create container
     const g = svg.append('g')
         .attr('transform', `translate(${margin.left},${margin.top})`);
+    
+    // Store gradient reference for updates
+    let currentGradient = null;
+    
+    // Function to update gradient
+    function updateGradient(newColor, newPercentage) {
+        if (currentGradient) {
+            // Remove existing stops
+            currentGradient.selectAll("stop").remove();
+            
+            // Add new stops with updated values
+            currentGradient.append("stop")
+                .attr("offset", "0%")
+                .style("stop-color", newColor)
+                .style("stop-opacity", 1);
+            
+            currentGradient.append("stop")
+                .attr("offset", newPercentage + "%")
+                .style("stop-color", newColor)
+                .style("stop-opacity", 1);
+            
+            currentGradient.append("stop")
+                .attr("offset", newPercentage + "%")
+                .style("stop-color", "#e0e0e0")
+                .style("stop-opacity", 1);
+            
+            currentGradient.append("stop")
+                .attr("offset", "100%")
+                .style("stop-color", "#e0e0e0")
+                .style("stop-opacity", 1);
+        }
+    }
    
     // Function to render the visualization
     function render(data, feature) {
@@ -224,6 +294,7 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
         
         // Clear existing content
         g.selectAll("*").remove();
+        svg.selectAll("defs").remove(); // Clear any existing defs
         
         // Check if we have country data
         if (!data) {
@@ -235,7 +306,7 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
                 .text('Select a country to view details');
             return;
         }
-
+        
         // Add main title
         g.append('text')
             .attr('x', innerWidth / 2)
@@ -244,7 +315,9 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
             .attr('font-weight', 'bold')
             .attr('font-size', '16px')
             .text(data.country_name);
+        
         const area_percentage = Math.round((data.normalizedValue || 0) * 100);
+        
         // Add subtitle with percentage of maximum value
         g.append('text')
             .attr('x', innerWidth / 2)
@@ -262,128 +335,63 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
             .attr('font-size', '14px')
             .attr('font-weight', 'bold')
             .text(`${data.value} ${data.unit}`);
-
-        // Create country SVG section (top half)
-        const countrySection = g.append('g')
-            .attr('class', 'country-section');
-
-        const countrySectionHeight = (innerHeight - 40) / 2;
-
-        // if (feature && geoData) {
-        //     // Create a projection for the individual country
-        //     const bounds = d3.geoBounds(feature);
-        //     const countryProjection = d3.geoMercator()
-        //         .fitSize([innerWidth - 20, countrySectionHeight - 20], feature);
-            
-        //     const countryPathGenerator = d3.geoPath().projection(countryProjection);
-
-        //     // Add country shape
-        //     countrySection.append('path')
-        //         .datum(feature)
-        //         .attr('d', countryPathGenerator)
-        //         .attr('fill', data.fillColor || '#69b3a2')
-        //         .attr('stroke', data.outlineColor || '#333')
-        //         .attr('stroke-width', 1.5)
-        //         .attr('transform', 'translate(10,10)')
-        //         .attr('filter', 'drop-shadow(2px 2px 4px rgba(0,0,0,0.2))');
-
-            
-        // } else {
-        //     // Fallback if no geographic feature available
-        //     countrySection.append('rect')
-        //         .attr('x', 10)
-        //         .attr('y', 10)
-        //         .attr('width', innerWidth - 20)
-        //         .attr('height', countrySectionHeight - 20)
-        //         .attr('fill', data.fillColor || '#69b3a2')
-        //         .attr('stroke', data.outlineColor || '#333')
-        //         .attr('stroke-width', 2)
-        //         .attr('rx', 8);
-
-        //     countrySection.append('text')
-        //         .attr('x', innerWidth / 2)
-        //         .attr('y', countrySectionHeight / 2)
-        //         .attr('text-anchor', 'middle')
-        //         .attr('fill', 'white')
-        //         .attr('font-weight', 'bold')
-        //         .attr('font-size', '14px')
-        //         .text(data.country_name);
-        // }
-
-
-        const svgCenterGroup = svg.append('g')
-        .attr('class', 'centered-paris-group')
-        .attr('transform', `translate(${width / 2}, ${height / 2})`);
         
+        // Now fetch and render Paris - only when render is called
         fetch_paris_svg().then(dValues => {
+            if (!dValues || dValues.length === 0) {
+                console.error('No Paris SVG data available');
+                return;
+            }
+            
             const pathData = dValues[0];
-
             const viewBoxWidth = 1000;
             const viewBoxHeight = 1000;
-
-            // Set the size we want to show Paris within
-            const targetWidth = innerWidth * 0.8;  // Use 60% of available width
-            const targetHeight = innerHeight * 0.8;
-
-            const scale = Math.min(targetWidth / viewBoxWidth, targetHeight / viewBoxHeight);
-
-            // Append group inside center group
-            const parisGroup = svg.select('.centered-paris-group')
-                .append('g')
-                .attr('transform', `scale(${scale}) translate(${-viewBoxWidth / 2}, ${-viewBoxHeight / 2})`);
-
-            //Create a linear gradient for the fill color
-            //make defs and add the linear gradient
-            var lg = parisGroup.append("defs").append("linearGradient")
-            .attr("id", "mygrad")//id of the gradient
-            .attr("x1", "0%")
-            .attr("x2", "100%")
-            .attr("y1", "0%")
-            .attr("y2", "0%");//since its a vertical linear gradient
             
-            lg.append("stop")
-            .attr("offset", "0%")
-            .style("stop-color", data.fillColor )//end in red
-            .style("stop-opacity", 1)
-
-            lg.append("stop")
-            .attr("offset",`${area_percentage}%`)
-            .style("stop-color", data.fillColor)//start in blue
-            .style("stop-opacity", 1)
-            lg.append("stop")
-            .attr("offset", `${area_percentage}%`)
-            .style("stop-color", "#e0e0e0")//start in blue
-            .style("stop-opacity", 1)
-
-            lg.append("stop")
-            .attr("offset", "100%")
-            .style("stop-color", "#e0e0e0")//start in blue
-            .style("stop-opacity", 1)
-
+            // Set the size we want to show Paris within
+            const targetWidth = innerWidth * 0.6;  // Use 60% of available width
+            const targetHeight = (innerHeight - 60) * 0.8; // Account for titles
+            const scale = Math.min(targetWidth / viewBoxWidth, targetHeight / viewBoxHeight);
+            
+            // Create center group for Paris
+            const parisGroup = g.append('g')
+                .attr('class', 'paris-group')
+                .attr('transform', `translate(${innerWidth / 2}, ${(innerHeight + 40) / 2}) scale(${scale}) translate(${-viewBoxWidth / 2}, ${-viewBoxHeight / 2})`);
+            
+            // Create gradient definition
+            const defs = svg.append("defs");
+            const lg = defs.append("linearGradient")
+                .attr("id", "mygrad")
+                .attr("x1", "0%")
+                .attr("x2", "100%")
+                .attr("y1", "0%")
+                .attr("y2", "0%");
+            
+            // Store the gradient reference
+            currentGradient = lg;
+            
+            // Set up gradient with current data
+            updateGradient(data.fillColor, area_percentage);
+            
+            // Add Paris path with gradient fill
             parisGroup.append('path')
                 .attr('d', pathData)
                 .attr('fill', "url(#mygrad)")
                 .attr('stroke', 'black')
-                .attr('stroke-width', 4 / scale); // Adjust stroke so it's not too thick when scaled
-            // This script modifies an SVG file to change the gradient fill of a path element.
-            
-
+                .attr('stroke-width', 4 / scale);
+                
+        }).catch(error => {
+            console.error('Failed to load Paris SVG:', error);
+            // Show error message in the visualization
+            g.append('text')
+                .attr('x', innerWidth / 2)
+                .attr('y', (innerHeight + 40) / 2)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '12px')
+                .attr('fill', 'red')
+                .text('Failed to load Paris visualization');
         });
-
-
-        // dataSection.append('rect')
-        // .attr('x', 2)
-        // .attr('y', 12)
-        // .attr('width', Math.max(0, (innerWidth - 4) * (data.normalizedValue || 0)))
-        // .attr('height', 21)
-        // .attr('fill', data.fillColor || '#69b3a2')
-        // .attr('fill-opacity', 0.8)
-        // .attr('rx', 4);
-
-        // Add percentage label
-        
     }
-
+    
     // Initial render
     render(countryData, countryFeature);
     
@@ -420,7 +428,7 @@ function createVisualizationPage(countryJson, smallAreaFunction = null, width = 
     container.style.display = 'flex';
     container.style.flexDirection = 'row';
     container.style.gap = '20px';
-
+    
     // Create map container
     const mapContainer = document.createElement('div');
     mapContainer.id = 'map-container';
@@ -429,14 +437,14 @@ function createVisualizationPage(countryJson, smallAreaFunction = null, width = 
     mapContainer.style.border = '1px solid #ccc';
     mapContainer.style.borderRadius = '4px';
     container.appendChild(mapContainer);
-
+    
     // Create title for map
     const mapTitle = document.createElement('h3');
     mapTitle.textContent = 'World Map';
     mapTitle.style.margin = '10px';
     mapTitle.style.fontWeight = 'bold';
     mapContainer.appendChild(mapTitle);
-
+    
     // Create actual map container
     const actualMapContainer = document.createElement('div');
     actualMapContainer.id = 'actual-map-container';
@@ -446,7 +454,7 @@ function createVisualizationPage(countryJson, smallAreaFunction = null, width = 
     actualMapContainer.style.left = '0';
     actualMapContainer.style.right = '0';
     mapContainer.appendChild(actualMapContainer);
-
+    
     // Create detail container
     const detailContainer = document.createElement('div');
     detailContainer.id = 'detail-container';
@@ -455,14 +463,14 @@ function createVisualizationPage(countryJson, smallAreaFunction = null, width = 
     detailContainer.style.border = '1px solid #ccc';
     detailContainer.style.borderRadius = '4px';
     container.appendChild(detailContainer);
-
+    
     // Create title for detail
     const detailTitle = document.createElement('h3');
     detailTitle.textContent = 'Country Details';
     detailTitle.style.margin = '10px';
     detailTitle.style.fontWeight = 'bold';
     detailContainer.appendChild(detailTitle);
-
+    
     // Create actual detail container
     const actualDetailContainer = document.createElement('div');
     actualDetailContainer.id = 'actual-detail-container';
@@ -472,17 +480,18 @@ function createVisualizationPage(countryJson, smallAreaFunction = null, width = 
     actualDetailContainer.style.left = '0';
     actualDetailContainer.style.right = '0';
     detailContainer.appendChild(actualDetailContainer);
-
+    
     // Process the country JSON to add styling
     const countryWideJson = createCountryWideJson(countryJson);
-
+    
     // Current selected country and geographic data
     let selectedCountry = null;
     let geoData = null;
-
+    
     // Create the detail visualization first (will be updated once geo data loads)
     const mapWidth = width / 2 - 30;
     const mapHeight = height - 60;
+    
     const detailViz = createSmallAreaVisualization(
         null,
         null, // no feature initially
@@ -490,7 +499,7 @@ function createVisualizationPage(countryJson, smallAreaFunction = null, width = 
         mapHeight,
         'actual-detail-container'
     );
-
+    
     // Create the world map with callbacks
     const map = createWorldMap(
         mapWidth, 
@@ -509,13 +518,12 @@ function createVisualizationPage(countryJson, smallAreaFunction = null, width = 
             console.log('Geographic data loaded and available for detail viz');
         }
     );
-
+    
     // Return control object
     return {
         update: (newCountryJson) => {
             const newCountryWideJson = createCountryWideJson(newCountryJson);
             map.update(newCountryWideJson);
-
             // Reset selected country
             selectedCountry = null;
             detailViz.update(null, null, geoData);
@@ -531,17 +539,4 @@ function createVisualizationPage(countryJson, smallAreaFunction = null, width = 
             }
         }
     };
-}
-
-function fetch_paris_svg() {
-    return fetch('https://raw.githubusercontent.com/GitHubLouisEPFL/site_colocaviz/bbe178cd7725a4e7fcafb7954e484f83d92838ef/svg_files/paris_border.svg')
-        .then(res => res.text())
-        .then(svg => {
-            const matches = svg.match(/<path[^>]*d="([^"]+)"/g) || [];
-            const dValues = matches.map(m => m.match(/d="([^"]+)"/)[1]);
-            return dValues;
-        })
-        .catch(error => {
-            console.error("Error fetching or processing the SVG:", error);
-        });
 }
