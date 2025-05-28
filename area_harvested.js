@@ -566,7 +566,7 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
  * @param {string} containerId - ID of the main container
  * @returns {Object} - Control object with update method
  */
-function createVisualizationPage(countryJson, smallAreaFunction = null, width = 1000, height = 500, containerId = 'visualization-container') {
+function createVisualizationPage(smallAreaFunction = null, width = 1000, height = 500, containerId = 'visualization-container') {
     // Get container
     const container = document.getElementById(containerId);
     container.innerHTML = '';

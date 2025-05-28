@@ -50,53 +50,17 @@
 
   <script>
     // Sample country data
-    const countryJson = {
-      "United States": { // USA
-        "country_name": "United States",
-        "value": 100,
-        "unit": "T/year",
-        "other_info": "Example data"
-      },
-      "China": { // China
-        "country_name": "China",
-        "value": 80,
-        "unit": "T/year",
-        "other_info": "Example data"
-      },
-      "India": { // India
-        "country_name": "India",
-        "value": 60,
-        "unit": "T/year",
-        "other_info": "Example data"
-      },
-      "Brazil": { // Brazil
-        "country_name": "Brazil",
-        "value": 40,
-        "unit": "T/year",
-        "other_info": "Example data"
-      },
-      "Germany": { // Germany
-        "country_name": "Germany",
-        "value": 30,
-        "unit": "T/year",
-        "other_info": "Example data"
-      }
-    };
+    
 
     // Initialize visualization when the page loads
     document.addEventListener('DOMContentLoaded', () => {
       // Create the visualization with default settings
       const viz = createVisualizationPage(
-        countryJson,
         null, // Use default small area visualization
         1000, // Width
         500   // Height
       );
 
-      // Example of programmatically selecting a country
-      // setTimeout(() => {
-      //   viz.selectCountry("840"); // Select USA after 2 seconds
-      // }, 2000);
     });
   </script>
 </body>
