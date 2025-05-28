@@ -1,9 +1,45 @@
 // Main modular functions for world map visualization
 
+let csvdata = null;
+let csvDataPromise = null;
+/**
+ * Fetches Paris SVG data with caching
+ * @returns {Promise<Array>} Promise resolving csvdata
+ */
+const getCSV = function getCSV() {
+    if (csvdata) {
+        return Promise.resolve(csvdata);
+    }
+    // Return existing promise if already fetching  
+    if (csvDataPromise) {
+        return csvDataPromise;
+    }
+
+    csvDataPromise = loadCSVData().then(data => {
+
+        csvdata = data.filter(item => item.Item === "rice");
+        csvdata = csvdata.filter(item => item.Element === "area harvested");
+        console.log("CSV data loaded successfully");
+        return csvdata;
+    }).catch(error => {
+        console.error("Error loading CSV data:", error);
+        throw error;        
+    });
+
+    return csvDataPromise;
+};
+
+let year_chosen = 2019; // Default year
+/**
+ * Sets the year for filtering data
+ * @param {number} year - The year to set
+ * */
+let yearlyData = null;
+
+
 // Global cache for Paris SVG data
 let parisDataCache = null;
 let parisDataPromise = null;
-
 /**
  * Fetches Paris SVG data with caching
  * @returns {Promise<Array>} Promise resolving to array of path data
@@ -46,15 +82,31 @@ function fetch_paris_svg() {
  */
 function createCountryWideJson(countryJson, colorGradient = ['#FADC00', '#FD1D1D'], colorMappingFunction = null) {
     // Default to linear mapping if no custom function provided
+
     const defaultMapping = (value, min, max) => {
         return (value - min) / (max - min);
     };
-    const mappingFn = colorMappingFunction || defaultMapping;
+    const logMapping = (value, min, max) => {
+    // Add small offset to handle zeros
+    const offset = 1;
+    const safeValue = Math.max(value + offset, offset);
+    const safeMin = Math.max(min + offset, offset);
+    const safeMax = Math.max(max + offset, offset);
+    
+    const logValue = Math.log(safeValue);
+    const logMin = Math.log(safeMin);
+    const logMax = Math.log(safeMax);
+    
+    return Math.max(0, Math.min(1, (logValue - logMin) / (logMax - logMin)));
+    };
+    const mappingFn = colorMappingFunction || logMapping;
     
     // Extract values for min/max calculation
-    const values = Object.values(countryJson).map(country => country.value);
-    const minValue = Math.min(...values);
-    const maxValue = Math.max(...values);
+
+    //const values = Object.values(countryJson).map(country => country.value);
+    const yearvalues = csvdata.map(item => item[year_chosen]).filter(value => value !== null && value !== undefined);
+    const minValue = Math.min(...yearvalues);
+    const maxValue = Math.max(...yearvalues);
     
     // Create color scale using D3
     const colorScale = d3.scaleLinear()
@@ -63,19 +115,22 @@ function createCountryWideJson(countryJson, colorGradient = ['#FADC00', '#FD1D1D
     
     // Create styled country data
     return Object.entries(countryJson).reduce((acc, [countryCode, data]) => {
-        const normalizedValue = mappingFn(data.value, minValue, maxValue);
-        acc[countryCode] = {
+        if (!data || !data[year_chosen]) {  
+            return acc; // Skip countries with missing data
+        }
+        const normalizedValue = mappingFn(data[year_chosen], minValue, maxValue);   
+        acc[data["Area"]] = {
             ...data,
             fillColor: colorScale(normalizedValue),
             outlineColor: '#333',
             outlineWidth: 0.5,
-            hoverText: `${data.country_name}: ${data.value} ${data.unit}`,
+            hoverText: `${data.Area}: ${data[year_chosen]} ${data.Unit}`,
             normalizedValue
         };
         return acc;
     }, {});
 }
-
+let countryWideJson = null;
 /**
  * Creates a world map visualization
  * @param {number} width - SVG width
@@ -106,9 +161,7 @@ function createWorldMap(width, height, countryWideJson, containerId, onCountrySe
     loader.style.transform = 'translate(-50%, -50%)';
     container.appendChild(loader);
     // Use .then to access the data after loading
-    loadCSVData().then(data => {
-    console.log("random loading", data);
-    });
+    
     
     // Load world map data
     Promise.all([
@@ -121,6 +174,11 @@ function createWorldMap(width, height, countryWideJson, containerId, onCountrySe
         // Create country name lookup
         const countryNames = tsvData.reduce((acc, d) => {
             acc[d.iso_n3] = d.name;
+            return acc;
+        }, {});
+
+        const nameToId = tsvData.reduce((acc, d) => {
+            acc[d.name] = d.iso_n3;
             return acc;
         }, {});
         
@@ -142,26 +200,116 @@ function createWorldMap(width, height, countryWideJson, containerId, onCountrySe
             .attr('height', height)
             .attr('fill', '#ffffff');
         
+            let country_name = '';
         // Add countries
-        g.selectAll('path')
-            .data(countries.features)
-            .enter()
-            .append('path')
-            .attr('d', pathGenerator)
-            .attr('fill', d => {
-                const countryCode = d.id;
-                return countryWideJson[countryCode]?.fillColor || '#ccc';
-            })
-            .attr('stroke', d => countryWideJson[d.id]?.outlineColor || '#333')
-            .attr('stroke-width', d => countryWideJson[d.id]?.outlineWidth || 0.5)
+            countryWideJson.then(resolvedCountryWideJson => {
+
+            // Calculate min/max values for legend
+            const values = Object.values(resolvedCountryWideJson)
+                .map(d => d[year_chosen])
+                .filter(v => v !== null && v !== undefined && v > 0);
+            const minValue = Math.min(...values);
+            const maxValue = Math.max(...values);
+            
+            // Create the same color scale used in createCountryWideJson
+            const colorScale = d3.scaleLinear()
+                .domain([0, 1])
+                .range(['#FADC00', '#FD1D1D']); // Use the same gradient as in createCountryWideJson
+            
+            // Add the legend function inside this scope where we have access to the values
+            const addLegend = (svg, colorScale, min, max) => {
+                const legendWidth = 250;
+                const legendHeight = 15;
+                const legendX = 20;
+                const legendY = height - 50; // Position at bottom of map
+                
+                // Create legend group
+                const legend = svg.append('g')
+                    .attr('class', 'legend')
+                    .attr('transform', `translate(${legendX}, ${legendY})`);
+                
+                // Create gradient definition
+                const defs = svg.select('defs').empty() ? svg.append('defs') : svg.select('defs');
+                const gradient = defs.append('linearGradient')
+                    .attr('id', 'legend-gradient');
+                
+                // Add color stops using log scale
+                const numStops = 10;
+                for (let i = 0; i <= numStops; i++) {
+                    const ratio = i / numStops;
+                    const logValue = min * Math.pow(max / min, ratio); // Log scale values
+                    
+                    // Apply the same log mapping as in createCountryWideJson
+                    const offset = 1;
+                    const safeValue = Math.max(logValue + offset, offset);
+                    const safeMin = Math.max(min + offset, offset);
+                    const safeMax = Math.max(max + offset, offset);
+                    
+                    const logVal = Math.log(safeValue);
+                    const logMin = Math.log(safeMin);
+                    const logMax = Math.log(safeMax);
+                    
+                    const normalizedValue = Math.max(0, Math.min(1, (logVal - logMin) / (logMax - logMin)));
+                    const color = colorScale(normalizedValue);
+                    
+                    gradient.append('stop')
+                        .attr('offset', `${ratio * 100}%`)
+                        .attr('stop-color', color);
+                }
+                
+                // Add rectangle with gradient
+                legend.append('rect')
+                    .attr('width', legendWidth)
+                    .attr('height', legendHeight)
+                    .style('fill', 'url(#legend-gradient)')
+                    .style('stroke', '#000')
+                    .style('stroke-width', 0.5);
+                
+                // Add scale labels
+                const scale = d3.scaleLog()
+                    .domain([min, max])
+                    .range([0, legendWidth]);
+                
+                const axis = d3.axisBottom(scale)
+                    .ticks(4, '.1s'); // Format large numbers nicely
+                
+                legend.append('g')
+                    .attr('transform', `translate(0, ${legendHeight})`)
+                    .style('font-size', '10px')
+                    .call(axis);
+                
+                // Add title
+                legend.append('text')
+                    .attr('x', legendWidth / 2)
+                    .attr('y', -5)
+                    .attr('text-anchor', 'middle')
+                    .style('font-size', '12px')
+                    .style('font-weight', 'bold')
+                    .text('Rice Area Harvested (hectares)');
+            };
+
+
+            // Append paths for each country
+            g.selectAll('path')
+                .data(countries.features)
+                .enter()
+                .append('path')
+                .attr('d', pathGenerator)
+                .attr('fill', d => {
+                    country_name = countryNames[d.id]
+                    country_name = countryNames[d.id].toLowerCase();
+                    return resolvedCountryWideJson[country_name]?.fillColor || '#ccc';
+                })
+            .attr('stroke', d => resolvedCountryWideJson[countryNames[d.id].toLowerCase()]?.outlineColor || '#333')
+            .attr('stroke-width', d => resolvedCountryWideJson[countryNames[d.id].toLowerCase()]?.outlineWidth || 0.5)
             .attr('class', 'country')
             .style('cursor', 'pointer')
             .on('click', function(event, d) {
-                if (onCountrySelect && countryWideJson[d.id]) {
+                if (onCountrySelect && resolvedCountryWideJson[countryNames[d.id].toLowerCase()]) {
                     // Find the geographic feature for this country
                     const countryFeature = countries.features.find(f => f.id === d.id);
                     // Call the callback with both country data and geographic feature
-                    onCountrySelect(countryWideJson[d.id], countryFeature, {
+                    onCountrySelect(resolvedCountryWideJson[countryNames[d.id].toLowerCase()], countryFeature, {
                         countries: countries,
                         countryNames: countryNames,
                         pathGenerator: pathGenerator,
@@ -171,12 +319,15 @@ function createWorldMap(width, height, countryWideJson, containerId, onCountrySe
             })
             .append('title')
             .text(d => {
-                if (countryWideJson[d.id]) {
-                    return countryWideJson[d.id].hoverText;
+                if (resolvedCountryWideJson[countryNames[d.id].toLowerCase()]) {
+                    return resolvedCountryWideJson[countryNames[d.id].toLowerCase()].hoverText;
                 }
                 return countryNames[d.id] || 'Unknown';
             });
-        
+             // Add the legend AFTER we have access to the data
+            addLegend(svg, colorScale, minValue, maxValue);
+            })
+
         // Add zoom behavior with better responsiveness
         const zoomHandler = d3.zoom()
             .scaleExtent([0.5, 10]) // Allow zoom out to 0.5x and in to 10x
@@ -208,12 +359,12 @@ function createWorldMap(width, height, countryWideJson, containerId, onCountrySe
             svg.selectAll('.country')
                 .attr('fill', d => {
                     const countryCode = d.id;
-                    return newCountryWideJson[countryCode]?.fillColor || '#ccc';
+                    return newCountryWideJson[countryNames[countryCode]]?.fillColor || '#ccc';
                 })
                 .select('title')
                 .text(d => {
-                    if (newCountryWideJson[d.id]) {
-                        return newCountryWideJson[d.id].hoverText;
+                    if (newCountryWideJson[countryNames[countryCode]]) {
+                        return newCountryWideJson[countryNames[countryCode]].hoverText;
                     }
                     return d.id;
                 });
@@ -287,10 +438,8 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
     }
    
     // Function to render the visualization
-    function render(data, feature) {
+    function render(data, feature,geodata) {
         console.log('Rendering small area visualization');
-        console.log('Data:', data);
-        console.log('Feature:', feature);
         
         // Clear existing content
         g.selectAll("*").remove();
@@ -306,7 +455,6 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
                 .text('Select a country to view details');
             return;
         }
-        
         // Add main title
         g.append('text')
             .attr('x', innerWidth / 2)
@@ -314,9 +462,10 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
             .attr('text-anchor', 'middle')
             .attr('font-weight', 'bold')
             .attr('font-size', '16px')
-            .text(data.country_name);
+            .text(geodata["countryNames"][feature.id]);
         
-        const area_percentage = Math.round((data.normalizedValue || 0) * 100);
+        
+        const area_percentage = Math.round((data[year_chosen]/10540|| 0) * 100);
         
         // Add subtitle with percentage of maximum value
         g.append('text')
@@ -325,8 +474,7 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
             .attr('text-anchor', 'middle')
             .attr('font-size', '12px')
             .attr('fill', '#666')
-            .text(`${area_percentage}% of maximum value`);
-        
+            .text(`${area_percentage}% of Paris surface area`);
         // Add data label
         g.append('text')
             .attr('x', innerWidth / 2)
@@ -334,7 +482,7 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
             .attr('text-anchor', 'middle')
             .attr('font-size', '14px')
             .attr('font-weight', 'bold')
-            .text(`${data.value} ${data.unit}`);
+            .text(`${data[year_chosen]} ${data.Unit}`);
         
         // Now fetch and render Paris - only when render is called
         fetch_paris_svg().then(dValues => {
@@ -393,16 +541,15 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
     }
     
     // Initial render
-    render(countryData, countryFeature);
+    render(countryData, countryFeature,geoData);
     
     // Return control object
     return {
         update: (newCountryData, newCountryFeature, newGeoData) => {
-            console.log('Updating detail viz with:', newCountryData);
             if (newGeoData) {
                 geoData = newGeoData;
             }
-            render(newCountryData, newCountryFeature);
+            render(newCountryData, newCountryFeature,newGeoData);
         },
         clear: () => {
             container.innerHTML = '';
@@ -482,7 +629,7 @@ function createVisualizationPage(countryJson, smallAreaFunction = null, width = 
     detailContainer.appendChild(actualDetailContainer);
     
     // Process the country JSON to add styling
-    const countryWideJson = createCountryWideJson(countryJson);
+    countryWideJson = getCSV().then(data => createCountryWideJson(data));
     
     // Current selected country and geographic data
     let selectedCountry = null;
@@ -511,6 +658,7 @@ function createVisualizationPage(countryJson, smallAreaFunction = null, width = 
             selectedCountry = country;            
             // Update detail visualization with country data, feature, and geo data
             detailViz.update(selectedCountry, countryFeature, geoDataFromMap);
+            
         },
         // onDataLoaded callback  
         (loadedGeoData) => {
