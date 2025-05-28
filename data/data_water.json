@@ -3,11 +3,11 @@
   "children": [
     {
       "name": "animal products",
-      "value": 5278.65,
+      "value": 5157.36,
       "children": [
         {
           "name": "beef and buffallo meat",
-          "value": 16627.0,
+          "value": 13041.0,
           "children": [
             {
               "name": "beef bone free meat",
@@ -21,7 +21,7 @@
         },
         {
           "name": "cheese",
-          "value": 5253.0,
+          "value": 6269.75,
           "children": [
             {
               "name": "cream",
@@ -51,7 +51,7 @@
         },
         {
           "name": "dairy products",
-          "value": 2302.4,
+          "value": 2819.83,
           "children": [
             {
               "name": "butter",
@@ -79,7 +79,7 @@
         },
         {
           "name": "eggs",
-          "value": 3270.0,
+          "value": 2562.0,
           "children": [
             {
               "name": "hen eggs",
@@ -89,7 +89,7 @@
         },
         {
           "name": "fish",
-          "value": 2313.0,
+          "value": 2206.2,
           "children": [
             {
               "name": "carp",
@@ -129,7 +129,7 @@
         },
         {
           "name": "pork meat",
-          "value": 6006.27,
+          "value": 5592.0,
           "children": [
             {
               "name": "bacon",
@@ -147,7 +147,7 @@
         },
         {
           "name": "poultry meat",
-          "value": 4159.17,
+          "value": 3645.0,
           "children": [
             {
               "name": "chicken bone free meat",
@@ -163,11 +163,11 @@
     },
     {
       "name": "crops",
-      "value": 2255.67,
+      "value": 2106.56,
       "children": [
         {
           "name": "coffee",
-          "value": 18593.33,
+          "value": 15897.0,
           "children": [
             {
               "name": "coffee green",
@@ -177,7 +177,7 @@
         },
         {
           "name": "dried fruit",
-          "value": 2636.0,
+          "value": 2636.5,
           "children": [
             {
               "name": "date",
@@ -191,7 +191,7 @@
         },
         {
           "name": "fruit",
-          "value": 748.0,
+          "value": 971.78,
           "children": [
             {
               "name": "apple",
@@ -309,7 +309,7 @@
         },
         {
           "name": "grains",
-          "value": 1618.0,
+          "value": 2160.14,
           "children": [
             {
               "name": "barley",
@@ -343,7 +343,7 @@
         },
         {
           "name": "legumes",
-          "value": 4615.0,
+          "value": 4300.9,
           "children": [
             {
               "name": "beans",
@@ -373,7 +373,7 @@
         },
         {
           "name": "nuts",
-          "value": 8246.43,
+          "value": 5680.67,
           "children": [
             {
               "name": "chestnut",
@@ -403,7 +403,7 @@
         },
         {
           "name": "seeds",
-          "value": 3087.0,
+          "value": 5002.67,
           "children": [
             {
               "name": "rape seed",
@@ -421,7 +421,7 @@
         },
         {
           "name": "spicies",
-          "value": 8280.0,
+          "value": 4511.0,
           "children": [
             {
               "name": "chilly",
@@ -435,7 +435,7 @@
         },
         {
           "name": "tubers",
-          "value": 555.0,
+          "value": 468.9,
           "children": [
             {
               "name": "potato",
@@ -449,7 +449,7 @@
         },
         {
           "name": "vegetables",
-          "value": 393.21,
+          "value": 442.76,
           "children": [
             {
               "name": "artichoke",
@@ -525,11 +525,11 @@
     },
     {
       "name": "processed food",
-      "value": 2278.92,
+      "value": 2086.36,
       "children": [
         {
           "name": "biscuits",
-          "value": 1870.0,
+          "value": 2312.5,
           "children": [
             {
               "name": "chocolate or cream filled cookie",
@@ -543,7 +543,7 @@
         },
         {
           "name": "bread",
-          "value": 1006.2,
+          "value": 1028.0,
           "children": [
             {
               "name": "bread multicereal",
@@ -565,7 +565,7 @@
         },
         {
           "name": "crackers",
-          "value": 1258.0,
+          "value": 1147.33,
           "children": [
             {
               "name": "flavored cracker",
@@ -583,7 +583,7 @@
         },
         {
           "name": "drinks",
-          "value": 2455.5,
+          "value": 543.57,
           "children": [
             {
               "name": "beer",
@@ -605,7 +605,7 @@
         },
         {
           "name": "flour",
-          "value": 1910.25,
+          "value": 2536.0,
           "children": [
             {
               "name": "oat meal",
@@ -615,7 +615,7 @@
         },
         {
           "name": "oil",
-          "value": 6792.0,
+          "value": 7033.0,
           "children": [
             {
               "name": "olive oil",
@@ -673,7 +673,7 @@
         },
         {
           "name": "sauces",
-          "value": 909.43,
+          "value": 1036.8,
           "children": [
             {
               "name": "ketchup",
@@ -699,7 +699,7 @@
         },
         {
           "name": "sugar",
-          "value": 919.67,
+          "value": 1294.5,
           "children": [
             {
               "name": "beet sugar",
@@ -713,7 +713,7 @@
         },
         {
           "name": "sweets",
-          "value": 2158.0,
+          "value": 2554.0,
           "children": [
             {
               "name": "cakes and croissant",
@@ -727,7 +727,7 @@
         },
         {
           "name": "vegetables",
-          "value": 393.21,
+          "value": 595.67,
           "children": [
             {
               "name": "corn canned",
@@ -745,7 +745,7 @@
         },
         {
           "name": "vegetal proteins",
-          "value": 1724.0,
+          "value": 1592.5,
           "children": [
             {
               "name": "quorne",

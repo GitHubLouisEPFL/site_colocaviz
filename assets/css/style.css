@@ -148,14 +148,28 @@ body.home-page {
   transition: font-size 0.2s ease;
 }
 
+
+.chosen-food-element {
+  font-size: 3rem; 
+  font-weight: 700;
+  text-align: center; 
+  color: #3B2F2F;
+  font-family: 'Inter', sans-serif; /* Style raffiné, parfait pour la gastronomie */
+  margin: 2rem 0; /* Espacement autour du titre */
+  text-transform: uppercase; /* Tout en majuscules pour l'effet "titre" */
+  letter-spacing: 0.05em; /* Espacement entre les lettres */
+  position: relative;
+}
+
+
 /* Container principal */
 .container {
   display: flex;
   justify-content: center;
   align-items: flex-start;
   gap: 20px;
-  margin-top: 30px;
-  padding: 20px;
+  margin-top: -1rem;
+  padding: 0px;
   padding-bottom: 50px;
 }
 
