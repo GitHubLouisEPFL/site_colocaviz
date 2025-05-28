@@ -669,21 +669,43 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function updateActiveElement(name) {
-    const activeElement = document.getElementById("active-element");
-    if (activeElement) {
-      activeElement.textContent = name;
+
+    const chosenFoodName = document.getElementById("chosen-food-name");
+    const activeMenuName = document.getElementById("active-menu-name");
+
+    if (chosenFoodName) {
+      chosenFoodName.textContent = name;
       
       // Réinitialiser d'abord la taille de police
-      activeElement.style.fontSize = "16px";
+      chosenFoodName.style.fontSize = "2rem";
+      chosenFoodName.style.fontWeight = "3rem";
       
       // Vérifier si le texte déborde et ajuster la taille de police si nécessaire
-      const container = activeElement.parentElement;
+      const container = chosenFoodName.parentElement;
       const containerWidth = container.clientWidth - 20; // Tenir compte du padding
       
       let currentFontSize = 16;
-      while (activeElement.scrollWidth > containerWidth && currentFontSize > 8) {
+      while (chosenFoodName.scrollWidth > containerWidth && currentFontSize > 8) {
         currentFontSize -= 0.5;
-        activeElement.style.fontSize = `${currentFontSize}px`;
+        chosenFoodName.style.fontSize = `${currentFontSize}px`;
+      }
+    }
+
+
+    if (activeMenuName) {
+      activeMenuName.textContent = name;
+      
+      // Réinitialiser d'abord la taille de police
+      activeMenuName.style.fontSize = "16px";
+      
+      // Vérifier si le texte déborde et ajuster la taille de police si nécessaire
+      const container = activeMenuName.parentElement;
+      const containerWidth = container.clientWidth - 20; // Tenir compte du padding
+      
+      let currentFontSize = 16;
+      while (activeMenuName.scrollWidth > containerWidth && currentFontSize > 8) {
+        currentFontSize -= 0.5;
+        activeMenuName.style.fontSize = `${currentFontSize}px`;
       }
     }
   }
