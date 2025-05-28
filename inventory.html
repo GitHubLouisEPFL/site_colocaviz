@@ -6,6 +6,7 @@
   <title>Inventaire</title>
   <link rel="stylesheet" href="assets/css/style.css" />
   <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 </head>
 <body class="inventory-page">
 
@@ -19,16 +20,14 @@
     </nav>
   </header>
 
-  <main class="main-content">
-    <h1>📝 Dataset Inventory</h1>
-
+  <div class="main-content" >
     <section class="search-panel">
       <div class="form-row">
-        <label for="layerSelect">🔎 Level :</label>
+        <label for="layerSelect">🔎 Level :
         <select id="layerSelect">
           <option value="2">Main Categories</option>
           <option value="3">Sub-Categories</option>
-          <option value="4">Products</option>
+            <option value="4">Products (Production data available)</option>
         </select>
       </div>
 
@@ -39,11 +38,13 @@
     </section>
 
     <section class="results-panel">
+
       <div class="results" id="results"></div>
     </section>
-  </main>
+  </div>
 
-  <script>
+  <script type="module">
+    import { RacingBarChart, initChart } from './assets/js/barchart_race.js';
 
     function getEmoji(name) {
       const emojiMap = {
@@ -188,14 +189,21 @@
 
     let carbonRoot = null;
     let waterRoot = null;
+    let productionRoot = null;
+    let productionItems = null;
+    let chart = null;
     let currentList = [];
 
     Promise.all([
       d3.json("data/data_carbon.json"),
-      d3.json("data/data_water.json")
-    ]).then(([carbon, water]) => {
+      d3.json("data/data_water.json"),
+      // TODO replace with real data
+      d3.json("data/data_production.json")
+    ]).then(([carbon, water, production]) => {
       carbonRoot = carbon;
       waterRoot = water;
+      productionRoot = production;
+      productionItems = new Set(Object.keys(production))
       updateList();
     });
 
@@ -234,7 +242,15 @@
 
       filtered.forEach(d => {
         const li = document.createElement("li");
+        // TODO Add red text to show if production data is missing
         li.textContent = d.name;
+        if (productionItems.has(d.name)) {
+          const greenText = document.createElement("span");
+          greenText.textContent = "✔ Production data available";
+          greenText.style.color = "green";
+          greenText.style.marginLeft = "10px";
+          li.appendChild(greenText);
+        }
         li.addEventListener("click", () => {
           document.getElementById("searchBox").value = d.name;
           dropdown.style.display = "none";
@@ -249,6 +265,7 @@
     function showDetails(name) {
       const carbonMatch = findByName(carbonRoot, name);
       const waterMatch = findByName(waterRoot, name);
+      const productionMatch = productionItems.has(name);
 
       const maxCarbon = getMaxValue(carbonRoot);
       const maxWater = getMaxValue(waterRoot);
@@ -256,6 +273,8 @@
       const resultDiv = document.getElementById("results");
       let html = `<div class="result-name">${getEmoji(name)} ${name}</div><div style="margin-bottom: 1rem;"></div>`;
 
+      html += `<h2 style="margin: 10px;">
+        🌱 Environmental Impact</h2>`;
       if (carbonMatch) {
         const carbonPct = Math.round((carbonMatch.value / maxCarbon) * 100);
         html += `
@@ -278,7 +297,46 @@
           </div>`;
       }
 
+      if (productionMatch) {
+        html += `
+        <h2 style="margin: 10px;">📈 Production Data</h2>
+        <div class="result-item">
+            <span class="highlight">Barchart race of the top 8 countries producing ${name} (number in tons per year):</span>
+          </div>
+    
+        <div id="chart"></div>
+        <div class="controls">
+          <button id="start-btn">Start</button>
+          <button id="pause-btn" disabled>Pause</button>
+          <button id="reset-btn">Reset</button>
+        </div>`;
+      } else {
+        html += `
+          <h2 style="margin: 10px;">📈 Production Data</h2>
+          <div class="result-item">
+            <span class="highlight" style="color: red;">❗ No production data available for ${name}.</span>
+          </div>`;
+
+      }
+
+      // Add a separator for production visualizations
+
       resultDiv.innerHTML = html;
+
+      if (productionMatch) {
+        chart = initChart(productionRoot, name);
+
+            // Event listeners
+        document.getElementById('start-btn').addEventListener('click', () => {
+            if (chart) chart.start();
+        });
+        document.getElementById('pause-btn').addEventListener('click', () => {
+            if (chart) chart.pause();
+        });
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            if (chart) chart.reset();
+        });
+      }
     }
 
     function getMaxValue(node) {
@@ -302,6 +360,72 @@
       return null;
     }
   </script>
-
+  <script src="assets/js/barchart_race.js" defer></script>
 </body>
 </html>
+
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Racing Bar Chart</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <style>
+        :root {
+        --sans-serif: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .controls {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .controls button {
+            margin: 0 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .controls button:hover {
+            background-color: #0056b3;
+        }
+        
+        .controls button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        #chart {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin: 0 auto;
+            max-width: 960px;
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <button id="start-btn">Start</button>
+        <button id="pause-btn" disabled>Pause</button>
+        <button id="reset-btn">Reset</button>
+    </div>
+    
+    <div id="chart"></div>
+
+    <script src="assets/js/barchart_race.js" defer></script>
+</body>
+</html> -->
