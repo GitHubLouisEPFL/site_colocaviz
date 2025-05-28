@@ -20,7 +20,7 @@
     </nav>
   </header>
 
-  <main class="main-content">
+  <div class="main-content" >
     <section class="search-panel">
       <div class="form-row">
         <label for="layerSelect">🔎 Level :
@@ -41,7 +41,7 @@
 
       <div class="results" id="results"></div>
     </section>
-  </main>
+  </div>
 
   <script type="module">
     import { RacingBarChart, initChart } from './assets/js/barchart_race.js';
@@ -312,7 +312,7 @@
         </div>`;
       } else {
         html += `
-          <h2>📈 Production Data</h2>
+          <h2 style="margin: 10px;">📈 Production Data</h2>
           <div class="result-item">
             <span class="highlight" style="color: red;">❗ No production data available for ${name}.</span>
           </div>`;
