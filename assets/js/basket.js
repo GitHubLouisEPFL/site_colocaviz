@@ -54,8 +54,9 @@ function showLevel(items) {
             
             const input = document.createElement('input');
             input.type = 'number';
-            input.min = '1';
+            input.min = '0';
             input.value = '100';
+            input.step = '50';
             input.placeholder = 'g';
             input.className = 'quantity-input';
             

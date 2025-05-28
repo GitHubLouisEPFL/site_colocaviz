@@ -2,53 +2,676 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Colocaviz home page</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colocaviz website</title>
+    <style>
+        /* Variables de couleurs - Style rustique */
+        :root {
+            --primary-color: #8B5E3C;
+            --secondary-color: #A38966;
+            --accent-color: #C1440E;
+            --background-light: #F6F1E7;
+            --background-gradient: linear-gradient(135deg, #EDE6DB 0%, #D4C4A8 100%);
+            --text-dark: #3B2F2F;
+            --text-light: #FAF9F6;
+            --shadow-soft: 0 8px 30px rgba(139, 94, 60, 0.15);
+            --shadow-hover: 0 14px 45px rgba(139, 94, 60, 0.2);
+            --border-radius: 12px;
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            padding-top: 60px;
+            padding-right: 0;
+            font-family: 'Inter', sans-serif;
+            background: var(--background-gradient);
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animation d'arrière-plan avec des particules flottantes */
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            opacity: 0.6;
+            animation: float 8s ease-in-out infinite;
+            color: var(--primary-color);
+        }
+
+        .particle:nth-child(odd) {
+            animation-direction: alternate;
+            color: var(--secondary-color);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(180deg); }
+        }
+
+        /* Header avec navigation - style rustique */
+        .top-nav {
+            background: var(--background-light);
+            padding: 14px 15px;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 2000;
+            box-shadow: var(--shadow-soft);
+            border-bottom: 4px solid var(--primary-color);
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .top-nav a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all var(--transition-speed) ease;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin: 2px;
+        }
+
+        .top-nav a:hover, .top-nav a.active {
+            background-color: var(--secondary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(139, 94, 60, 0.2);
+        }
+
+        /* Contenu principal */
+        .hero-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 80px;
+        }
+
+        .logo-container {
+            margin-bottom: 2rem;
+            animation: bounceIn 1.2s ease-out;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            animation: pulse 3s ease-in-out infinite;
+            filter: drop-shadow(2px 2px 4px rgba(139, 94, 60, 0.3));
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.3); opacity: 0; }
+            50% { transform: scale(1.1); }
+            70% { transform: scale(0.9); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        .title {
+            font-size: 3.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(139, 94, 60, 0.2);
+            animation: slideInLeft 1s ease-out 0.5s both;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1.4rem;
+            color: var(--text-dark);
+            margin-bottom: 2rem;
+            animation: slideInRight 1s ease-out 0.7s both;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        @keyframes slideInLeft {
+            0% { transform: translateX(-100px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideInRight {
+            0% { transform: translateX(100px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+
+        .description {
+            max-width: 800px;
+            font-size: 1.15rem;
+            color: var(--text-dark);
+            line-height: 1.7;
+            margin-bottom: 3rem;
+            animation: fadeInUp 1s ease-out 1s both;
+            background: rgba(246, 241, 231, 0.8);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-soft);
+        }
+
+        @keyframes fadeInUp {
+            0% { transform: translateY(30px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .cta-button {
+            background: linear-gradient(45deg, var(--accent-color), #D2691E);
+            color: var(--text-light);
+            padding: 1.2rem 2.5rem;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-speed) ease;
+            box-shadow: var(--shadow-soft);
+            animation: fadeInUp 1s ease-out 1.2s both;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+            background: linear-gradient(45deg, #D2691E, var(--accent-color));
+        }
+
+        /* Animation des icônes alimentaires - style rustique */
+        .food-animation {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px;
+            height: 250px;
+            animation: rotate 12s linear infinite;
+        }
+
+        .food-item {
+            position: absolute;
+            font-size: 2.5rem;
+            animation: orbit 10s linear infinite;
+            filter: drop-shadow(1px 1px 2px rgba(139, 94, 60, 0.3));
+        }
+
+        .food-item:nth-child(1) { animation-delay: 0s; }
+        .food-item:nth-child(2) { animation-delay: -2.5s; }
+        .food-item:nth-child(3) { animation-delay: -5s; }
+        .food-item:nth-child(4) { animation-delay: -7.5s; }
+
+        @keyframes rotate {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        @keyframes orbit {
+            0% { transform: rotate(0deg) translateX(120px) rotate(0deg); }
+            100% { transform: rotate(360deg) translateX(120px) rotate(-360deg); }
+        }
+
+        /* Section des fonctionnalités - style rustique AMÉLIORÉ */
+        .features-section {
+            background: var(--background-light);
+            padding: 4rem 2rem;
+            margin: 2rem auto;
+            max-width: 1400px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-soft);
+            animation: slideInUp 1s ease-out 1.5s both;
+            border: 2px solid rgba(139, 94, 60, 0.1);
+        }
+
+        @keyframes slideInUp {
+            0% { transform: translateY(50px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .features-title {
+            text-align: center;
+            color: var(--primary-color);
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            font-weight: 700;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .features-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 30%;
+            right: 30%;
+            height: 3px;
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        /* NOUVEAU CSS GRID AMÉLIORÉ */
+        .features-grid {
+            display: grid;
+            gap: 1.5rem;
+            max-width: 1000px;
+            margin: 0 auto;
+            /* Grid responsive optimisé */
+            grid-template-columns: repeat(2, 1fr);
+            justify-items: center;
+            align-items: stretch;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            transition: all var(--transition-speed) ease;
+            border: 1px solid rgba(139, 94, 60, 0.2);
+            box-shadow: var(--shadow-soft);
+            width: 100%;
+            max-width: 500px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-hover);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .feature-card-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            height: 100%;
+        }
+
+        .feature-card-link:hover .feature-card {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .feature-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .feature-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            display: block;
+            filter: drop-shadow(2px 2px 4px rgba(139, 94, 60, 0.2));
+        }
+
+        .feature-title {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .feature-description {
+            color: var(--text-dark);
+            line-height: 1.6;
+            opacity: 0.9;
+            flex-grow: 1;
+        }
+
+        /* Footer rustique */
+        .footer-section {
+            background: var(--primary-color);
+            color: var(--text-light);
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        .footer-section p {
+            margin-bottom: 1rem;
+            opacity: 0.9;
+        }
+
+        .warning-text {
+            color: var(--accent-color);
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        /* Responsive AMÉLIORÉ */
+        @media (max-width: 1200px) {
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+            }
+            
+            .feature-card {
+                max-width: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .title { font-size: 2.5rem; }
+            .subtitle { font-size: 1.1rem; }
+            .top-nav { 
+                flex-wrap: wrap; 
+                gap: 1rem; 
+                justify-content: center;
+            }
+            
+            /* Une seule colonne sur mobile */
+            .features-grid { 
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                padding: 0 1rem;
+            }
+            
+            .feature-card {
+                padding: 2rem;
+                max-width: 100%;
+            }
+            
+            .hero-section { padding: 1rem; }
+            .description { padding: 1.5rem; }
+            .features-section { 
+                margin: 1rem;
+                padding: 3rem 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .feature-card {
+                padding: 1.5rem;
+            }
+            
+            .feature-icon {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+            }
+            
+            .feature-title {
+                font-size: 1.3rem;
+            }
+            
+            .features-title {
+                font-size: 2rem;
+                margin-bottom: 2rem;
+            }
+        }
+
+        /* Animation de chute des aliments */
+        @keyframes fall {
+            to {
+                transform: translateY(110vh) rotate(720deg);
+                opacity: 0.8;
+            }
+        }
+
+        .falling {
+            position: fixed;
+            top: -60px;
+            animation: fall 3s linear forwards;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.9;
+            color: var(--primary-color);
+            filter: drop-shadow(1px 1px 2px rgba(139, 94, 60, 0.3));
+        }
+    </style>
 </head>
+<body>
+    <!-- Background animation -->
+    <div class="background-animation" id="particles"></div>
 
-<body class="home-page">
-
+    <!-- Header -->
     <header>
         <nav class="top-nav">
-          <a href="index.html">🏠 Home</a>
-          <a href="inventory.html" class="active">📝 Inventory</a>
-          <a href="comparateur.html">📊 Comparison</a>
-          <a href="#">🌍 Visualizations</a>
-          <a href="basket.html">🛒 Basket</a>
+            <a href="index.html" class="active">🏠 Home</a>
+            <a href="viz.html">🌍 Interactive Visualizations</a>
+            <a href="inventory.html">📝 Inventory</a>
+            <a href="comparateur.html">📊 Comparison</a>
+            <a href="basket.html">🛒 Basket</a>
         </nav>
     </header>
 
-    <div class="container">
+    <!-- Hero section -->
+    <section class="hero-section">
+        <div class="logo-container">
+            <div class="logo">🌱</div>
+            <div class="food-animation">
+                <div class="food-item">🥕</div>
+                <div class="food-item">🥩</div>
+                <div class="food-item">🍎</div>
+                <div class="food-item">🌾</div>
+            </div>
+        </div>
+        
+        <h1 class="title">Colocaviz</h1>
+        <p class="subtitle">Discover the environmental impact of your diet</p>
+        
+        <div class="description">
+            <p>Explore the carbon and water footprint of food items through captivating interactive visualizations. 
+                Colocaviz unveils the hidden environmental impacts of your plate to help you make more informed and 
+                sustainable dietary choices.</p>
+        </div>
+        
+        <div id="lottie-animation" style="width: 300px; height: 300px; margin-top: 2rem;"></div>
 
-        <div class="footprint-container">
-            <h2 class="footprint-title">Carbon footprint</h2>
-            <div class="footprint" id="carbon"></div>
+        <button class="cta-button" onclick="window.location.href='viz.html'">
+            Start exploring 🚀
+        </button>
+    </section>
+
+    <!-- Features section -->
+    <section class="features-section">
+        <h2 class="features-title">Explore your food data</h2>
+        <div class="features-grid">
+            <a href="viz.html" class="feature-card-link">
+                <div class="feature-card">
+                    <div class="feature-content">
+                        <span class="feature-icon">🗺️</span>
+                        <h3 class="feature-title">Interactive visualizations</h3>
+                        <p class="feature-description">
+                            Explore dynamic treemaps showing the carbon and water footprint of foods, 
+                            along with world maps detailing production and yields by country.
+                        </p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="comparateur.html" class="feature-card-link">
+                <div class="feature-card">
+                    <div class="feature-content">
+                        <span class="feature-icon">📊</span>
+                        <h3 class="feature-title">Detailed comparisons</h3>
+                        <p class="feature-description">
+                            Compare the environmental impact of different foods items using our comparison tool.
+                        </p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="basket.html" class="feature-card-link">
+                <div class="feature-card">
+                    <div class="feature-content">
+                        <span class="feature-icon">🛒</span>
+                        <h3 class="feature-title">Basket simulator</h3>
+                        <p class="feature-description">
+                            Calculate the total environmental footprint of your grocery basket 
+                            by selecting your favorite foods and their respective quantities.
+                        </p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="inventory.html" class="feature-card-link">
+                <div class="feature-card">
+                    <div class="feature-content">
+                        <span class="feature-icon">📚</span>
+                        <h3 class="feature-title">Comprehensive inventory</h3>
+                        <p class="feature-description">
+                            Access a comprehensive database containing detailed information 
+                            on the environmental footprint of a selection of food items and categories.
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <section class="footer-section">
+        <div class="warning-text">
+            ⚠️ Data Disclaimer – Category Averages
         </div>
 
-        <div class="footprint-container">
-            <h2 class="footprint-title">Water footprint</h2>
-            <div class="footprint" id="water"></div>
-        </div>
+        <p>The environmental impact data presented for individual food items is <strong>based on scientifically 
+            rigorous sources and methodologies</strong>. However, please be aware that the <strong>values shown 
+            for broader food categories</strong> (e.g. "Meat", "Dairy") are <strong>simple averages of the items 
+            available in our dataset</strong>, and <strong>do not represent comprehensive or globally 
+            representative figures</strong>.</p>
 
-        <div class="menu">
-            <div class="active-element"> <span id="active-element">Food</span></div>
-            <a href="#">Footprint</a>
-            <a href="#">Area harvested per country</a>
-            <a href="#">Production per country</a>
-            <a href="#">Yield per country</a>
-        </div>
+        <p>For instance, if a category includes only chicken and beef, the average shown for "Meat" reflects only 
+            those two items — not the full spectrum of meat products. These category-level values are provided for 
+            <strong>illustrative purposes only</strong> and should not be interpreted as precise environmental impact 
+            assessments.</p>
 
-    </div>
+    </section>
 
-    <div class="blabla">
-        <p style="color: red;">Warning !!! This is a draft website using dummy values!</p>
-        <p>The goal of this project is to highlight the environmental, social, and ethical impacts of different food products through engaging data visualizations.</p>
-        <p>The motivation is to raise awareness about the hidden impacts of food consumption...</p>
-    </div>
+    <script>
+        // Animation des particules en arrière-plan - style rustique
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const particles = ['🌱', '🍃', '🌾', '🌰', '🥕', '🌿', '🍂'];
+            
+            for (let i = 0; i < 15; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.textContent = particles[Math.floor(Math.random() * particles.length)];
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.fontSize = (Math.random() * 25 + 20) + 'px';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 6 + 6) + 's';
+                container.appendChild(particle);
+            }
+        }
 
-    <script src="assets/js/treemap_water.js" defer></script>
-    <script src="assets/js/treemap_carbon.js" defer></script>
+        // Animation d'apparition progressive des éléments
+        function animateOnScroll() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            });
 
+            document.querySelectorAll('.feature-card').forEach(card => {
+                observer.observe(card);
+            });
+        }
+
+        // Effet de parallaxe léger
+        function parallaxEffect() {
+            window.addEventListener('scroll', () => {
+                const scrolled = window.pageYOffset;
+                const parallax = document.querySelector('.background-animation');
+                const speed = scrolled * 0.3;
+                parallax.style.transform = `translateY(${speed}px)`;
+            });
+        }
+
+        // Animation de chute d'aliments aléatoire
+        // function createFallingFood() {
+        //     const foods = ['🥕', '🍎', '🌾', '🥩', '🐟', '🥬', '🍞', '🧀'];
+            
+        //     setInterval(() => {
+        //         if (Math.random() < 0.3) {
+        //             const food = document.createElement('div');
+        //             food.className = 'falling';
+        //             food.textContent = foods[Math.floor(Math.random() * foods.length)];
+        //             food.style.left = Math.random() * 100 + '%';
+        //             food.style.fontSize = (Math.random() * 20 + 25) + 'px';
+        //             document.body.appendChild(food);
+                    
+        //             setTimeout(() => {
+        //                 if (food.parentNode) {
+        //                     food.parentNode.removeChild(food);
+        //                 }
+        //             }, 3000);
+        //         }
+        //     }, 2000);
+        // }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            animateOnScroll();
+            parallaxEffect();
+            createFallingFood();
+        });
+
+        // Animation du bouton CTA
+        document.querySelector('.cta-button').addEventListener('click', function(e) {
+            e.target.style.transform = 'scale(0.95) translateY(-3px)';
+            setTimeout(() => {
+                e.target.style.transform = 'scale(1) translateY(-3px)';
+            }, 150);
+        });
+
+        // Effet de clic sur les cartes
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.addEventListener('click', function() {
+                this.style.transform = 'translateY(-12px) scale(1.02)';
+                setTimeout(() => {
+                    this.style.transform = 'translateY(-8px) scale(1)';
+                }, 200);
+            });
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.10.2/lottie.min.js"></script>
+    <script>
+        lottie.loadAnimation({
+            container: document.getElementById('lottie-animation'),
+            renderer: 'svg',
+            loop: true,
+            autoplay: true,
+            path: 'Animation.json'
+        });
+    </script>
 </body>
 </html>
