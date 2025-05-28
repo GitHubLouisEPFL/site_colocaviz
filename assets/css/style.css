@@ -507,9 +507,10 @@ body.basket-page {
     background-color: var(--background-light);
     display: grid;
     grid-template-columns: 3fr 1fr;
-    grid-template-rows: auto auto 1fr;
+    grid-template-rows: auto auto auto 1fr;
     grid-template-areas:
         "header header"
+        "info-section info-section"
         "breadcrumb breadcrumb"
         "main cart";
     gap: 20px;
@@ -536,6 +537,66 @@ body.basket-page {
     color: var(--primary-color);
     margin: 0;
     font-size: 1.8em;
+}
+
+.info-section {
+    grid-area: info-section;
+    background-color: #fffdf8;
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.instructions {
+    background-color:  #fffdf8;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9em;
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+.instructions h3 {
+    color: var(--primary-color);
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 5px;
+    font-family: 'Inter', sans-serif;
+}
+
+.instructions p {
+    margin: 0;
+}
+
+.reference-info {
+    background-color:  #fffdf8;
+    padding: 0;
+    border-radius: 0;
+    box-shadow: none;
+    font-size: 0.95em;
+    color: var(--text-dark);
+}
+
+.reference-info h3 {
+    color: var(--primary-color);
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 5px;
+}
+
+.reference-info p {
+    margin-bottom: 10px;
+    font-size: 0.9em;
+    line-height: 1.5;
 }
 
 #breadcrumb {
@@ -576,6 +637,8 @@ main {
     padding-bottom: 8px;
     color: var(--primary-color);
 }
+
+
 
 .breadcrumb-item {
     cursor: pointer;
@@ -715,6 +778,11 @@ main {
         max-width: 98%;
     }
     
+    .info-section {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
     main, #cart {
         max-height: 60vh;
     }
@@ -725,12 +793,18 @@ main {
         grid-template-columns: 1fr;
         grid-template-areas:
             "header"
+            "info-section"
             "breadcrumb"
             "cart"
             "main";
         max-width: 98%;
         padding: 15px;
         gap: 15px;
+    }
+    
+    .info-section {
+        gap: 15px;
+        padding: 15px;
     }
     
     main, #cart {
@@ -778,6 +852,10 @@ main {
     
     .basket-header h1 {
         font-size: 1.3em;
+    }
+    
+    .info-section {
+        padding: 15px;
     }
     
     main, #cart {
