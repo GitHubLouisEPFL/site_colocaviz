@@ -21,7 +21,7 @@
         </nav>
     </header>
 
-    <div class="container">
+    <div class="container" id="footprint-container">
 
         <div class="footprint-container">
             <h2 class="footprint-title">Carbon footprint (in kg CO₂e / kg)</h2>
@@ -35,15 +35,15 @@
 
         <div class="menu">
             <div class="active-element"> <span id="active-menu-name">Food</span></div>
-            <a href="#">Footprint</a>
-            <a href="#">Area harvested per country</a>
+            <a href="#chosen-food-name" data-target="chosen-food-name">Footprint</a>
+            <a href="#blabla" data-target="blabla">Area harvested per country</a>
             <a href="#">Production per country</a>
             <a href="#">Yield per country</a>
         </div>
 
     </div>
 
-    <div class="blabla">
+    <div class="blabla" id="blabla">
         <p style="color: red;">Warning !!! This is a draft website using dummy values!</p>
         <p>The goal of this project is to highlight the environmental, social, and ethical impacts of different food products through engaging data visualizations.</p>
         <p>The motivation is to raise awareness about the hidden impacts of food consumption...</p>
@@ -51,6 +51,9 @@
 
     <script src="assets/js/treemap_water.js" defer></script>
     <script src="assets/js/treemap_carbon.js" defer></script>
+    <script src="assets/js/scroll_menu.js" defer></script>
+
+
 
 </body>
 </html>
