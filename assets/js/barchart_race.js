@@ -1,7 +1,8 @@
 // Chart class to encapsulate all functionality
 export class RacingBarChart {
-    constructor(containerId, options = {}) {
+    constructor(containerId, chartId, options = {}) {
         this.containerId = containerId;
+        this.chartId = chartId || 'barchart-race';
         this.margin = options.margin || {top: 16, right: 6, bottom: 6, left: 0};
         this.k = options.k || 10; // Number of frames per transition
         this.barSize = options.barSize || 48;
@@ -15,6 +16,7 @@ export class RacingBarChart {
         
         this.currentFrame = 0;
         this.animationRunning = false;
+        this.userDragging = false; // Track if user is manually dragging slider
         
         this.setupScales();
     }
@@ -198,17 +200,192 @@ export class RacingBarChart {
             transition.end().then(() => now.text(this.formatDate(date)));
         };
     }
+
+    getElementId(element_id) {
+        return `${this.chartId}-${element_id}`;
+    }
+
+    createButtons() {
+        // Create and append the controls div
+        const controlsDiv = document.createElement('div');
+        controlsDiv.className = 'controls';
+        controlsDiv.style.cssText = `
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+            padding: 0 10px;
+        `;
+
+        // Create control buttons
+        const startBtn = document.createElement('button');
+        startBtn.id = this.getElementId('start-btn');
+        startBtn.textContent = 'Start';
+
+        const pauseBtn = document.createElement('button');
+        pauseBtn.id = this.getElementId('pause-btn');
+        pauseBtn.textContent = 'Pause';
+        pauseBtn.disabled = true;
+
+        const resetBtn = document.createElement('button');
+        resetBtn.id = this.getElementId('reset-btn');
+        resetBtn.textContent = 'Reset';
+
+        // Create the slider input
+        const slider = document.createElement('input');
+        slider.type = 'range';
+        slider.id = this.getElementId('timeline-slider');
+        slider.min = '0';
+        slider.max = '0'; // Will be set when keyframes are available
+        slider.value = '0';
+        slider.step = '1';
+        slider.style.cssText = `
+            flex: 1;
+            height: 6px;
+            background: #ddd;
+            outline: none;
+            border-radius: 3px;
+            margin: 0 15px;
+        `;
+
+        // Create frame display
+        const frameDisplay = document.createElement('span');
+        frameDisplay.id = this.getElementId('frame-display');
+        frameDisplay.style.cssText = `
+            min-width: 80px;
+            font-size: 12px;
+            color: #666;
+        `;
+
+        controlsDiv.appendChild(startBtn);
+        controlsDiv.appendChild(pauseBtn);
+        controlsDiv.appendChild(resetBtn);
+        controlsDiv.appendChild(slider);
+        controlsDiv.appendChild(frameDisplay);
+
+        document.getElementById(this.containerId).appendChild(controlsDiv);
+        
+        // Add event listeners to buttons
+        startBtn.addEventListener('click', () => this.start());
+        pauseBtn.addEventListener('click', () => this.pause());
+        resetBtn.addEventListener('click', () => this.reset());
+
+        // Add event listeners to slider
+        slider.addEventListener('input', (e) => {
+            this.userDragging = true;
+            this.goToFrame(parseInt(e.target.value));
+        });
+
+        slider.addEventListener('mousedown', () => {
+            this.userDragging = true;
+        });
+
+        slider.addEventListener('mouseup', () => {
+            setTimeout(() => {
+                this.userDragging = false;
+                this.pause(); // Pause animation when user stops dragging
+            }, 100); // Small delay to prevent immediate animation resume
+        });
+
+        slider.addEventListener('touchstart', () => {
+            this.userDragging = true;
+        });
+
+        slider.addEventListener('touchend', () => {
+            setTimeout(() => {
+                this.userDragging = false;
+                this.pause();
+            }, 100);
+        });
+    }
+
+    updateSlider() {
+        const slider = document.getElementById(this.getElementId('timeline-slider'));
+        const frameDisplay = document.getElementById(this.getElementId('frame-display'));
+        
+        if (slider && !this.userDragging) {
+            slider.value = this.currentFrame;
+        }
+        
+        if (frameDisplay && this.keyframes) {
+            frameDisplay.textContent = `${this.currentFrame + 1} / ${this.keyframes.length}`;
+        }
+    }
+
+    goToFrame(frameIndex) {
+        if (!this.keyframes || frameIndex < 0 || frameIndex >= this.keyframes.length) {
+            return;
+        }
+
+        this.currentFrame = frameIndex;
+        const keyframe = this.keyframes[this.currentFrame];
+        
+        // Update chart without transition for immediate response
+        this.x.domain([0, keyframe[1][0].value]);
+        this.updateAxis(keyframe);
+        this.updateBars(keyframe);
+        this.updateLabels(keyframe);
+        this.updateTicker(keyframe);
+        
+        this.updateSlider();
+    }
+
+    createTitle(title) {
+        // Create and append the result item div
+        const resultItem = document.createElement('div');
+        resultItem.className = 'result-item';
+        resultItem.style.margin = '10px 0 10px 0';
+
+        const highlightSpan = document.createElement('span');
+        highlightSpan.className = 'highlight';
+        highlightSpan.textContent = `${title}`;
+
+        resultItem.appendChild(highlightSpan);
+        document.getElementById(this.containerId).appendChild(resultItem);
+    }    
+
+    createChartContainer() {
+        // Create the chart container div
+        const chartContainer = document.createElement('div');
+        chartContainer.id = this.chartId;
+
+        document.getElementById(this.containerId).appendChild(chartContainer);
+    }
+
+    createSeperator(size) {
+        // Create a horizontal line separator
+        const separator = document.createElement('hr');
+        separator.style.width = '100%';
+        separator.style.height = `${size}px`;
+        separator.style.border = 'none';
+        separator.style.borderTop = '1px solid #ccc';
+        separator.style.margin = '10px 0';
+        document.getElementById(this.containerId).appendChild(separator);
+    }
+
     
-    init(data, itemName = 'margarine', prodMetric = 'production_t') {
+    init(data, title, itemName = 'margarine', prodMetric = 'production_t') {
         const processedData = this.processData(data, itemName, prodMetric);
         this.keyframes = processedData.keyframes;
         this.prev = processedData.prev;
         this.next = processedData.next;
         this.color = this.createColorScale(processedData.data);
+
+        // Create the title and controls
+        this.createTitle(title);
+        this.createChartContainer();
+        this.createButtons(); // Now includes slider in same div
+        this.createSeperator(10);
+
+        // Initialize slider max value
+        const slider = document.getElementById(this.getElementId('timeline-slider'));
+        if (slider) {
+            slider.max = this.keyframes.length - 1;
+        }
+
+        d3.select(`#${this.chartId}`).select("svg").remove();
         
-        d3.select(`#${this.containerId}`).select("svg").remove();
-        
-        this.svg = d3.select(`#${this.containerId}`)
+        this.svg = d3.select(`#${this.chartId}`)
             .append("svg")
             .attr("viewBox", [0, 0, this.width, this.height])
             .attr("width", this.width)
@@ -230,10 +407,11 @@ export class RacingBarChart {
         this.updateTicker(keyframe);
         
         this.currentFrame = 0;
+        this.updateSlider(); // Initialize slider display
     }
     
     async animate() {
-        if (!this.animationRunning) return;
+        if (!this.animationRunning || this.userDragging) return;
         
         if (this.currentFrame >= this.keyframes.length) {
             this.stop();
@@ -251,33 +429,36 @@ export class RacingBarChart {
         this.updateBars(keyframe, transition);
         this.updateLabels(keyframe, transition);
         this.updateTicker(keyframe, transition);
+        
+        // Update slider during animation
+        this.updateSlider();
 
         await transition.end();
         
         this.currentFrame++;
-        if (this.animationRunning) {
+        if (this.animationRunning && !this.userDragging) {
             requestAnimationFrame(() => this.animate());
         }
     }
     
     start() {
         this.animationRunning = true;
-        document.getElementById('start-btn').disabled = true;
-        document.getElementById('pause-btn').disabled = false;
+        document.getElementById(this.getElementId('start-btn')).disabled = true;
+        document.getElementById(this.getElementId('pause-btn')).disabled = false;
         this.animate();
     }
     
     pause() {
         this.animationRunning = false;
-        document.getElementById('start-btn').disabled = false;
-        document.getElementById('pause-btn').disabled = true;
+        document.getElementById(this.getElementId('start-btn')).disabled = false;
+        document.getElementById(this.getElementId('pause-btn')).disabled = true;
         this.svg.interrupt();
     }
     
     stop() {
         this.animationRunning = false;
-        document.getElementById('start-btn').disabled = false;
-        document.getElementById('pause-btn').disabled = true;
+        document.getElementById(this.getElementId('start-btn')).disabled = false;
+        document.getElementById(this.getElementId('pause-btn')).disabled = true;
         this.svg.interrupt();
     }
     
@@ -291,6 +472,7 @@ export class RacingBarChart {
             this.updateBars(keyframe);
             this.updateLabels(keyframe);
             this.updateTicker(keyframe);
+            this.updateSlider(); // Update slider on reset
         }
     }
 }
