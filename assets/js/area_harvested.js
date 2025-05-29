@@ -6,7 +6,7 @@ let chosenFoodName = null;
 let switzerlandFeature = null;
 let singaporeFeature = null;
 /**
- * Fetches Paris SVG data with caching
+ * Fetches global svg data with caching
  * @returns {Promise<Array>} Promise resolving csvdata
  */
 const getCSV = function getCSV() {
@@ -168,10 +168,10 @@ function createTimeSlider(availableYears, currentYear, onYearChange, containerId
     `;
     
     const title = document.createElement('div');
-    title.textContent = 'Période Temporelle';
+    title.textContent = 'Time Period';
     title.style.cssText = `
         font-weight: 700;
-        font-size: 16px;
+        font-size: 10px;
         color: #3B2F2F;
         text-transform: uppercase;
         letter-spacing: 0.5px;
@@ -363,13 +363,78 @@ function createTimeSlider(availableYears, currentYear, onYearChange, containerId
         }
     };
 }
-// Global cache for Paris SVG data
+
+
+/**
+ * Fetches Leman SVG data with caching
+ * @returns {Promise<Array>} Promise resolving to array of `d` path values.
+ */
+
+function fetch_leman_svg() {
+    // Return cached data if available
+    if (lemanDataCache) {
+        return Promise.resolve(lemanDataCache);
+    }
+    
+    // Return existing promise if already fetching
+    if (lemanDataPromise) {
+        return lemanDataPromise;
+    }
+    https://github.com/com-480-data-visualization/com480-project-colocaviz/tree/13a44cb13c2e05ef4871acfcc794aedef8cec6ce/data
+    // Create new fetch promise
+    lemanDataPromise = fetch('https://raw.githubusercontent.com/GitHubLouisEPFL/site_colocaviz/refs/heads/main/svg_files/lac_leman.svg')
+        .then(res => res.text())
+        .then(svg => {
+            const matches = svg.match(/<path[^>]*d="([^"]+)"/g) || [];
+            const dValues = matches.map(m => m.match(/d="([^"]+)"/)[1]);
+            lemanDataCache = dValues; // Cache the result
+            return dValues;
+        })
+        .catch(error => {
+            console.error("Error fetching or processing the SVG:", error);
+            lemanDataPromise = null; // Reset promise on error to allow retry
+            throw error;
+        });
+    
+    return lemanDataPromise;
+}
 let parisDataCache = null;
 let parisDataPromise = null;
+let lemanDataCache = null;
+let lemanDataPromise = null;
 /**
- * Fetches Paris SVG data with caching
- * @returns {Promise<Array>} Promise resolving to array of path data
+ * Fetches Leman SVG data with caching
+ * @returns {Promise<Array>} Promise resolving to array of `d` path values.
  */
+
+function fetch_leman_svg() {
+    // Return cached data if available
+    if (lemanDataCache) {
+        return Promise.resolve(lemanDataCache);
+    }
+    
+    // Return existing promise if already fetching
+    if (lemanDataPromise) {
+        return lemanDataPromise;
+    }
+    https://github.com/com-480-data-visualization/com480-project-colocaviz/tree/13a44cb13c2e05ef4871acfcc794aedef8cec6ce/data
+    // Create new fetch promise
+    lemanDataPromise = fetch('https://raw.githubusercontent.com/GitHubLouisEPFL/site_colocaviz/refs/heads/main/svg_files/lac_leman.svg')
+        .then(res => res.text())
+        .then(svg => {
+            const matches = svg.match(/<path[^>]*d="([^"]+)"/g) || [];
+            const dValues = matches.map(m => m.match(/d="([^"]+)"/)[1]);
+            lemanDataCache = dValues; // Cache the result
+            return dValues;
+        })
+        .catch(error => {
+            console.error("Error fetching or processing the SVG:", error);
+            lemanDataPromise = null; // Reset promise on error to allow retry
+            throw error;
+        });
+    
+    return lemanDataPromise;
+}
 function fetch_paris_svg() {
     // Return cached data if available
     if (parisDataCache) {
@@ -806,8 +871,8 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
     
-    // Create container
-    const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+    // Create container - CHANGED: Use wrapper object
+    const gWrapper = { current: svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`) };
             
     // Store gradient reference for updates
     let currentGradient = null;
@@ -842,19 +907,17 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
     }
    
     // Function to render the visualization
-    function render(data, feature,geodata) {
+    function render(data, feature, geodata) {
         console.log('Rendering small area visualization');
-        console.log('Data:', data);
-        console.log('Feature:', feature);
-        console.log('GeoData:', geodata);
-        console.log('Year chosen:', year_chosen);
+        // CHANGED: Reset gWrapper to main container before clearing
+        gWrapper.current = svg.select('g');
         // Clear existing content
-        g.selectAll("*").remove();
+        gWrapper.current.selectAll("*").remove();
         svg.selectAll("defs").remove(); // Clear any existing defs
         
         // Check if we have country data
         if (!data) {
-            g.append('text')
+            gWrapper.current.append('text')
                 .attr('x', innerWidth / 2)
                 .attr('y', innerHeight / 2)
                 .attr('text-anchor', 'middle')
@@ -863,7 +926,7 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
             return;
         }
         // Add main title
-        g.append('text')
+        gWrapper.current.append('text')
             .attr('x', innerWidth / 2)
             .attr('y', -10)
             .attr('text-anchor', 'middle')
@@ -876,22 +939,23 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
 
         if ( data[year_chosen] <= 10540) {   
             area_for_comparison = "Paris";     
-        area_percentage = Math.round((data[year_chosen]/10540|| 0) * 100);
-        const number_of_times_lausanne = Math.round(data[year_chosen] / 55);
+            area_percentage = Math.round((data[year_chosen]/10540|| 0) * 100);
+            const number_of_times_lausanne = Math.round(data[year_chosen] / 55);
+            
+            gWrapper.current.append('text')
+                .attr('x', innerWidth / 2)
+                .attr('y', 5)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '12px')
+                .attr('fill', '#666')
+                .text(`${area_percentage}% of ${area_for_comparison} surface area and ${number_of_times_lausanne} times Lausanne surface area`);
+        }
         
-        g.append('text')
-            .attr('x', innerWidth / 2)
-            .attr('y', 5)
-            .attr('text-anchor', 'middle')
-            .attr('font-size', '12px')
-            .attr('fill', '#666')
-            .text(`${area_percentage}% of ${area_for_comparison} surface area and ${number_of_times_lausanne} times Lausanne surface area`);}
-        
-        else if (data[year_chosen] <=  72900) {
-            area_for_comparison = "Singapore";
-            area_percentage = Math.round((data[year_chosen]/72900 || 0) * 100);
+        else if (data[year_chosen] <=  58100) {
+            area_for_comparison = "Leman Lake";
+            area_percentage = Math.round((data[year_chosen]/58100 || 0) * 100);
             const number_of_times_paris = Math.round(data[year_chosen] / 10540);
-            g.append('text')
+            gWrapper.current.append('text')
                 .attr('x', innerWidth / 2)
                 .attr('y', 5)
                 .attr('text-anchor', 'middle')
@@ -899,140 +963,144 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
                 .attr('fill', '#666')
                 .text(`${area_percentage}% of ${area_for_comparison} surface area and ${number_of_times_paris} times Paris surface area`)
          }
+        else if (data[year_chosen] <=  72900) {
+            area_for_comparison = "Singapore";
+            area_percentage = Math.round((data[year_chosen]/72900 || 0) * 100);
+            const number_of_times = Math.round(data[year_chosen] / 58100);
+            gWrapper.current.append('text')
+                .attr('x', innerWidth / 2)
+                .attr('y', 5)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '12px')
+                .attr('fill', '#666')
+                .text(`${area_percentage}% of ${area_for_comparison} surface area and ${number_of_times} times Paris surface area`)
+         }
         else {
             // switzerland id is 756
             area_for_comparison = "Switzerland";
-        area_percentage = Math.round((data[year_chosen]/4128500 || 0) * 100);
-        const number_of_times = Math.round(data[year_chosen] / 72900);
-        g.append('text')
-            .attr('x', innerWidth / 2)
-            .attr('y', 5)
-            .attr('text-anchor', 'middle')
-            .attr('font-size', '12px')
-            .attr('fill', '#666')
-            .text(`${area_percentage}% of ${area_for_comparison} surface area and ${number_of_times} times Singapore surface area`);
+            area_percentage = Math.round((data[year_chosen]/4128500 || 0) * 100);
+            const number_of_times = Math.round(data[year_chosen] / 72900);
+            gWrapper.current.append('text')
+                .attr('x', innerWidth / 2)
+                .attr('y', 5)
+                .attr('text-anchor', 'middle')
+                .attr('font-size', '12px')
+                .attr('fill', '#666')
+                .text(`${area_percentage}% of ${area_for_comparison} surface area and ${number_of_times} times Singapore surface area`);
         }
 
-
-        // Add subtitle with percentage of maximum value
-        
         // Add data label
-        g.append('text')
+        gWrapper.current.append('text')
             .attr('x', innerWidth / 2)
             .attr('y', 30)
             .attr('text-anchor', 'middle')
             .attr('font-size', '14px')
             .attr('font-weight', 'bold')
             .text(`${data[year_chosen]} ${data.Unit} of ${chosenFoodName} harvested in ${year_chosen}`);
-        // Now fetch and render Paris - only when render is called
-        if (area_for_comparison == "Paris") {fetch_paris_svg().then(dValues => {
+        
+        // CHANGED: Create gradient outside the function to avoid duplicates
+        const defs = svg.append("defs");
+        const lg = defs.append("linearGradient")
+            .attr("id", "mygrad")
+            .attr("x1", "0%")
+            .attr("x2", "100%")
+            .attr("y1", "0%")
+            .attr("y2", "0%");
+        
+        // Store the gradient reference
+        currentGradient = lg;
+        
+         // Fetch and render svgs for leman lake, paris, and ginevra
+         function createcountrysvgandfill(data, area_percentage, dValues, gWrapper, area_for_comparison) {
             if (!dValues || dValues.length === 0) {
-                console.error('No Paris SVG data available');
-                return;
-            }
+                console.error(`No ${area_for_comparison} SVG data available`);
+                return null;
+            }            
             
             const pathData = dValues[0];
-            const viewBoxWidth = 1000;
-            const viewBoxHeight = 1000;
             
-            // Set the size we want to show Paris within
+            // CHANGED: Calculate actual bounds of the path instead of assuming viewBox
+            const tempSvg = d3.select('body').append('svg').style('visibility', 'hidden');
+            const tempPath = tempSvg.append('path').attr('d', pathData);
+            const bbox = tempPath.node().getBBox();
+            tempSvg.remove();
+            
+            console.log(`${area_for_comparison} bbox:`, bbox);
+            
+            // Use actual path dimensions
+            const pathWidth = bbox.width;
+            const pathHeight = bbox.height;
+        
+            // Set the size we want to show the area within
             const targetWidth = innerWidth * 0.6;  // Use 60% of available width
             const targetHeight = (innerHeight - 60) * 0.8; // Account for titles
-            const scale = Math.min(targetWidth / viewBoxWidth, targetHeight / viewBoxHeight);
-            
-            // Create center group for Paris
-            const parisGroup = g.append('g')
-                .attr('class', 'paris-group')
-                .attr('transform', `translate(${innerWidth / 2}, ${(innerHeight + 40) / 2}) scale(${scale}) translate(${-viewBoxWidth / 2}, ${-viewBoxHeight / 2})`);
-            
-            // Create gradient definition
-            const defs = svg.append("defs");
-            const lg = defs.append("linearGradient")
-                .attr("id", "mygrad")
-                .attr("x1", "0%")
-                .attr("x2", "100%")
-                .attr("y1", "0%")
-                .attr("y2", "0%");
-            
-            // Store the gradient reference
-            currentGradient = lg;
+            const scale = Math.min(targetWidth / pathWidth, targetHeight / pathHeight);
+        
+            // Create center group
+            const Group = gWrapper.current.append('g')
+                .attr('class', `${area_for_comparison.toLowerCase().replace(' ', '-')}-group`)
+                .attr('transform', `translate(${innerWidth / 2}, ${(innerHeight + 40) / 2}) scale(${scale}) translate(${-bbox.x - pathWidth/2}, ${-bbox.y - pathHeight/2})`);
             
             // Set up gradient with current data
             updateGradient(data.fillColor, area_percentage);
-            
-            // Add Paris path with gradient fill
-            parisGroup.append('path')
+        
+            // Add path with gradient fill
+            Group.append('path')
                 .attr('d', pathData)
-                .attr('fill', "url(#mygrad)")
+                .attr('fill', `url(#mygrad)`)
                 .attr('stroke', 'black')
-                .attr('stroke-width', 4/ scale);
+                .attr('stroke-width', 4 / scale);
                 
-        }).catch(error => {
-            console.error('Failed to load Paris SVG:', error);
-            // Show error message in the visualization
-            g.append('text')
-                .attr('x', innerWidth / 2)
-                .attr('y', (innerHeight + 40) / 2)
-                .attr('text-anchor', 'middle')
-                .attr('font-size', '12px')
-                .attr('fill', 'red')
-                .text('Failed to load Paris visualization');
-        });
+            console.log(`Rendering ${area_for_comparison} SVG with scale: ${scale}, bbox:`, bbox);
+            
+            // CHANGED: Update the wrapper's current reference
+            gWrapper.current = Group;
+            return Group;
+        }
+            
+        // Now fetch and render Paris - only when render is called
+        if (area_for_comparison == "Paris") {
+            fetch_paris_svg().then(dValues => {
+                createcountrysvgandfill(data, area_percentage, dValues, gWrapper, area_for_comparison);
+            }).catch(error => {
+                console.error("Error fetching Paris SVG data:", error);
+            });
+        }
+        else if (area_for_comparison == "Leman Lake") {
+            fetch_leman_svg().then(dValues => {
+                createcountrysvgandfill(data, area_percentage, dValues, gWrapper, area_for_comparison);
+            }).catch(error => {
+                console.error("Error fetching Leman Lake SVG data:", error);
+            });
         }
         else if (area_for_comparison == "Singapore") {
-        // Create center group for Switzerland
-            
+            // Create center group for Singapore
             const projection = d3.geoMercator().fitSize([400, 400], singaporeFeature);
             const pathGenerator = d3.geoPath().projection(projection);
 
-            const Singaporegroup = g.append('g')
+            const Singaporegroup = gWrapper.current.append('g')
                 .attr('class', 'singapore-group')
                 .attr('transform', `translate(${innerWidth / 2 - 200}, ${(innerHeight + 40) / 2 - 200})`);
-            
-            // Create gradient definition
-            const defs = svg.append("defs");
-            const lg = defs.append("linearGradient")
-                .attr("id", "mygrad")
-                .attr("x1", "0%")
-                .attr("x2", "100%")
-                .attr("y1", "0%")
-                .attr("y2", "0%");
-            
-            // Store the gradient reference
-            currentGradient = lg;
             
             // Set up gradient with current data
             updateGradient(data.fillColor, area_percentage);
             
-            // Draw Switzerland path
+            // Draw Singapore path
             Singaporegroup.append('path')
                 .datum(singaporeFeature)
                 .attr('d', pathGenerator)
                 .attr('fill', 'url(#mygrad)')
                 .attr('stroke', 'black')                
-                .attr('stroke-width', 4);  // Optional: scale stroke
-            }
+                .attr('stroke-width', 4);
+        }
         else if (area_for_comparison == "Switzerland") {
-        // Create center group for Switzerland
-            
+            // Create center group for Switzerland
             const projection = d3.geoMercator().fitSize([400, 400], switzerlandFeature);
             const pathGenerator = d3.geoPath().projection(projection);
 
-            const switzerlandGroup = g.append('g')
+            const switzerlandGroup = gWrapper.current.append('g')
                 .attr('class', 'switzerland-group')
                 .attr('transform', `translate(${innerWidth / 2 - 200}, ${(innerHeight + 40) / 2 - 200})`);
-            
-            // Create gradient definition
-            const defs = svg.append("defs");
-            const lg = defs.append("linearGradient")
-                .attr("id", "mygrad")
-                .attr("x1", "0%")
-                .attr("x2", "100%")
-                .attr("y1", "0%")
-                .attr("y2", "0%");
-            
-            // Store the gradient reference
-            currentGradient = lg;
             
             // Set up gradient with current data
             updateGradient(data.fillColor, area_percentage);
@@ -1043,11 +1111,12 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
                 .attr('d', pathGenerator)
                 .attr('fill', 'url(#mygrad)')
                 .attr('stroke', 'black')                
-                .attr('stroke-width', 4);  // Optional: scale stroke
-        }}
+                .attr('stroke-width', 4);
+        }
+    }
     
     // Initial render
-    render(countryData, countryFeature,geoData);
+    render(countryData, countryFeature, geoData);
     
     // Return control object
     return {
@@ -1055,14 +1124,13 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
             if (newGeoData) {
                 geoData = newGeoData;
             }
-            render(newCountryData, newCountryFeature,newGeoData);
+            render(newCountryData, newCountryFeature, newGeoData);
         },
         clear: () => {
             container.innerHTML = '';
         }
     };
 }
-
 let selectedCountry = null;
 /**
  * Creates the complete visualization page with world map and country detail
@@ -1187,14 +1255,12 @@ async function createVisualizationPage(smallAreaFunction = null, width = 1000, h
             
             // Get available years from the data and create/update time slider
             const availableYears = getAvailableYears(data);
-            console.log("Available years:", availableYears);
             
             if (timeSlider) {
                 // Update existing slider
                 timeSlider.update(availableYears, year_chosen);
             } else if (availableYears.length > 0) {
                 // Create new slider
-                console.log("Creating new time slider with years:", availableYears,year_chosen);
                 timeSlider = createTimeSlider(
                     availableYears,
                     year_chosen,
@@ -1207,10 +1273,7 @@ async function createVisualizationPage(smallAreaFunction = null, width = 1000, h
                         if (map) {
                             map.update(updatedCountryWideJson);
                         }
-                        console.log(updatedCountryWideJson)
                         if (selectedCountry && geoData) {
-                            console.log("newid", selectedCountry.id);
-
                             detailViz.update(
                                 selectedCountry,
                                 geoData.countries.features.find(f => f.id === country_to_iso[selectedCountry.Area]),
