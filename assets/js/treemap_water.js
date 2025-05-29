@@ -411,7 +411,7 @@ document.addEventListener("DOMContentLoaded", function () {
       // Échelle de couleur pour les valeurs propres
       const color = d3.scaleSequential()
         .domain([minValue, maxValue])
-        .interpolator(d3.interpolateRgb("#5C7E91", "#A7C8D9"));
+        .interpolator(d3.interpolateRgb("#A7C8D9", "#5C7E91"));
       
       // Création des cellules
       const cell = group.selectAll("g")
