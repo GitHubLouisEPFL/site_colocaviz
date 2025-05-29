@@ -1,367 +1,369 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Inventaire</title>
-  <link rel="stylesheet" href="assets/css/style.css" />
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Inventaire</title>
+    <link rel="stylesheet" href="assets/css/style.css" />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 </head>
+
 <body class="inventory-page">
 
-  <header>
-    <nav class="top-nav">
-      <a href="index.html">🏠 Home</a>
-      <a href="viz.html">🌍 Interactive Visualizations</a>
-      <a href="inventory.html" class="active">📝 Inventory</a>
-      <a href="comparateur.html">📊 Comparison</a>
-      <a href="basket.html">🛒 Basket</a>
-    </nav>
-  </header>
+    <header>
+        <nav class="top-nav">
+            <a href="index.html">🏠 Home</a>
+            <a href="viz.html">🌍 Interactive Visualizations</a>
+            <a href="inventory.html" class="active">📝 Inventory</a>
+            <a href="comparateur.html">📊 Comparison</a>
+            <a href="basket.html">🛒 Basket</a>
+        </nav>
+    </header>
 
-  <div class="main-content" >
-    <section class="search-panel">
-      <div class="form-row">
-        <label for="layerSelect">🔎 Level :
-        <select id="layerSelect">
-          <option value="2">Main Categories</option>
-          <option value="3">Sub-Categories</option>
-            <option value="4">Products (Production data available)</option>
-        </select>
-      </div>
-
-      <div class="search-container">
-        <input type="text" id="searchBox" placeholder="Search for a product..." autocomplete="off" />
-        <ul id="dropdownList" class="dropdown" style="display: none;"></ul>
-      </div>
-    </section>
-
-    <section class="results-panel">
-
-      <div class="results" id="results"></div>
-    </section>
-  </div>
-
-  <script type="module">
-    import { RacingBarChart, initChart } from './assets/js/barchart_race.js';
-
-    function getEmoji(name) {
-      const emojiMap = {
-        oil: "🛢️",
-        pesto : "🍃",
-        plant: "🌱",
-        eggplant: "🍆",
-        pumpkin: "🎃",
-        pasta: "🍝",
-        cookie: "🍪",
-        chocolate: "🍫",
-        spinach: "🥬",
-        zucchini: "🥒",
-        beef: "🥩",
-        lamb: "🥩",
-        pork: "🥩",
-        date: "🌴",
-        raisin:"🍇",
-        apricot: "🍑",
-        berry: "🫐",
-        currant: "🫐",
-        bacon: "🥓",
-        kiwi: "🥝",
-        chicken: "🍗",
-        poultry: "🍗",
-        egg: "🥚",
-        milk: "🥛",
-        cream: "🍶",
-        "dairy products": "🍶",
-        mascarpone: "🍶",
-        mozzarella: "🧀",
-        "parmigiano reggiano" : "🧀",
-        seed: "🌱",
-        sunflower: "🌻",
-        chilly: "🌶️",
-        ricotta: "🧀",
-        stracchino: "🧀",
-        mealworm: "🪱",
-        tangerin: "🍊",
-        mandarin: "🍊",
-        olive: "🫒",
-        pineapple: "🍍",
-        barley: "🌾",
-        flour: "🌾",
-        grains: "🌾",
-        millet: "🌾",
-        oat: "🌾",
-        rye: "🌾",
-        sorghum: "🌾",
-        wheat: "🌾",
-        beans: "🫘",
-        chickpea: "🫘",
-        cowpea: "🫘",
-        lentil:"🫘",
-        soybean: "🫘",
-        chestnut: "🌰",
-        hazelnut: "🌰",
-        "mixed nut": "🌰",
-        "palm nut": "🌰",
-        pistachio:"🌰",
-        burger: "🍔",
-        peanut:"🥜",
-        maize: "🌽",
-        clementine: "🍊",
-        cheese: "🧀",
-        yogurt: "🍶",
-        butter: "🧈",
-        margarine: "🧈",
-        fish: "🐟",
-        salmon: "🐟",
-        trout: "🐟",
-        turbot: "🐟",
-        carp: "🐟",
-        cod: "🐟",
-        apple: "🍎",
-        banana: "🍌",
-        orange: "🍊",
-        lemon: "🍋",
-        lime: "🍋",
-        mango: "🥭",
-        pear: "🍐",
-        peach: "🍑",
-        plum: "🍑",
-        pineapple: "🍍",
-        grape: "🍇",
-        strawberry: "🍓",
-        raspberry: "🍓",
-        blueberry: "🫐",
-        raspberry: "🫐",
-        avocado: "🥑",
-        tomato: "🍅",
-        ketchup: "🍅",
-        cucumber: "🥒",
-        carrot: "🥕",
-        corn: "🌽",
-        "sweet potato": "🍠",
-        cabbage: "🥬",
-        cauliflower: "🥦",
-        potato: "🥔",
-        onion: "🧅",
-        garlic: "🧄",
-        broccoli: "🥦",
-        lettuce: "🥬",
-        bread: "🍞",
-        cake: "🍰",
-        croissant: "🥐",
-        wine: "🍷",
-        beer: "🍺",
-        juice: "🧃",
-        coffee: "☕",
-        sugar: "🍬",
-        pepper: "🌶️",
-        ginger: "🫚",
-        watermelon: "🍉",
-        fruit: "🍎",
-        legumes: "🌱",
-        nuts: "🌰",
-        spicies: "🌶️",
-        tubers : "🥔",
-        vegetables : "🥦",
-        biscuits : "🍪",
-        drinks: "🍹",
-        vegetal: "🌱",
-        animal: "🐮",
-        "processed food": "🍕",
-        crops: "🌾"
-      };
-
-      const key = Object.keys(emojiMap).find(k => name.toLowerCase().includes(k));
-      return emojiMap[key] || "🍽️";
-    }
-
-
-    function flattenByLevel(node, level, currentLevel = 1, result = []) {
-      if (currentLevel === level) {
-        result.push({ name: node.name, value: node.value });
-      } else if (node.children) {
-        node.children.forEach(child => flattenByLevel(child, level, currentLevel + 1, result));
-      }
-      return result;
-    }
-
-    let carbonRoot = null;
-    let waterRoot = null;
-    let productionRoot = null;
-    let productionItems = null;
-    let chart = null;
-    let currentList = [];
-
-    Promise.all([
-      d3.json("data/data_carbon.json"),
-      d3.json("data/data_water.json"),
-      // TODO replace with real data
-      d3.json("data/data_production.json")
-    ]).then(([carbon, water, production]) => {
-      carbonRoot = carbon;
-      waterRoot = water;
-      productionRoot = production;
-      productionItems = new Set(Object.keys(production))
-      updateList();
-    });
-
-    document.getElementById("layerSelect").addEventListener("change", updateList);
-    document.getElementById("searchBox").addEventListener("input", filterDropdown);
-    document.getElementById("searchBox").addEventListener("focus", () => {
-      if (currentList.length > 0) {
-        filterDropdown();
-      }
-    });
-    document.addEventListener("click", (e) => {
-      const container = document.querySelector(".search-container");
-      if (!container.contains(e.target)) {
-        document.getElementById("dropdownList").style.display = "none";
-      }
-    });
-
-    function updateList() {
-      const level = +document.getElementById("layerSelect").value;
-      currentList = flattenByLevel(carbonRoot, level);
-      filterDropdown();
-      document.getElementById("dropdownList").style.display = "none";
-    }
-
-    function filterDropdown() {
-      const query = document.getElementById("searchBox").value.toLowerCase();
-      const filtered = currentList.filter(d => d.name.toLowerCase().includes(query));
-      const dropdown = document.getElementById("dropdownList");
-
-      dropdown.innerHTML = "";
-
-      if (filtered.length === 0) {
-        dropdown.style.display = "none";
-        return;
-      }
-
-      filtered.forEach(d => {
-        const li = document.createElement("li");
-        // TODO Add red text to show if production data is missing
-        li.textContent = d.name;
-        if (productionItems.has(d.name)) {
-          const greenText = document.createElement("span");
-          greenText.textContent = "✔ Production data available";
-          greenText.style.color = "green";
-          greenText.style.marginLeft = "10px";
-          li.appendChild(greenText);
-        }
-        li.addEventListener("click", () => {
-          document.getElementById("searchBox").value = d.name;
-          dropdown.style.display = "none";
-          showDetails(d.name);
-        });
-        dropdown.appendChild(li);
-      });
-
-      dropdown.style.display = "block";
-    }
-
-    function showDetails(name) {
-      const carbonMatch = findByName(carbonRoot, name);
-      const waterMatch = findByName(waterRoot, name);
-      const productionMatch = productionItems.has(name);
-
-      const maxCarbon = getMaxValue(carbonRoot);
-      const maxWater = getMaxValue(waterRoot);
-
-      const resultDiv = document.getElementById("results");
-      let html = `<div class="result-name">${getEmoji(name)} ${name}</div><div style="margin-bottom: 1rem;"></div>`;
-
-      html += `<h2 style="margin: 10px;">
-        🌱 Environmental Impact</h2>`;
-      if (carbonMatch) {
-        const carbonPct = Math.round((carbonMatch.value / maxCarbon) * 100);
-        html += `
-          <div class="result-item">
-            <span class="highlight">🌍 Carbon:</span> ${carbonMatch.value} kg CO₂
-            <div class="impact-bar">
-              <div class="bar carbon-bar" style="width: ${carbonPct}%"></div>
+    <div class="main-content">
+        <section class="search-panel">
+            <div class="form-row">
+                <label for="layerSelect">🔎 Level :
+                    <select id="layerSelect">
+                        <option value="2">Main Categories</option>
+                        <option value="3">Sub-Categories</option>
+                        <option value="4">Products (Production data available)</option>
+                    </select>
             </div>
-          </div>`;
-      }
 
-      if (waterMatch) {
-        const waterPct = Math.round((waterMatch.value / maxWater) * 100);
-        html += `
-          <div class="result-item">
-            <span class="highlight">💧 Water:</span> ${waterMatch.value} L
-            <div class="impact-bar">
-              <div class="bar water-bar" style="width: ${waterPct}%"></div>
+            <div class="search-container">
+                <input type="text" id="searchBox" placeholder="Search for a product..." autocomplete="off" />
+                <ul id="dropdownList" class="dropdown" style="display: none;"></ul>
             </div>
-          </div>`;
-      }
+        </section>
 
-      if (productionMatch) {
-        html += `
-        <h2 style="margin: 10px;">📈 Production Data</h2>
-        <div class="result-item">
-            <span class="highlight">Barchart race of the top 8 countries producing ${name} (number in tons per year):</span>
-          </div>
-    
-        <div id="chart"></div>
-        <div class="controls">
-          <button id="start-btn">Start</button>
-          <button id="pause-btn" disabled>Pause</button>
-          <button id="reset-btn">Reset</button>
-        </div>`;
-      } else {
-        html += `
-          <h2 style="margin: 10px;">📈 Production Data</h2>
-          <div class="result-item">
-            <span class="highlight" style="color: red;">❗ No production data available for ${name}.</span>
-          </div>`;
+        <section class="results-panel">
 
-      }
+            <div class="results" id="results"></div>
+        </section>
+    </div>
 
-      // Add a separator for production visualizations
+    <script type="module">
+        import { RacingBarChart, initChart } from './assets/js/barchart_race.js';
 
-      resultDiv.innerHTML = html;
+        function getEmoji(name) {
+            const emojiMap = {
+                oil: "🛢️",
+                pesto: "🍃",
+                plant: "🌱",
+                eggplant: "🍆",
+                pumpkin: "🎃",
+                pasta: "🍝",
+                cookie: "🍪",
+                chocolate: "🍫",
+                spinach: "🥬",
+                zucchini: "🥒",
+                beef: "🥩",
+                lamb: "🥩",
+                pork: "🥩",
+                date: "🌴",
+                raisin: "🍇",
+                apricot: "🍑",
+                berry: "🫐",
+                currant: "🫐",
+                bacon: "🥓",
+                kiwi: "🥝",
+                chicken: "🍗",
+                poultry: "🍗",
+                egg: "🥚",
+                milk: "🥛",
+                cream: "🍶",
+                "dairy products": "🍶",
+                mascarpone: "🍶",
+                mozzarella: "🧀",
+                "parmigiano reggiano": "🧀",
+                seed: "🌱",
+                sunflower: "🌻",
+                chilly: "🌶️",
+                ricotta: "🧀",
+                stracchino: "🧀",
+                mealworm: "🪱",
+                tangerin: "🍊",
+                mandarin: "🍊",
+                olive: "🫒",
+                pineapple: "🍍",
+                barley: "🌾",
+                flour: "🌾",
+                grains: "🌾",
+                millet: "🌾",
+                oat: "🌾",
+                rye: "🌾",
+                sorghum: "🌾",
+                wheat: "🌾",
+                beans: "🫘",
+                chickpea: "🫘",
+                cowpea: "🫘",
+                lentil: "🫘",
+                soybean: "🫘",
+                chestnut: "🌰",
+                hazelnut: "🌰",
+                "mixed nut": "🌰",
+                "palm nut": "🌰",
+                pistachio: "🌰",
+                burger: "🍔",
+                peanut: "🥜",
+                maize: "🌽",
+                clementine: "🍊",
+                cheese: "🧀",
+                yogurt: "🍶",
+                butter: "🧈",
+                margarine: "🧈",
+                fish: "🐟",
+                salmon: "🐟",
+                trout: "🐟",
+                turbot: "🐟",
+                carp: "🐟",
+                cod: "🐟",
+                apple: "🍎",
+                banana: "🍌",
+                orange: "🍊",
+                lemon: "🍋",
+                lime: "🍋",
+                mango: "🥭",
+                pear: "🍐",
+                peach: "🍑",
+                plum: "🍑",
+                pineapple: "🍍",
+                grape: "🍇",
+                strawberry: "🍓",
+                raspberry: "🍓",
+                blueberry: "🫐",
+                raspberry: "🫐",
+                avocado: "🥑",
+                tomato: "🍅",
+                ketchup: "🍅",
+                cucumber: "🥒",
+                carrot: "🥕",
+                corn: "🌽",
+                "sweet potato": "🍠",
+                cabbage: "🥬",
+                cauliflower: "🥦",
+                potato: "🥔",
+                onion: "🧅",
+                garlic: "🧄",
+                broccoli: "🥦",
+                lettuce: "🥬",
+                bread: "🍞",
+                cake: "🍰",
+                croissant: "🥐",
+                wine: "🍷",
+                beer: "🍺",
+                juice: "🧃",
+                coffee: "☕",
+                sugar: "🍬",
+                pepper: "🌶️",
+                ginger: "🫚",
+                watermelon: "🍉",
+                fruit: "🍎",
+                legumes: "🌱",
+                nuts: "🌰",
+                spicies: "🌶️",
+                tubers: "🥔",
+                vegetables: "🥦",
+                biscuits: "🍪",
+                drinks: "🍹",
+                vegetal: "🌱",
+                animal: "🐮",
+                "processed food": "🍕",
+                crops: "🌾"
+            };
 
-      if (productionMatch) {
-        chart = initChart(productionRoot, name);
-
-            // Event listeners
-        document.getElementById('start-btn').addEventListener('click', () => {
-            if (chart) chart.start();
-        });
-        document.getElementById('pause-btn').addEventListener('click', () => {
-            if (chart) chart.pause();
-        });
-        document.getElementById('reset-btn').addEventListener('click', () => {
-            if (chart) chart.reset();
-        });
-      }
-    }
-
-    function getMaxValue(node) {
-      let max = node.value || 0;
-      if (node.children) {
-        node.children.forEach(child => {
-          max = Math.max(max, getMaxValue(child));
-        });
-      }
-      return max;
-    }
-
-    function findByName(node, name) {
-      if (node.name === name) return node;
-      if (node.children) {
-        for (const child of node.children) {
-          const found = findByName(child, name);
-          if (found) return found;
+            const key = Object.keys(emojiMap).find(k => name.toLowerCase().includes(k));
+            return emojiMap[key] || "🍽️";
         }
-      }
-      return null;
-    }
-  </script>
-  <script src="assets/js/barchart_race.js" defer></script>
+
+        function getBarchartTitle(name, metric, n=8) {
+            const titles = {
+                "production_t": `Barchart race of the top ${n} countries producing ${name} (in tons per year):`,
+                "area_harvested_ha": `Barchart race of the top ${n} countries producing ${name} (by harvested area in ha):`,
+                "producing_animals_slaughtered_an": `Barchart race of the top ${n} countries producing ${name} (by number of animals slaughtered):`
+            };
+            return titles[metric] || "Data Visualization";
+        }
+
+
+        function flattenByLevel(node, level, currentLevel = 1, result = []) {
+            if (currentLevel === level) {
+                result.push({ name: node.name, value: node.value });
+            } else if (node.children) {
+                node.children.forEach(child => flattenByLevel(child, level, currentLevel + 1, result));
+            }
+            return result;
+        }
+
+        let carbonRoot = null;
+        let waterRoot = null;
+        let productionRoot = null;
+        let productionItems = null;
+        let charts = [];
+        let currentList = [];
+
+        Promise.all([
+            d3.json("data/data_carbon.json"),
+            d3.json("data/data_water.json"),
+            // TODO replace with real data
+            d3.json("data/data_production.json")
+        ]).then(([carbon, water, production]) => {
+            carbonRoot = carbon;
+            waterRoot = water;
+            productionRoot = production;
+            productionItems = new Set(Object.keys(production))
+            updateList();
+        });
+
+        document.getElementById("layerSelect").addEventListener("change", updateList);
+        document.getElementById("searchBox").addEventListener("input", filterDropdown);
+        document.getElementById("searchBox").addEventListener("focus", () => {
+            if (currentList.length > 0) {
+                filterDropdown();
+            }
+        });
+        document.addEventListener("click", (e) => {
+            const container = document.querySelector(".search-container");
+            if (!container.contains(e.target)) {
+                document.getElementById("dropdownList").style.display = "none";
+            }
+        });
+
+        function updateList() {
+            const level = +document.getElementById("layerSelect").value;
+            currentList = flattenByLevel(carbonRoot, level);
+            filterDropdown();
+            document.getElementById("dropdownList").style.display = "none";
+        }
+
+        function filterDropdown() {
+            const query = document.getElementById("searchBox").value.toLowerCase();
+            const filtered = currentList.filter(d => d.name.toLowerCase().includes(query));
+            const dropdown = document.getElementById("dropdownList");
+
+            dropdown.innerHTML = "";
+
+            if (filtered.length === 0) {
+                dropdown.style.display = "none";
+                return;
+            }
+
+            filtered.forEach(d => {
+                const li = document.createElement("li");
+                // TODO Add red text to show if production data is missing
+                li.textContent = d.name;
+                if (productionItems.has(d.name)) {
+                    const greenText = document.createElement("span");
+                    greenText.textContent = "✔ Production data available";
+                    greenText.style.color = "green";
+                    greenText.style.marginLeft = "10px";
+                    li.appendChild(greenText);
+                }
+                li.addEventListener("click", () => {
+                    document.getElementById("searchBox").value = d.name;
+                    dropdown.style.display = "none";
+                    showDetails(d.name);
+                });
+                dropdown.appendChild(li);
+            });
+
+            dropdown.style.display = "block";
+        }
+
+        function showDetails(name) {
+            const carbonMatch = findByName(carbonRoot, name);
+            const waterMatch = findByName(waterRoot, name);
+            const productionMatch = productionItems.has(name);
+
+            const maxCarbon = getMaxValue(carbonRoot);
+            const maxWater = getMaxValue(waterRoot);
+
+            const resultDiv = document.getElementById("results");
+            let html = `<div class="result-name">${getEmoji(name)} ${name}</div><div style="margin-bottom: 1rem;"></div>`;
+
+            html += `<h2 style="margin: 10px;">🌱 Environmental Impact</h2>`;
+            if (carbonMatch) {
+                const carbonPct = Math.round((carbonMatch.value / maxCarbon) * 100);
+                html += `<div class="result-item">
+                        <span class="highlight">🌍 Carbon:</span> ${carbonMatch.value} kg CO₂
+                        <div class="impact-bar">
+                            <div class="bar carbon-bar" style="width: ${carbonPct}%"></div>
+                        </div>
+                    </div>`;
+            }
+
+            if (waterMatch) {
+                const waterPct = Math.round((waterMatch.value / maxWater) * 100);
+                html += `
+                    <div class="result-item">
+                        <span class="highlight">💧 Water:</span> ${waterMatch.value} L
+                        <div class="impact-bar">
+                            <div class="bar water-bar" style="width: ${waterPct}%"></div>
+                        </div>
+                    </div>`;
+            }
+
+            resultDiv.innerHTML = html;
+
+            if (productionMatch) {
+                resultDiv.innerHTML += `<h2 style="margin: 20px;">📈 Production Data</h2`
+                const metrics = new Set(Object.keys(productionRoot[name]));
+                console.log(metrics);
+                for (const metric of metrics) {
+                    const defaultOptions = {
+                        margin: { top: 16, right: 6, bottom: 6, left: 0 },
+                        barSize: 48,
+                        n: 8,
+                        k: 5,
+                        duration: 100,
+                        width: 928
+                    };
+
+                    const chart = new RacingBarChart("results", `chart-${metric}`, {...defaultOptions});
+                    charts.push(chart);
+                    const title = getBarchartTitle(name, metric);
+                    chart.init(productionRoot, title, name, metric);
+                }
+            } else {
+                html += `
+                    <h2 style="margin: 20px;">📈 Production Data</h2>
+                    <div class="result-item">
+                        <span class="highlight" style="color: red;">❗ No production data available for ${name}.</span>
+                    </div>`;
+
+            }
+
+            // Add a separator for production visualizations
+
+        }
+
+        function getMaxValue(node) {
+            let max = node.value || 0;
+            if (node.children) {
+                node.children.forEach(child => {
+                    max = Math.max(max, getMaxValue(child));
+                });
+            }
+            return max;
+        }
+
+        function findByName(node, name) {
+            if (node.name === name) return node;
+            if (node.children) {
+                for (const child of node.children) {
+                    const found = findByName(child, name);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+    </script>
+    <script src="assets/js/barchart_race.js" defer></script>
 </body>
+
 </html>
 
 
