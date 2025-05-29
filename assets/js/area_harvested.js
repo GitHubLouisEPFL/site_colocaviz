@@ -2,6 +2,8 @@
 
 let csvdata = null;
 let csvDataPromise = null;
+let chosenFoodName = null;
+let switzerlandFeature = null;
 /**
  * Fetches Paris SVG data with caching
  * @returns {Promise<Array>} Promise resolving csvdata
@@ -16,9 +18,7 @@ const getCSV = function getCSV() {
     }
 
     csvDataPromise = loadCSVData().then(data => {
-
-        csvdata = data.filter(item => item.Item === "rice");
-        csvdata = csvdata.filter(item => item.Element === "area harvested");
+        csvdata = data;
         console.log("CSV data loaded successfully");
         return csvdata;
     }).catch(error => {
@@ -28,6 +28,25 @@ const getCSV = function getCSV() {
 
     return csvDataPromise;
 };
+
+// Separate filtering function
+const filterCSV = function filterCSV(data, item_name = null, element_name = "area harvested") {
+    const filteredData = data
+        .filter(item => item.Item === item_name)
+        .filter(item => item.Element === element_name);
+    
+    console.log(`CSV data filtered for Item: ${item_name}, Element: ${element_name}`);
+    console.log(`Filtered ${filteredData.length} records from ${data.length} total records`);
+    
+    return filteredData;
+};
+
+// Convenience function that combines both
+const getFilteredCSV = function getFilteredCSV(item_name = null, element_name = "area harvested") {
+    let filteredcsv =getCSV().then(data => filterCSV(data, item_name, element_name)); 
+    return filteredcsv;
+};
+
 
 let year_chosen = 2019; // Default year
 /**
@@ -82,6 +101,7 @@ function fetch_paris_svg() {
  */
 function createCountryWideJson(countryJson, colorGradient = ['#FADC00', '#FD1D1D'], colorMappingFunction = null) {
     // Default to linear mapping if no custom function provided
+    if (!countryJson){return countryJson}
 
     const defaultMapping = (value, min, max) => {
         return (value - min) / (max - min);
@@ -104,7 +124,7 @@ function createCountryWideJson(countryJson, colorGradient = ['#FADC00', '#FD1D1D
     // Extract values for min/max calculation
 
     //const values = Object.values(countryJson).map(country => country.value);
-    const yearvalues = csvdata.map(item => item[year_chosen]).filter(value => value !== null && value !== undefined);
+    const yearvalues = countryJson.map(item => item[year_chosen]).filter(value => value !== null && value !== undefined);
     const minValue = Math.min(...yearvalues);
     const maxValue = Math.max(...yearvalues);
     
@@ -130,7 +150,7 @@ function createCountryWideJson(countryJson, colorGradient = ['#FADC00', '#FD1D1D
         return acc;
     }, {});
 }
-let countryWideJson = null;
+
 /**
  * Creates a world map visualization
  * @param {number} width - SVG width
@@ -142,16 +162,15 @@ let countryWideJson = null;
  * @returns {Object} - Control object with update and clear methods
  */
 function createWorldMap(width, height, countryWideJson, containerId, onCountrySelect = null, onDataLoaded = null) {
-    // Create SVG element
     const container = document.getElementById(containerId);
     container.innerHTML = '';
-    
+
     const svg = d3.select(container)
         .append('svg')
         .attr('width', width)
         .attr('height', height)
         .attr('class', 'world-map');
-    
+
     // Create loader element
     const loader = document.createElement('div');
     loader.textContent = 'Loading map data...';
@@ -160,156 +179,125 @@ function createWorldMap(width, height, countryWideJson, containerId, onCountrySe
     loader.style.left = '50%';
     loader.style.transform = 'translate(-50%, -50%)';
     container.appendChild(loader);
-    // Use .then to access the data after loading
-    
-    
-    // Load world map data
-    Promise.all([
-        d3.tsv('https://unpkg.com/world-atlas@1.1.4/world/50m.tsv'),
-        d3.json('https://unpkg.com/world-atlas@1.1.4/world/50m.json')
-    ]).then(([tsvData, topoJSONdata]) => {
-        // Remove loader
-        container.removeChild(loader);
-        
-        // Create country name lookup
-        const countryNames = tsvData.reduce((acc, d) => {
-            acc[d.iso_n3] = d.name;
-            return acc;
-        }, {});
 
-        const nameToId = tsvData.reduce((acc, d) => {
-            acc[d.name] = d.iso_n3;
-            return acc;
-        }, {});
-        
-        // Convert TopoJSON to GeoJSON
-        const countries = topojson.feature(topoJSONdata, topoJSONdata.objects.countries);
-        
-        // Setup projection and path generator
-        const projection = d3.geoNaturalEarth1()
-            .fitSize([width, height], countries);
-        const pathGenerator = d3.geoPath().projection(projection);
-        
-        // Create container for zoom
-        const g = svg.append('g');
-        
-        // Add background
-        g.append('rect')
-            .attr('class', 'background')
-            .attr('width', width)
-            .attr('height', height)
-            .attr('fill', '#ffffff');
-        
-            let country_name = '';
-        // Add countries
-            countryWideJson.then(resolvedCountryWideJson => {
+    const g = svg.append('g'); // container group for zoom and map elements
 
-            // Calculate min/max values for legend
-            const values = Object.values(resolvedCountryWideJson)
-                .map(d => d[year_chosen])
-                .filter(v => v !== null && v !== undefined && v > 0);
-            const minValue = Math.min(...values);
-            const maxValue = Math.max(...values);
-            
-            // Create the same color scale used in createCountryWideJson
-            const colorScale = d3.scaleLinear()
-                .domain([0, 1])
-                .range(['#FADC00', '#FD1D1D']); // Use the same gradient as in createCountryWideJson
-            
-            // Add the legend function inside this scope where we have access to the values
-            const addLegend = (svg, colorScale, min, max) => {
-                const legendWidth = 250;
-                const legendHeight = 15;
-                const legendX = 20;
-                const legendY = height - 50; // Position at bottom of map
-                
-                // Create legend group
-                const legend = svg.append('g')
-                    .attr('class', 'legend')
-                    .attr('transform', `translate(${legendX}, ${legendY})`);
-                
-                // Create gradient definition
-                const defs = svg.select('defs').empty() ? svg.append('defs') : svg.select('defs');
-                const gradient = defs.append('linearGradient')
-                    .attr('id', 'legend-gradient');
-                
-                // Add color stops using log scale
-                const numStops = 10;
-                for (let i = 0; i <= numStops; i++) {
-                    const ratio = i / numStops;
-                    const logValue = min * Math.pow(max / min, ratio); // Log scale values
-                    
-                    // Apply the same log mapping as in createCountryWideJson
-                    const offset = 1;
-                    const safeValue = Math.max(logValue + offset, offset);
-                    const safeMin = Math.max(min + offset, offset);
-                    const safeMax = Math.max(max + offset, offset);
-                    
-                    const logVal = Math.log(safeValue);
-                    const logMin = Math.log(safeMin);
-                    const logMax = Math.log(safeMax);
-                    
-                    const normalizedValue = Math.max(0, Math.min(1, (logVal - logMin) / (logMax - logMin)));
-                    const color = colorScale(normalizedValue);
-                    
-                    gradient.append('stop')
-                        .attr('offset', `${ratio * 100}%`)
-                        .attr('stop-color', color);
-                }
-                
-                // Add rectangle with gradient
-                legend.append('rect')
-                    .attr('width', legendWidth)
-                    .attr('height', legendHeight)
-                    .style('fill', 'url(#legend-gradient)')
-                    .style('stroke', '#000')
-                    .style('stroke-width', 0.5);
-                
-                // Add scale labels
-                const scale = d3.scaleLog()
-                    .domain([min, max])
-                    .range([0, legendWidth]);
-                
-                const axis = d3.axisBottom(scale)
-                    .ticks(4, '.1s'); // Format large numbers nicely
-                
-                legend.append('g')
-                    .attr('transform', `translate(0, ${legendHeight})`)
-                    .style('font-size', '10px')
-                    .call(axis);
-                
-                // Add title
-                legend.append('text')
-                    .attr('x', legendWidth / 2)
-                    .attr('y', -5)
-                    .attr('text-anchor', 'middle')
-                    .style('font-size', '12px')
-                    .style('font-weight', 'bold')
-                    .text('Rice Area Harvested (hectares)');
-            };
+    // Add background rect once
+    g.append('rect')
+        .attr('class', 'background')
+        .attr('width', width)
+        .attr('height', height)
+        .attr('fill', '#ffffff');
 
+    let countryNames = {};
+    let countries;
+    let pathGenerator;
+    let hasData = false;
 
-            // Append paths for each country
-            g.selectAll('path')
-                .data(countries.features)
-                .enter()
-                .append('path')
-                .attr('d', pathGenerator)
-                .attr('fill', d => {
-                    country_name = countryNames[d.id]
-                    country_name = countryNames[d.id].toLowerCase();
-                    return resolvedCountryWideJson[country_name]?.fillColor || '#ccc';
-                })
-            .attr('stroke', d => resolvedCountryWideJson[countryNames[d.id].toLowerCase()]?.outlineColor || '#333')
-            .attr('stroke-width', d => resolvedCountryWideJson[countryNames[d.id].toLowerCase()]?.outlineWidth || 0.5)
+    // --- Functions to render the map ---
+
+    // Render no-data map
+    const renderNoDataMap = () => {
+        hasData = false;
+        // Clear existing map elements
+        g.selectAll('.country').remove();
+        g.selectAll('.no-data-element').remove();
+        svg.selectAll('.legend').remove();
+
+        // Add gray countries
+        g.selectAll('path.no-data-path')
+            .data(countries.features)
+            .enter()
+            .append('path')
+            .attr('class', 'country no-data-element no-data-path')
+            .attr('d', pathGenerator)
+            .attr('fill', '#cccccc')
+            .attr('stroke', '#333')
+            .attr('stroke-width', 0.5)
+            .style('cursor', 'default')
+            .append('title')
+            .text(d => countryNames[d.id] || 'Unknown');
+
+        // Add "No data" text
+        const noDataText = g.append('text')
+            .attr('class', 'no-data-element no-data-text')
+            .attr('x', width / 2)
+            .attr('y', height / 2)
+            .attr('text-anchor', 'middle')
+            .attr('font-size', '18px')
+            .attr('font-weight', 'bold')
+            .attr('fill', '#666')
+            .text('No data available for the selected element');
+
+        // Add background rect behind text for readability
+        const bbox = noDataText.node().getBBox();
+        g.insert('rect', '.no-data-text')
+            .attr('class', 'no-data-element no-data-background')
+            .attr('x', bbox.x - 10)
+            .attr('y', bbox.y - 5)
+            .attr('width', bbox.width + 20)
+            .attr('height', bbox.height + 10)
+            .attr('fill', 'rgba(255, 255, 255, 0.8)')
+            .attr('stroke', '#ccc')
+            .attr('stroke-width', 1)
+            .attr('rx', 5);
+
+    };
+
+    // Render data map (colored countries)
+    const renderDataMap = (resolvedCountryWideJson) => {
+        hasData = true;
+        // Clear previous map and legend
+        g.selectAll('.country').remove();
+        g.selectAll('.no-data-element').remove();
+        svg.selectAll('.legend').remove();
+
+        // Calculate min and max for legend (example assumes year_chosen variable exists)
+        const values = Object.values(resolvedCountryWideJson)
+            .map(d => d[year_chosen])
+            .filter(v => v !== null && v !== undefined && v > 0);
+
+        if (values.length === 0) {
+            renderNoDataMap();
+            return;
+        }
+
+        const minValue = Math.min(...values);
+        const maxValue = Math.max(...values);
+
+        // Color scale - adjust domain & range to your data
+        const colorScale = d3.scaleLinear()
+            .domain([0, 1])
+            .range(['#FADC00', '#FD1D1D']);
+
+        // Draw countries with data
+        g.selectAll('path')
+            .data(countries.features)
+            .enter()
+            .append('path')
             .attr('class', 'country')
-            .style('cursor', 'pointer')
+            .attr('d', pathGenerator)
+            .attr('fill', d => {
+                const name = countryNames[d.id]?.toLowerCase();
+                return resolvedCountryWideJson[name]?.fillColor || '#ccc';
+            })
+            .attr('stroke', d => {
+                const name = countryNames[d.id]?.toLowerCase();
+                return resolvedCountryWideJson[name]?.outlineColor || '#333';
+            })
+            .attr('stroke-width', d => {
+                const name = countryNames[d.id]?.toLowerCase();
+                return resolvedCountryWideJson[name]?.outlineWidth || 0.5;
+            })
+            .style('cursor', d => {
+                const name = countryNames[d.id]?.toLowerCase();
+                return resolvedCountryWideJson[name] ? 'pointer' : 'default';
+            })
             .on('click', function(event, d) {
-                if (onCountrySelect && resolvedCountryWideJson[countryNames[d.id].toLowerCase()]) {
-                    // Find the geographic feature for this country
+                const name = countryNames[d.id]?.toLowerCase();
+                if (onCountrySelect && resolvedCountryWideJson[name]) {
                     const countryFeature = countries.features.find(f => f.id === d.id);
-                    // Call the callback with both country data and geographic feature
-                    onCountrySelect(resolvedCountryWideJson[countryNames[d.id].toLowerCase()], countryFeature, {
+                    onCountrySelect(resolvedCountryWideJson[name], countryFeature, {
                         countries: countries,
                         countryNames: countryNames,
                         pathGenerator: pathGenerator,
@@ -319,61 +307,157 @@ function createWorldMap(width, height, countryWideJson, containerId, onCountrySe
             })
             .append('title')
             .text(d => {
-                if (resolvedCountryWideJson[countryNames[d.id].toLowerCase()]) {
-                    return resolvedCountryWideJson[countryNames[d.id].toLowerCase()].hoverText;
-                }
-                return countryNames[d.id] || 'Unknown';
+                const name = countryNames[d.id]?.toLowerCase();
+                return resolvedCountryWideJson[name]?.hoverText || countryNames[d.id] || 'Unknown';
             });
-             // Add the legend AFTER we have access to the data
-            addLegend(svg, colorScale, minValue, maxValue);
-            })
 
-        // Add zoom behavior with better responsiveness
+        // Add legend
+        const addLegend = (svg, colorScale, min, max) => {
+            const legendWidth = 250;
+            const legendHeight = 15;
+            const legendX = 20;
+            const legendY = height - 50;
+
+            const legend = svg.append('g')
+                .attr('class', 'legend')
+                .attr('transform', `translate(${legendX}, ${legendY})`);
+
+            const defs = svg.select('defs').empty() ? svg.append('defs') : svg.select('defs');
+            const gradient = defs.append('linearGradient')
+                .attr('id', 'legend-gradient');
+
+            const numStops = 10;
+            for (let i = 0; i <= numStops; i++) {
+                const ratio = i / numStops;
+                const logValue = min * Math.pow(max / min, ratio);
+
+                const offset = 1;
+                const safeValue = Math.max(logValue + offset, offset);
+                const safeMin = Math.max(min + offset, offset);
+                const safeMax = Math.max(max + offset, offset);
+
+                const logVal = Math.log(safeValue);
+                const logMin = Math.log(safeMin);
+                const logMax = Math.log(safeMax);
+
+                const normalizedValue = Math.max(0, Math.min(1, (logVal - logMin) / (logMax - logMin)));
+                const color = colorScale(normalizedValue);
+
+                gradient.append('stop')
+                    .attr('offset', `${ratio * 100}%`)
+                    .attr('stop-color', color);
+            }
+
+            legend.append('rect')
+                .attr('width', legendWidth)
+                .attr('height', legendHeight)
+                .style('fill', 'url(#legend-gradient)')
+                .style('stroke', '#000')
+                .style('stroke-width', 0.5);
+
+            const scale = d3.scaleLog()
+                .domain([min, max])
+                .range([0, legendWidth]);
+
+            const axis = d3.axisBottom(scale)
+                .ticks(4, '.1s');
+
+            legend.append('g')
+                .attr('transform', `translate(0, ${legendHeight})`)
+                .style('font-size', '10px')
+                .call(axis);
+
+            legend.append('text')
+                .attr('x', legendWidth / 2)
+                .attr('y', -5)
+                .attr('text-anchor', 'middle')
+                .style('font-size', '12px')
+                .style('font-weight', 'bold')
+                .text(`${chosenFoodName} Area Harvested (hectares)`);
+        };
+
+        addLegend(svg, colorScale, minValue, maxValue);
+    };
+
+    // Setup projection and pathGenerator after loading data
+    let projection;
+
+    Promise.all([
+        d3.tsv('https://unpkg.com/world-atlas@1.1.4/world/50m.tsv'),
+        d3.json('https://unpkg.com/world-atlas@1.1.4/world/50m.json')
+    ]).then(([tsvData, topoJSONdata]) => {
+        container.removeChild(loader);
+
+        countryNames = tsvData.reduce((acc, d) => {
+            acc[d.iso_n3] = d.name;
+            return acc;
+        }, {});
+        
+
+        countries = topojson.feature(topoJSONdata, topoJSONdata.objects.countries);
+
+        projection = d3.geoNaturalEarth1()
+            .fitSize([width, height], countries);
+        pathGenerator = d3.geoPath().projection(projection);
+        
+        switzerlandFeature = countries.features.find(f => f.id === '756');
+
+        // Add zoom behavior
         const zoomHandler = d3.zoom()
-            .scaleExtent([0.5, 10]) // Allow zoom out to 0.5x and in to 10x
-            .translateExtent([[-width * 2, -height * 2], [width * 2, height * 2]]) // Limit pan area
+            .scaleExtent([0.5, 10])
+            .translateExtent([[-width * 2, -height * 2], [width * 2, height * 2]])
             .on('zoom', (event) => {
                 g.attr('transform', event.transform);
-                
-                // Adjust stroke width based on zoom level for better visibility
                 g.selectAll('.country')
                     .attr('stroke-width', 0.5 / event.transform.k);
             });
-        
+
         svg.call(zoomHandler);
-        
-        // Call the onDataLoaded callback if provided
+
+        // Render initial map based on passed data or fallback
+        if (!countryWideJson) {
+            renderNoDataMap();
+        } else if (typeof countryWideJson.then === 'function') {
+            countryWideJson.then(resolved => {
+                if (!resolved || Object.keys(resolved).length === 0) {
+                    renderNoDataMap();
+                } else {
+                    renderDataMap(resolved);
+                }
+            }).catch(() => {
+                renderNoDataMap();
+            });
+        } else {
+            renderDataMap(countryWideJson);
+        }
+
         if (onDataLoaded) {
             onDataLoaded({
-                countries: countries,
-                countryNames: countryNames,
-                pathGenerator: pathGenerator,
-                projection: projection
+                countries,
+                countryNames,
+                pathGenerator,
+                projection
             });
         }
     });
-    
-    // Return control object
     return {
         update: (newCountryWideJson) => {
-            svg.selectAll('.country')
-                .attr('fill', d => {
-                    const countryCode = d.id;
-                    return newCountryWideJson[countryNames[countryCode]]?.fillColor || '#ccc';
-                })
-                .select('title')
-                .text(d => {
-                    if (newCountryWideJson[countryNames[countryCode]]) {
-                        return newCountryWideJson[countryNames[countryCode]].hoverText;
-                    }
-                    return d.id;
-                });
-        },
+            if (!newCountryWideJson && hasData) {
+                console.warn('No new country-wide JSON provided, rendering no-data map');
+                renderNoDataMap();
+            } else if (newCountryWideJson ) {
+            console.log('Rendering data map with new country-wide JSON');
+            renderDataMap(newCountryWideJson);
+            }
+             else {
+                return; // No update needed
+            }
+            },
         clear: () => {
-            container.innerHTML = '';
+        container.innerHTML = '';
         }
-    };
-}
+        };
+        }
 
 /**
  * Creates a small area visualization for a selected country
@@ -396,14 +480,23 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
         .attr('width', width)
         .attr('height', height)
         .attr('class', 'small-area-visualization');
+    svg.append('rect')
+        .attr('class', 'background')
+        .attr('width', width)
+        .attr('height', height)
+        .attr('fill', '#ffffff');
     
     const margin = { top: 40, right: 20, bottom: 60, left: 40 };
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
     
     // Create container
-    const g = svg.append('g')
-        .attr('transform', `translate(${margin.left},${margin.top})`);
+    const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+        
+    // Add background rect once
+    
+    //g
+
     
     // Store gradient reference for updates
     let currentGradient = null;
@@ -440,7 +533,9 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
     // Function to render the visualization
     function render(data, feature,geodata) {
         console.log('Rendering small area visualization');
-        
+        console.log('geodata:', geodata);
+        console.log('data:', data);
+        console.log('feature:', feature);
         // Clear existing content
         g.selectAll("*").remove();
         svg.selectAll("defs").remove(); // Clear any existing defs
@@ -464,9 +559,18 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
             .attr('font-size', '16px')
             .text(geodata["countryNames"][feature.id]);
         
-        
-        const area_percentage = Math.round((data[year_chosen]/10540|| 0) * 100);
-        
+        let area_for_comparison = "";    
+        let area_percentage = 0;
+
+        if (data[year_chosen] <= 10540) {   
+            area_for_comparison = "Paris";     
+        area_percentage = Math.round((data[year_chosen]/10540|| 0) * 100);}
+        else {
+            // switzerland id is 756
+            area_for_comparison = "Switzerland";
+        area_percentage = Math.round((data[year_chosen]/4128500 || 0) * 100);
+        }
+
         // Add subtitle with percentage of maximum value
         g.append('text')
             .attr('x', innerWidth / 2)
@@ -474,7 +578,7 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
             .attr('text-anchor', 'middle')
             .attr('font-size', '12px')
             .attr('fill', '#666')
-            .text(`${area_percentage}% of Paris surface area`);
+            .text(`${area_percentage}% of ${area_for_comparison} surface area`);
         // Add data label
         g.append('text')
             .attr('x', innerWidth / 2)
@@ -483,9 +587,8 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
             .attr('font-size', '14px')
             .attr('font-weight', 'bold')
             .text(`${data[year_chosen]} ${data.Unit}`);
-        
         // Now fetch and render Paris - only when render is called
-        fetch_paris_svg().then(dValues => {
+        if (area_for_comparison == "Paris") {fetch_paris_svg().then(dValues => {
             if (!dValues || dValues.length === 0) {
                 console.error('No Paris SVG data available');
                 return;
@@ -525,7 +628,7 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
                 .attr('d', pathData)
                 .attr('fill', "url(#mygrad)")
                 .attr('stroke', 'black')
-                .attr('stroke-width', 4 / scale);
+                .attr('stroke-width', 4/ scale);
                 
         }).catch(error => {
             console.error('Failed to load Paris SVG:', error);
@@ -538,7 +641,41 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
                 .attr('fill', 'red')
                 .text('Failed to load Paris visualization');
         });
-    }
+        }
+        else if (area_for_comparison == "Switzerland") {
+            if (switzerlandFeature) {console.log("Switzerland feature found", switzerlandFeature);}
+        // Create center group for Switzerland
+            
+            const projection = d3.geoMercator().fitSize([400, 400], switzerlandFeature);
+            const pathGenerator = d3.geoPath().projection(projection);
+
+            const switzerlandGroup = g.append('g')
+                .attr('class', 'switzerland-group')
+                .attr('transform', `translate(${innerWidth / 2 - 200}, ${(innerHeight + 40) / 2 - 200})`);
+            
+            // Create gradient definition
+            const defs = svg.append("defs");
+            const lg = defs.append("linearGradient")
+                .attr("id", "mygrad")
+                .attr("x1", "0%")
+                .attr("x2", "100%")
+                .attr("y1", "0%")
+                .attr("y2", "0%");
+            
+            // Store the gradient reference
+            currentGradient = lg;
+            
+            // Set up gradient with current data
+            updateGradient(data.fillColor, area_percentage);
+            
+            // Draw Switzerland path
+            switzerlandGroup.append('path')
+                .datum(switzerlandFeature)
+                .attr('d', pathGenerator)
+                .attr('fill', 'url(#mygrad)')
+                .attr('stroke', 'black')                
+                .attr('stroke-width', 4);  // Optional: scale stroke
+        }}
     
     // Initial render
     render(countryData, countryFeature,geoData);
@@ -566,7 +703,7 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
  * @param {string} containerId - ID of the main container
  * @returns {Object} - Control object with update method
  */
-function createVisualizationPage(smallAreaFunction = null, width = 1000, height = 500, containerId = 'visualization-container') {
+async function createVisualizationPage(smallAreaFunction = null, width = 1000, height = 500, containerId = 'visualization-container') {
     // Get container
     const container = document.getElementById(containerId);
     container.innerHTML = '';
@@ -588,6 +725,7 @@ function createVisualizationPage(smallAreaFunction = null, width = 1000, height 
     // Create title for map
     const mapTitle = document.createElement('h3');
     mapTitle.textContent = 'World Map';
+    mapTitle.style.textAlign = "center";
     mapTitle.style.margin = '10px';
     mapTitle.style.fontWeight = 'bold';
     mapContainer.appendChild(mapTitle);
@@ -614,6 +752,7 @@ function createVisualizationPage(smallAreaFunction = null, width = 1000, height 
     // Create title for detail
     const detailTitle = document.createElement('h3');
     detailTitle.textContent = 'Country Details';
+    detailTitle.style.textAlign = "center";
     detailTitle.style.margin = '10px';
     detailTitle.style.fontWeight = 'bold';
     detailContainer.appendChild(detailTitle);
@@ -629,7 +768,8 @@ function createVisualizationPage(smallAreaFunction = null, width = 1000, height 
     detailContainer.appendChild(actualDetailContainer);
     
     // Process the country JSON to add styling
-    countryWideJson = getCSV().then(data => createCountryWideJson(data));
+
+    countryWideJson = null;
     
     // Current selected country and geographic data
     let selectedCountry = null;
@@ -669,12 +809,23 @@ function createVisualizationPage(smallAreaFunction = null, width = 1000, height 
     
     // Return control object
     return {
-        update: (newCountryJson) => {
-            const newCountryWideJson = createCountryWideJson(newCountryJson);
-            map.update(newCountryWideJson);
-            // Reset selected country
-            selectedCountry = null;
-            detailViz.update(null, null, geoData);
+        update: () => {
+            chosenFoodName = document.getElementById("chosen-food-name").textContent;
+            getFilteredCSV(chosenFoodName).then(data => {
+                
+                const newCountryWideJson = createCountryWideJson(data);
+                console.log("updated element", chosenFoodName, newCountryWideJson);
+                if (map) {  // Check if map is ready
+                    map.update(newCountryWideJson);
+                }
+                // Reset selected country
+                selectedCountry = null;
+                if (detailViz && geoData) {
+                    detailViz.update(null, null, geoData);
+                }
+            }).catch(error => {
+                console.error("Error updating visualization:", error);
+            });
         },
         selectCountry: (countryCode) => {
             if (countryWideJson[countryCode] && geoData) {
@@ -682,7 +833,6 @@ function createVisualizationPage(smallAreaFunction = null, width = 1000, height 
                 
                 // Find the geographic feature for this country
                 const countryFeature = geoData.countries.features.find(f => f.id === countryCode);
-                
                 detailViz.update(selectedCountry, countryFeature, geoData);
             }
         }
