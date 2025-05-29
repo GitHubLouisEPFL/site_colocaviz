@@ -4,7 +4,6 @@ let csvdata = null;
 let csvDataPromise = null;
 let chosenFoodName = null;
 let switzerlandFeature = null;
-let singaporeFeature = null;
 /**
  * Fetches Paris SVG data with caching
  * @returns {Promise<Array>} Promise resolving csvdata
@@ -29,9 +28,6 @@ const getCSV = function getCSV() {
 
     return csvDataPromise;
 };
-
-getCSV().then(data => {console.log("firstdownload")}).catch(error => {
-    console.error("Error in getCSV:", error);  });
 
 // Separate filtering function
 const filterCSV = function filterCSV(data, item_name = null, element_name = "area harvested") {
@@ -62,6 +58,7 @@ let year_chosen = 2023; // Default year
  * @param {number} year - The year to set
  * */
 let yearlyData = null;
+
 /**
  * Gets available years from the CSV data
  * @param {Array} data - The filtered CSV data
@@ -72,12 +69,13 @@ function getAvailableYears(data) {
     
     // Get all column names that look like years (4-digit numbers)
     const sampleRow = data[0];
-    console.log("Sample row for year extraction:", sampleRow);
     const yearColumns = Object.keys(sampleRow).filter(key => {
         return /^\d{4}$/.test(key) && parseInt(key) >= 1960 && parseInt(key) <= 2030;
     });
+    
     return yearColumns.map(year => parseInt(year)).sort((a, b) => a - b);
 }
+
 /**
  * Creates a time slider control
  * @param {Array} availableYears - Array of available years
@@ -86,283 +84,91 @@ function getAvailableYears(data) {
  * @param {string} containerId - ID of container for the slider
  * @returns {Object} Control object with update method
  */
-
 function createTimeSlider(availableYears, currentYear, onYearChange, containerId) {
     const container = document.getElementById(containerId);
-    if (!container) {
-        console.error(`Container with id '${containerId}' not found`);
-        return { update: () => {} };
-    }
     container.innerHTML = '';
     
     if (!availableYears || availableYears.length === 0) {
-        const noDataMsg = document.createElement('p');
-        noDataMsg.textContent = 'Aucune donnée temporelle disponible';
-        noDataMsg.style.textAlign = 'center';
-        noDataMsg.style.color = '#8B5E3C';
-        noDataMsg.style.fontStyle = 'italic';
-        noDataMsg.style.padding = '20px';
-        container.appendChild(noDataMsg);
+        container.innerHTML = '<p>No time data available</p>';
         return { update: () => {} };
     }
     
-    const sortedYears = [...availableYears].sort((a, b) => a - b);
-    let currentIndex = sortedYears.indexOf(currentYear);
-    if (currentIndex === -1) {
-        currentIndex = 0;
-        currentYear = sortedYears[0];
-    }
-    
-    // --- Create Slider Container ---
+    // Create slider container
     const sliderContainer = document.createElement('div');
-    sliderContainer.style.cssText = `
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 25px 30px;
-        background: linear-gradient(135deg, #F6F1E7 0%, #EDE6DB 100%);
-        border: 2px solid rgba(139, 94, 60, 0.2);
-        border-radius: 12px;
-        box-shadow: 0 8px 30px rgba(139, 94, 60, 0.15);
-        margin: 20px auto;
-        max-width: 450px;
-        width: fit-content;
-        font-family: 'Inter', sans-serif;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-        left: 50%;
-        transform: translateX(-50%);
-    `;
+    sliderContainer.style.padding = '15px';
+    sliderContainer.style.backgroundColor = '#f8f9fa';
+    sliderContainer.style.border = '1px solid #dee2e6';
+    sliderContainer.style.borderRadius = '6px';
+    sliderContainer.style.margin = '10px 0';
     
-    // Add subtle pattern overlay
-    const patternOverlay = document.createElement('div');
-    patternOverlay.style.cssText = `
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-image: radial-gradient(circle at 20% 50%, rgba(163, 137, 102, 0.05) 0%, transparent 50%),
-                          radial-gradient(circle at 80% 20%, rgba(139, 94, 60, 0.05) 0%, transparent 50%);
-        pointer-events: none;
-    `;
-    sliderContainer.appendChild(patternOverlay);
-    
-    // Title with decorative elements
-    const titleContainer = document.createElement('div');
-    titleContainer.style.cssText = `
-        display: flex;
-        align-items: center;
-        margin-bottom: 20px;
-        position: relative;
-        z-index: 1;
-    `;
-    
-    const decorLeft = document.createElement('div');
-    decorLeft.style.cssText = `
-        width: 30px;
-        height: 2px;
-        background: linear-gradient(to right, transparent, #8B5E3C);
-        margin-right: 15px;
-    `;
-    
+    // Create title
     const title = document.createElement('div');
-    title.textContent = 'Période Temporelle';
-    title.style.cssText = `
-        font-weight: 700;
-        font-size: 16px;
-        color: #3B2F2F;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        white-space: nowrap;
-    `;
+    title.textContent = 'Time Period';
+    title.style.fontWeight = 'bold';
+    title.style.marginBottom = '10px';
+    title.style.fontSize = '14px';
+    title.style.color = '#495057';
+    sliderContainer.appendChild(title);
     
-    const decorRight = document.createElement('div');
-    decorRight.style.cssText = `
-        width: 30px;
-        height: 2px;
-        background: linear-gradient(to left, transparent, #8B5E3C);
-        margin-left: 15px;
-    `;
-    
-    titleContainer.appendChild(decorLeft);
-    titleContainer.appendChild(title);
-    titleContainer.appendChild(decorRight);
-    sliderContainer.appendChild(titleContainer);
-    
-    // Year display (large and prominent)
-    const yearDisplay = document.createElement('div');
-    yearDisplay.textContent = currentYear;
-    yearDisplay.style.cssText = `
-        font-size: 32px;
-        font-weight: 800;
-        color: #8B5E3C;
-        text-shadow: 0 2px 4px rgba(139, 94, 60, 0.1);
-        margin-bottom: 15px;
-        position: relative;
-        z-index: 1;
-        transition: all 0.3s ease;
-    `;
-    sliderContainer.appendChild(yearDisplay);
-    
-    // Slider container with custom styling
-    const sliderWrapper = document.createElement('div');
-    sliderWrapper.style.cssText = `
-        width: 100%;
-        padding: 0 10px;
-        margin: 10px 0 15px 0;
-        position: relative;
-        z-index: 1;
-    `;
-    
-    // Create custom slider track background
-    const sliderTrack = document.createElement('div');
-    sliderTrack.style.cssText = `
-        width: 100%;
-        height: 8px;
-        background: linear-gradient(to right, #D4C4A8, #A38966);
-        border-radius: 4px;
-        position: relative;
-        box-shadow: inset 0 2px 4px rgba(59, 47, 47, 0.1);
-    `;
-    
+    // Create slider input
     const slider = document.createElement('input');
     slider.type = 'range';
-    slider.min = 0;
-    slider.max = sortedYears.length - 1;
-    slider.value = currentIndex;
+    slider.min = Math.min(...availableYears);
+    slider.max = Math.max(...availableYears);
+    slider.value = currentYear;
     slider.step = 1;
-    slider.style.cssText = `
-        width: 100%;
-        height: 8px;
-        background: transparent;
-        outline: none;
-        position: absolute;
-        top: 0;
-        left: 0;
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        cursor: pointer;
-        z-index: 2;
-    `;
+    slider.style.width = '100%';
+    slider.style.marginBottom = '8px';
     
-    // Custom slider thumb styling
-    const styleSheet = document.createElement('style');
-    const randomId = 'slider_' + Math.random().toString(36).substr(2, 9);
-    slider.id = randomId;
+    // Create year display
+    const yearDisplay = document.createElement('div');
+    yearDisplay.textContent = currentYear;
+    yearDisplay.style.textAlign = 'center';
+    yearDisplay.style.fontWeight = 'bold';
+    yearDisplay.style.fontSize = '16px';
+    yearDisplay.style.color = '#007bff';
     
-    styleSheet.textContent = `
-        #${randomId}::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #8B5E3C, #A38966);
-            cursor: pointer;
-            border: 3px solid #FAF9F6;
-            box-shadow: 0 4px 12px rgba(139, 94, 60, 0.3);
-            transition: all 0.2s ease;
-        }
-        
-        #${randomId}::-webkit-slider-thumb:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 16px rgba(139, 94, 60, 0.4);
-        }
-        
-        #${randomId}::-moz-range-thumb {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: radial-gradient(circle, #8B5E3C, #A38966);
-            cursor: pointer;
-            border: 3px solid #FAF9F6;
-            box-shadow: 0 4px 12px rgba(139, 94, 60, 0.3);
-            -moz-appearance: none;
-        }
-        
-        #${randomId}::-moz-range-track {
-            background: transparent;
-            border: none;
-        }
-    `;
-    document.head.appendChild(styleSheet);
-    
-    sliderTrack.appendChild(slider);
-    sliderWrapper.appendChild(sliderTrack);
-    sliderContainer.appendChild(sliderWrapper);
-    
-    // Range display with rustic styling
+    // Create year range display
     const rangeDisplay = document.createElement('div');
-    rangeDisplay.textContent = `${sortedYears[0]} — ${sortedYears[sortedYears.length - 1]}`;
-    rangeDisplay.style.cssText = `
-        font-size: 13px;
-        color: #A38966;
-        font-weight: 500;
-        text-align: center;
-        position: relative;
-        z-index: 1;
-        letter-spacing: 0.5px;
-    `;
-    sliderContainer.appendChild(rangeDisplay);
+    rangeDisplay.textContent = `${Math.min(...availableYears)} - ${Math.max(...availableYears)}`;
+    rangeDisplay.style.textAlign = 'center';
+    rangeDisplay.style.fontSize = '12px';
+    rangeDisplay.style.color = '#6c757d';
+    rangeDisplay.style.marginTop = '5px';
     
-    // Add hover effect to container
-    sliderContainer.addEventListener('mouseenter', () => {
-        sliderContainer.style.transform = 'translateX(-50%) translateY(-2px)';
-        sliderContainer.style.boxShadow = '0 14px 45px rgba(139, 94, 60, 0.2)';
-        yearDisplay.style.transform = 'scale(1.05)';
-    });
-    
-    sliderContainer.addEventListener('mouseleave', () => {
-        sliderContainer.style.transform = 'translateX(-50%) translateY(0)';
-        sliderContainer.style.boxShadow = '0 8px 30px rgba(139, 94, 60, 0.15)';
-        yearDisplay.style.transform = 'scale(1)';
-    });
-    
-    // Event listener with smooth transitions
+    // Add event listener
     slider.addEventListener('input', (event) => {
-        const yearIndex = parseInt(event.target.value);
-        const newYear = sortedYears[yearIndex];
-        
-        // Smooth year change animation
-        yearDisplay.style.opacity = '0.7';
-        yearDisplay.style.transform = 'scale(0.95)';
-        
-        setTimeout(() => {
-            yearDisplay.textContent = newYear;
-            yearDisplay.style.opacity = '1';
-            yearDisplay.style.transform = 'scale(1)';
-        }, 100);
-        
-        year_chosen = newYear;
+        const newYear = parseInt(event.target.value);
+        yearDisplay.textContent = newYear;
+        year_chosen = newYear; // Update global variable
         if (onYearChange) {
             onYearChange(newYear);
         }
     });
     
+    // Assemble the slider
+    sliderContainer.appendChild(slider);
+    sliderContainer.appendChild(yearDisplay);
+    sliderContainer.appendChild(rangeDisplay);
     container.appendChild(sliderContainer);
     
     return {
         update: (newAvailableYears, newCurrentYear) => {
             if (newAvailableYears && newAvailableYears.length > 0) {
-                const newSortedYears = [...newAvailableYears].sort((a, b) => a - b);
-                let newCurrentIndex = newSortedYears.indexOf(newCurrentYear || year_chosen);
-                if (newCurrentIndex === -1) {
-                    newCurrentIndex = 0;
-                    newCurrentYear = newSortedYears[0];
-                }
-                
-                slider.min = 0;
-                slider.max = newSortedYears.length - 1;
-                slider.value = newCurrentIndex;
-                yearDisplay.textContent = newCurrentYear || newSortedYears[newCurrentIndex];
-                rangeDisplay.textContent = `${newSortedYears[0]} — ${newSortedYears[newSortedYears.length - 1]}`;
-                year_chosen = newCurrentYear || newSortedYears[newCurrentIndex];
-                sortedYears.splice(0, sortedYears.length, ...newSortedYears);
+                slider.min = Math.min(...newAvailableYears);
+                slider.max = Math.max(...newAvailableYears);
+                rangeDisplay.textContent = `${Math.min(...newAvailableYears)} - ${Math.max(...newAvailableYears)}`;
+            }
+            if (newCurrentYear) {
+                slider.value = newCurrentYear;
+                yearDisplay.textContent = newCurrentYear;
+                year_chosen = newCurrentYear;
             }
         }
     };
 }
+
+
 // Global cache for Paris SVG data
 let parisDataCache = null;
 let parisDataPromise = null;
@@ -380,7 +186,7 @@ function fetch_paris_svg() {
     if (parisDataPromise) {
         return parisDataPromise;
     }
-    https://github.com/com-480-data-visualization/com480-project-colocaviz/tree/13a44cb13c2e05ef4871acfcc794aedef8cec6ce/data
+    
     // Create new fetch promise
     parisDataPromise = fetch('https://raw.githubusercontent.com/GitHubLouisEPFL/site_colocaviz/bbe178cd7725a4e7fcafb7954e484f83d92838ef/svg_files/paris_border.svg')
         .then(res => res.text())
@@ -406,7 +212,7 @@ function fetch_paris_svg() {
  * @param {Function} colorMappingFunction - Optional custom mapping function
  * @returns {Object} Styled country data
  */
-function createCountryWideJson(countryJson, colorGradient = ['#A8E6CF', '#FFFACD', '#CC3232'], colorMappingFunction = null) {
+function createCountryWideJson(countryJson, colorGradient = ['#FADC00', '#FD1D1D'], colorMappingFunction = null) {
     // Default to linear mapping if no custom function provided
     if (!countryJson){return countryJson}
 
@@ -436,9 +242,8 @@ function createCountryWideJson(countryJson, colorGradient = ['#A8E6CF', '#FFFACD
     const maxValue = Math.max(...yearvalues);
     
     // Create color scale using D3
-    
     const colorScale = d3.scaleLinear()
-        .domain([0, 0.5,1])
+        .domain([0, 1])
         .range(colorGradient);
     
     // Create styled country data
@@ -459,8 +264,6 @@ function createCountryWideJson(countryJson, colorGradient = ['#A8E6CF', '#FFFACD
     }, {});
 }
 
-
-let country_to_iso = {};
 /**
  * Creates a world map visualization
  * @param {number} width - SVG width
@@ -577,8 +380,8 @@ function createWorldMap(width, height, countryWideJson, containerId, onCountrySe
 
         // Color scale - adjust domain & range to your data
         const colorScale = d3.scaleLinear()
-            .domain([0, 0.5, 1])
-            .range(['#A8E6CF', '#FFFACD', '#CC3232']);
+            .domain([0, 1])
+            .range(['#FADC00', '#FD1D1D']);
 
         // Draw countries with data
         g.selectAll('path')
@@ -620,7 +423,6 @@ function createWorldMap(width, height, countryWideJson, containerId, onCountrySe
                 const name = countryNames[d.id]?.toLowerCase();
                 return resolvedCountryWideJson[name]?.hoverText || countryNames[d.id] || 'Unknown';
             });
-            
 
         // Add legend
         const addLegend = (svg, colorScale, min, max) => {
@@ -684,7 +486,7 @@ function createWorldMap(width, height, countryWideJson, containerId, onCountrySe
                 .attr('text-anchor', 'middle')
                 .style('font-size', '12px')
                 .style('font-weight', 'bold')
-                .text(`${chosenFoodName} Area Harvested (hectares)`);
+                .text(`${chosenFoodName} Area Harvested (hectares) - ${year_chosen}`);
         };
 
         addLegend(svg, colorScale, minValue, maxValue);
@@ -703,11 +505,6 @@ function createWorldMap(width, height, countryWideJson, containerId, onCountrySe
             acc[d.iso_n3] = d.name;
             return acc;
         }, {});
-        // Convert TopoJSON to GeoJSON
-        country_to_iso = tsvData.reduce((acc, d) => {  
-            acc[d.name.toLowerCase()] = d.iso_n3;
-            return acc;
-        }, {});
         
 
         countries = topojson.feature(topoJSONdata, topoJSONdata.objects.countries);
@@ -717,7 +514,7 @@ function createWorldMap(width, height, countryWideJson, containerId, onCountrySe
         pathGenerator = d3.geoPath().projection(projection);
         
         switzerlandFeature = countries.features.find(f => f.id === '756');
-        singaporeFeature = countries.features.find(f => f.id === country_to_iso['singapore']);
+
         // Add zoom behavior
         const zoomHandler = d3.zoom()
             .scaleExtent([0.5, 10])
@@ -808,7 +605,12 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
     
     // Create container
     const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
-            
+        
+    // Add background rect once
+    
+    //g
+
+    
     // Store gradient reference for updates
     let currentGradient = null;
     
@@ -844,10 +646,6 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
     // Function to render the visualization
     function render(data, feature,geodata) {
         console.log('Rendering small area visualization');
-        console.log('Data:', data);
-        console.log('Feature:', feature);
-        console.log('GeoData:', geodata);
-        console.log('Year chosen:', year_chosen);
         // Clear existing content
         g.selectAll("*").remove();
         svg.selectAll("defs").remove(); // Clear any existing defs
@@ -874,45 +672,29 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
         let area_for_comparison = "";    
         let area_percentage = 0;
 
-        if ( data[year_chosen] <= 10540) {   
+        if (data[year_chosen] <= 10540) {   
             area_for_comparison = "Paris";     
         area_percentage = Math.round((data[year_chosen]/10540|| 0) * 100);
-        const number_of_times_lausanne = Math.round(data[year_chosen] / 55);
-        
         g.append('text')
             .attr('x', innerWidth / 2)
             .attr('y', 5)
             .attr('text-anchor', 'middle')
             .attr('font-size', '12px')
             .attr('fill', '#666')
-            .text(`${area_percentage}% of ${area_for_comparison} surface area and ${number_of_times_lausanne} times Lausanne surface area`);}
-        
-        else if (data[year_chosen] <=  72900) {
-            area_for_comparison = "Singapore";
-            area_percentage = Math.round((data[year_chosen]/72900 || 0) * 100);
-            const number_of_times_paris = Math.round(data[year_chosen] / 10540);
-            g.append('text')
-                .attr('x', innerWidth / 2)
-                .attr('y', 5)
-                .attr('text-anchor', 'middle')
-                .attr('font-size', '12px')
-                .attr('fill', '#666')
-                .text(`${area_percentage}% of ${area_for_comparison} surface area and ${number_of_times_paris} times Paris surface area`)
-         }
+            .text(`${area_percentage}% of ${area_for_comparison} surface area`);}
         else {
             // switzerland id is 756
             area_for_comparison = "Switzerland";
         area_percentage = Math.round((data[year_chosen]/4128500 || 0) * 100);
-        const number_of_times = Math.round(data[year_chosen] / 72900);
+        const number_of_times_paris = Math.round(data[year_chosen] / 10540);
         g.append('text')
             .attr('x', innerWidth / 2)
             .attr('y', 5)
             .attr('text-anchor', 'middle')
             .attr('font-size', '12px')
             .attr('fill', '#666')
-            .text(`${area_percentage}% of ${area_for_comparison} surface area and ${number_of_times} times Singapore surface area`);
+            .text(`${area_percentage}% of ${area_for_comparison} surface area and ${number_of_times_paris} times Paris surface area`);
         }
-
 
         // Add subtitle with percentage of maximum value
         
@@ -923,7 +705,7 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
             .attr('text-anchor', 'middle')
             .attr('font-size', '14px')
             .attr('font-weight', 'bold')
-            .text(`${data[year_chosen]} ${data.Unit} of ${chosenFoodName} harvested in ${year_chosen}`);
+            .text(`${data[year_chosen]} ${data.Unit} of ${chosenFoodName} harvested  in ${year_chosen}`);
         // Now fetch and render Paris - only when render is called
         if (area_for_comparison == "Paris") {fetch_paris_svg().then(dValues => {
             if (!dValues || dValues.length === 0) {
@@ -979,268 +761,5 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
                 .text('Failed to load Paris visualization');
         });
         }
-        else if (area_for_comparison == "Singapore") {
-        // Create center group for Switzerland
-            
-            const projection = d3.geoMercator().fitSize([400, 400], singaporeFeature);
-            const pathGenerator = d3.geoPath().projection(projection);
-
-            const Singaporegroup = g.append('g')
-                .attr('class', 'singapore-group')
-                .attr('transform', `translate(${innerWidth / 2 - 200}, ${(innerHeight + 40) / 2 - 200})`);
-            
-            // Create gradient definition
-            const defs = svg.append("defs");
-            const lg = defs.append("linearGradient")
-                .attr("id", "mygrad")
-                .attr("x1", "0%")
-                .attr("x2", "100%")
-                .attr("y1", "0%")
-                .attr("y2", "0%");
-            
-            // Store the gradient reference
-            currentGradient = lg;
-            
-            // Set up gradient with current data
-            updateGradient(data.fillColor, area_percentage);
-            
-            // Draw Switzerland path
-            Singaporegroup.append('path')
-                .datum(singaporeFeature)
-                .attr('d', pathGenerator)
-                .attr('fill', 'url(#mygrad)')
-                .attr('stroke', 'black')                
-                .attr('stroke-width', 4);  // Optional: scale stroke
-            }
         else if (area_for_comparison == "Switzerland") {
-        // Create center group for Switzerland
-            
-            const projection = d3.geoMercator().fitSize([400, 400], switzerlandFeature);
-            const pathGenerator = d3.geoPath().projection(projection);
-
-            const switzerlandGroup = g.append('g')
-                .attr('class', 'switzerland-group')
-                .attr('transform', `translate(${innerWidth / 2 - 200}, ${(innerHeight + 40) / 2 - 200})`);
-            
-            // Create gradient definition
-            const defs = svg.append("defs");
-            const lg = defs.append("linearGradient")
-                .attr("id", "mygrad")
-                .attr("x1", "0%")
-                .attr("x2", "100%")
-                .attr("y1", "0%")
-                .attr("y2", "0%");
-            
-            // Store the gradient reference
-            currentGradient = lg;
-            
-            // Set up gradient with current data
-            updateGradient(data.fillColor, area_percentage);
-            
-            // Draw Switzerland path
-            switzerlandGroup.append('path')
-                .datum(switzerlandFeature)
-                .attr('d', pathGenerator)
-                .attr('fill', 'url(#mygrad)')
-                .attr('stroke', 'black')                
-                .attr('stroke-width', 4);  // Optional: scale stroke
-        }}
-    
-    // Initial render
-    render(countryData, countryFeature,geoData);
-    
-    // Return control object
-    return {
-        update: (newCountryData, newCountryFeature, newGeoData) => {
-            if (newGeoData) {
-                geoData = newGeoData;
-            }
-            render(newCountryData, newCountryFeature,newGeoData);
-        },
-        clear: () => {
-            container.innerHTML = '';
-        }
-    };
-}
-
-let selectedCountry = null;
-/**
- * Creates the complete visualization page with world map and country detail
- * @param {Object} countryJson - Raw country data
- * @param {Function} smallAreaFunction - Optional custom visualization function
- * @param {number} width - Overall container width
- * @param {number} height - Overall container height
- * @param {string} containerId - ID of the main container
- * @returns {Object} - Control object with update method
- */
-async function createVisualizationPage(smallAreaFunction = null, width = 1000, height = 500, containerId = 'visualization-container') {
-    // Get container
-    const container = document.getElementById(containerId);
-    container.innerHTML = '';
-    container.style.width = `${width}px`;
-    container.style.height = `${height}px`;
-    container.style.display = 'flex';
-    container.style.flexDirection = 'row';
-    container.style.gap = '20px';
-    
-    // Create map container
-    const mapContainer = document.createElement('div');
-    mapContainer.id = 'map-container';
-    mapContainer.style.flex = '1';
-    mapContainer.style.position = 'relative';
-    mapContainer.style.border = '1px solid #ccc';
-    mapContainer.style.borderRadius = '4px';
-    container.appendChild(mapContainer);
-    
-    // Create title for map
-    const mapTitle = document.createElement('h3');
-    mapTitle.textContent = 'World Map';
-    mapTitle.style.textAlign = "center";
-    mapTitle.style.margin = '10px';
-    mapTitle.style.fontWeight = 'bold';
-    mapContainer.appendChild(mapTitle);
-    
-    // Create actual map container
-    const actualMapContainer = document.createElement('div');
-    actualMapContainer.id = 'actual-map-container';
-    actualMapContainer.style.position = 'absolute';
-    actualMapContainer.style.top = '40px';
-    actualMapContainer.style.bottom = '0';
-    actualMapContainer.style.left = '0';
-    actualMapContainer.style.right = '0';    
-    mapContainer.appendChild(actualMapContainer); 
-    // Create detail container
-    const detailContainer = document.createElement('div');
-    detailContainer.id = 'detail-container';
-    detailContainer.style.flex = '1';
-    detailContainer.style.position = 'relative';
-    detailContainer.style.border = '1px solid #ccc';
-    detailContainer.style.borderRadius = '4px';
-    container.appendChild(detailContainer);
-    
-    // Create title for detail
-    const detailTitle = document.createElement('h3');
-    detailTitle.textContent = 'Country Details';
-    detailTitle.style.textAlign = "center";
-    detailTitle.style.margin = '10px';
-    detailTitle.style.fontWeight = 'bold';
-    detailContainer.appendChild(detailTitle);
-    
-    // Create actual detail container
-    const actualDetailContainer = document.createElement('div');
-    actualDetailContainer.id = 'actual-detail-container';
-    actualDetailContainer.style.position = 'absolute';
-    actualDetailContainer.style.top = '40px';
-    actualDetailContainer.style.bottom = '0';
-    actualDetailContainer.style.left = '0';
-    actualDetailContainer.style.right = '0';
-    detailContainer.appendChild(actualDetailContainer);
-
-    // Initialize time slider variable (declare it here, outside the return object)
-    let timeSlider = null;
-    
-    // Process the country JSON to add styling
-
-    countryWideJson = null;
-    selectedCountry = null;
-    // Current selected country and geographic data
-    let geoData = null;
-    
-    // Create the detail visualization first (will be updated once geo data loads)
-    const mapWidth = width / 2 - 30;
-    const mapHeight = height - 60;
-    
-    const detailViz = createSmallAreaVisualization(
-        null,
-        null, // no feature initially
-        mapWidth,
-        mapHeight,
-        'actual-detail-container'
-    );
-    
-    // Create the world map with callbacks
-    const map = createWorldMap(        
-        mapWidth, 
-        mapHeight, 
-        countryWideJson, 
-        'actual-map-container', 
-        // onCountrySelect callback
-        (country, countryFeature, geoDataFromMap) => {
-            selectedCountry = country;            
-            // Update detail visualization with country data, feature, and geo data
-            detailViz.update(selectedCountry, countryFeature, geoDataFromMap);
-            
-        },
-        // onDataLoaded callback  
-        (loadedGeoData) => {
-            geoData = loadedGeoData;
-            console.log('Geographic data loaded and available for detail viz');
-        }
-    );
-        
-    // Return control object
-    return {
-    update: () => {
-        chosenFoodName = document.getElementById("chosen-food-name").textContent;
-        getFilteredCSV(chosenFoodName).then(data => {
-            const newCountryWideJson = createCountryWideJson(data);
-            
-            // Get available years from the data and create/update time slider
-            const availableYears = getAvailableYears(data);
-            console.log("Available years:", availableYears);
-            
-            if (timeSlider) {
-                // Update existing slider
-                timeSlider.update(availableYears, year_chosen);
-            } else if (availableYears.length > 0) {
-                // Create new slider
-                console.log("Creating new time slider with years:", availableYears,year_chosen);
-                timeSlider = createTimeSlider(
-                    availableYears,
-                    year_chosen,
-                    (newYear) => {
-                        // Callback when year changes
-                        year_chosen = newYear;
-                        
-                        // Update the map with new year data
-                        const updatedCountryWideJson = createCountryWideJson(data);
-                        if (map) {
-                            map.update(updatedCountryWideJson);
-                        }
-                        console.log(updatedCountryWideJson)
-                        if (selectedCountry && geoData) {
-                            console.log("newid", selectedCountry.id);
-
-                            detailViz.update(
-                                selectedCountry,
-                                geoData.countries.features.find(f => f.id === country_to_iso[selectedCountry.Area]),
-                                geoData
-                            );}
-                    },
-                    'time-slider-container'
-                );
-            }
-            
-            if (map) {  // Check if map is ready
-                map.update(newCountryWideJson);
-            }
-            // Reset selected country
-            selectedCountry = null;
-            if (detailViz && geoData) {
-                detailViz.update(null, null, geoData);
-            }
-        }).catch(error => {
-            console.error("Error updating visualization:", error);
-        });
-    },
-    selectCountry: (countryCode) => {
-        if (countryWideJson[countryCode] && geoData) {
-            selectedCountry = countryWideJson[countryCode];
-            
-            // Find the geographic feature for this country
-            const countryFeature = geoData.countries.features.find(f => f.id === countryCode);
-            detailViz.update(selectedCountry, countryFeature, geoData);
-        }
-    }
-    };
-}
+            if (switzerlandFeature) {console.log("Switzerland feature found");
