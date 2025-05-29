@@ -237,13 +237,13 @@ document.addEventListener('DOMContentLoaded', () => {
         labels: labels,
         datasets: [
           {
-            label: 'Carbon (kg CO₂)',
+            label: 'Carbon (kg CO₂e / kg)',
             data: carbonValues,
             backgroundColor: 'rgba(109, 138, 96, 0.7)',
             xAxisID: 'xCarbon'
           },
           {
-            label: 'Water (L)',
+            label: 'Water (L / kg)',
             data: waterValues,
             backgroundColor: 'rgba(142, 202, 230, 0.7)',
             xAxisID: 'xWater'
@@ -258,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
           legend: { position: 'bottom' },
           title: {
             display: true,
-            text: 'Food Comparison: Carbon vs Water'
+            text: 'Food Comparison: Carbon vs Water Footprint',
           }
         },
         scales: {
@@ -267,7 +267,7 @@ document.addEventListener('DOMContentLoaded', () => {
             beginAtZero: true,
             title: {
               display: true,
-              text: 'Carbon (kg CO₂)'
+              text: 'Carbon (kg CO₂e / kg)'
             }
           },
           xWater: {
@@ -278,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             title: {
               display: true,
-              text: 'Water (L)'
+              text: 'Water (L / kg)'
             }
           },
           y: {
