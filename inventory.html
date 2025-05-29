@@ -23,6 +23,7 @@
     </header>
 
     <div class="main-content">
+        <h1>📝 Dataset Inventory</h1>
         <section class="search-panel">
             <div class="form-row">
                 <label for="layerSelect">🔎 Level :
@@ -182,11 +183,20 @@
 
         function getBarchartTitle(name, metric, n=8) {
             const titles = {
-                "production_t": `Barchart race of the top ${n} countries producing ${name} (in tons per year):`,
-                "area_harvested_ha": `Barchart race of the top ${n} countries producing ${name} (by harvested area in ha):`,
-                "producing_animals_slaughtered_an": `Barchart race of the top ${n} countries producing ${name} (by number of animals slaughtered):`
+                "production_t": {
+                    "title": `Production of ${name} in tons per year`,
+                    "subtitle": `Barchart race showcasing the top ${n} countries producing ${name}`
+                },
+                "area_harvested_ha": {
+                    "title": `Harvested Area for ${name} per year (in ha)`,
+                    "subtitle": `Barchart race showcasing the top ${n} countries with the highest harvest area for ${name}`
+                },
+                "producing_animals_slaughtered_an": {
+                    "title": `Animals slaughtered per year for the production of ${name}`,
+                    "subtitle": `Barchart race showcasing the top ${n} countries with the highest number of animals slaughtered`
+                }
             };
-            return titles[metric] || "Data Visualization";
+            return titles[metric];
         }
 
 
@@ -255,7 +265,7 @@
             filtered.forEach(d => {
                 const li = document.createElement("li");
                 // TODO Add red text to show if production data is missing
-                li.textContent = d.name;
+                li.textContent = d.name.charAt(0).toUpperCase() + d.name.slice(1);
                 if (productionItems.has(d.name)) {
                     const greenText = document.createElement("span");
                     greenText.textContent = "✔ Production data available";
@@ -264,7 +274,7 @@
                     li.appendChild(greenText);
                 }
                 li.addEventListener("click", () => {
-                    document.getElementById("searchBox").value = d.name;
+                    document.getElementById("searchBox").value = d.name.charAt(0).toUpperCase() + d.name.slice(1);
                     dropdown.style.display = "none";
                     showDetails(d.name);
                 });
@@ -275,6 +285,13 @@
         }
 
         function showDetails(name) {
+            if (charts.length) {
+                charts.forEach(chart => {
+                    if (chart.animationRunning) {
+                        chart.pause();
+                    }
+                });
+            }
             const carbonMatch = findByName(carbonRoot, name);
             const waterMatch = findByName(waterRoot, name);
             const productionMatch = productionItems.has(name);
@@ -285,7 +302,7 @@
             const resultDiv = document.getElementById("results");
             let html = `<div class="result-name">${getEmoji(name)} ${name}</div><div style="margin-bottom: 1rem;"></div>`;
 
-            html += `<h2 style="margin: 10px;">🌱 Environmental Impact</h2>`;
+            html += `<h2 style="margin: 10px;">🌱 Environmental Impact of 1kg (1L)</h2>`;
             if (carbonMatch) {
                 const carbonPct = Math.round((carbonMatch.value / maxCarbon) * 100);
                 html += `<div class="result-item">
@@ -312,7 +329,6 @@
             if (productionMatch) {
                 resultDiv.innerHTML += `<h2 style="margin: 20px;">📈 Production Data</h2`
                 const metrics = new Set(Object.keys(productionRoot[name]));
-                console.log(metrics);
                 for (const metric of metrics) {
                     const defaultOptions = {
                         margin: { top: 16, right: 6, bottom: 6, left: 0 },
@@ -329,7 +345,7 @@
                     chart.init(productionRoot, title, name, metric);
                 }
             } else {
-                html += `
+                resultDiv.innerHTML += `
                     <h2 style="margin: 20px;">📈 Production Data</h2>
                     <div class="result-item">
                         <span class="highlight" style="color: red;">❗ No production data available for ${name}.</span>

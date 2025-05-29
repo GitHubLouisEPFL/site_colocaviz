@@ -11,6 +11,7 @@
     --shadow-hover: 0 14px 45px rgba(139, 94, 60, 0.2);
     --border-radius: 12px;
     --transition-speed: 0.3s;
+    --sans-serif: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 /* RESET ET BASE */
@@ -489,6 +490,40 @@ select, input[type="text"] {
     .card h2 {
         font-size: 1.2rem;
     }
+}
+
+/* Bar charts */
+/* Button styles */
+.start-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.pause-btn {
+    background-color: #f0ad4e;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.pause-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.reset-btn {
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
 }
 
 /* ==================== PANIER ==================== */

@@ -149,7 +149,7 @@ export class RacingBarChart {
                     .attr("y", this.y.bandwidth() / 2)
                     .attr("x", -6)
                     .attr("dy", "-0.25em")
-                    .text(d => d.name)
+                    .text(d => d.name.charAt(0).toUpperCase() + d.name.slice(1).toLowerCase())
                     .call(text => text.append("tspan")
                         .attr("fill-opacity", 0.7)
                         .attr("font-weight", "normal")
@@ -220,16 +220,20 @@ export class RacingBarChart {
         // Create control buttons
         const startBtn = document.createElement('button');
         startBtn.id = this.getElementId('start-btn');
-        startBtn.textContent = 'Start';
+        startBtn.className = 'start-btn';
+        startBtn.textContent = '▶ Start';
 
         const pauseBtn = document.createElement('button');
         pauseBtn.id = this.getElementId('pause-btn');
-        pauseBtn.textContent = 'Pause';
+        pauseBtn.className = 'pause-btn';
+        pauseBtn.textContent = '⏸ Pause';
         pauseBtn.disabled = true;
 
         const resetBtn = document.createElement('button');
         resetBtn.id = this.getElementId('reset-btn');
-        resetBtn.textContent = 'Reset';
+        resetBtn.className = 'reset-btn';
+        resetBtn.textContent = '⏹ Reset';
+
 
         // Create the slider input
         const slider = document.createElement('input');
@@ -242,6 +246,7 @@ export class RacingBarChart {
         slider.style.cssText = `
             flex: 1;
             height: 6px;
+            max-width: 300px;
             background: #ddd;
             outline: none;
             border-radius: 3px;
@@ -336,10 +341,15 @@ export class RacingBarChart {
         resultItem.className = 'result-item';
         resultItem.style.margin = '10px 0 10px 0';
 
+        const titleheading = document.createElement('h3');
+        titleheading.className = 'title';
+        titleheading.textContent = `${title['title']}`;
+
         const highlightSpan = document.createElement('span');
         highlightSpan.className = 'highlight';
-        highlightSpan.textContent = `${title}`;
+        highlightSpan.textContent = `${title['subtitle']}`;
 
+        resultItem.appendChild(titleheading);
         resultItem.appendChild(highlightSpan);
         document.getElementById(this.containerId).appendChild(resultItem);
     }    
@@ -434,9 +444,10 @@ export class RacingBarChart {
         this.updateSlider();
 
         await transition.end();
-        
+        console.log(this.animationRunning)
         this.currentFrame++;
         if (this.animationRunning && !this.userDragging) {
+            console.log(`Animating frame ${this.currentFrame}`);
             requestAnimationFrame(() => this.animate());
         }
     }
@@ -450,9 +461,11 @@ export class RacingBarChart {
     
     pause() {
         this.animationRunning = false;
+        console.log(this.animationRunning)
         document.getElementById(this.getElementId('start-btn')).disabled = false;
         document.getElementById(this.getElementId('pause-btn')).disabled = true;
         this.svg.interrupt();
+
     }
     
     stop() {
