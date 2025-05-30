@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rustic Calendar Visualization</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: #f2eee3;
+      color: #3e3e3e;
+    }
+    .container {
+      width: 100vmin;
+      height: 100vmin;
+      margin: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #fffaf3;
+      border: 2px solid #8b7b6b;
+      border-radius: 8px;
+      padding: 2vmin;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+    }
+    .title {
+      font-size: 2.5vmin;
+      font-weight: bold;
+      margin-bottom: 1vmin;
+      text-align: center;
+    }
+    .calendar {
+      display: grid;
+      width: 100%;
+      flex-grow: 1;
+      gap: 1vmin;
+      margin: 1vmin 0;
+    }
+    .time-unit {
+      border: 1px solid #8b7b6b;
+      background-color: #e0d6c3;
+      padding: 1vmin;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 2vmin;
+      font-weight: bold;
+      position: relative;
+      flex-direction: column;
+    }
+    .filled-full {
+      background-color: #b15e5e !important;
+      color: white;
+    }
+    .filled-partial::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background-color: #b15e5e;
+      z-index: 0;
+    }
+    .filled-partial span {
+      position: relative;
+      z-index: 1;
+    }
+    .summary {
+      font-size: 2vmin;
+      margin-top: 1vmin;
+      text-align: center;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title" id="title"></div>
+    <div class="calendar" id="calendar"></div>
+    <div class="summary" id="summary"></div>
+  </div>
+
+  <script>
+    const totalAnimals = 100000; // NUMBER OF ANIMALS KILLED EVERY YEAR, CHANGE THIS VALUE TO GET THE WORLD MAP VALUE
+    const calendarEl = document.getElementById('calendar');
+    const titleEl = document.getElementById('title');
+    const summaryEl = document.getElementById('summary');
+
+    const secondsInMinute = 60;
+    const secondsInHour = 60 * secondsInMinute;
+    const secondsInDay = 24 * secondsInHour;
+    const secondsInMonth = 30 * secondsInDay;
+    const secondsInYear = 365 * secondsInDay;
+
+    const lausanne = 140619;
+    const zurich = 423193;
+    const switzerland = 8888000;
+    const canada = 40100000;
+
+    function formatDuration(seconds) {
+      let remaining = seconds;
+      const y = Math.floor(remaining / secondsInYear);
+      remaining %= secondsInYear;
+      const mo = Math.floor(remaining / secondsInMonth);
+      remaining %= secondsInMonth;
+      const d = Math.floor(remaining / secondsInDay);
+      remaining %= secondsInDay;
+      const h = Math.floor(remaining / secondsInHour);
+      remaining %= secondsInHour;
+      const m = Math.floor(remaining / secondsInMinute);
+      remaining %= secondsInMinute;
+      const s = Math.floor(remaining);
+
+      const parts = [];
+      if (y > 0) parts.push(`${y} year${y > 1 ? 's' : ''}`);
+      if (mo > 0) parts.push(`${mo} month${mo > 1 ? 's' : ''}`);
+      if (d > 0) parts.push(`${d} day${d > 1 ? 's' : ''}`);
+      if (h > 0) parts.push(`${h} hour${h > 1 ? 's' : ''}`);
+      if (m > 0) parts.push(`${m} minute${m > 1 ? 's' : ''}`);
+      if (s > 0) parts.push(`${s} second${s > 1 ? 's' : ''}`);
+
+      return parts.join(', ');
+    }
+
+    function formatPopulationComparison(count) {
+      if (count >= canada) {
+        return `The total is equivalent to ${(count / canada).toFixed(1)} times the population of Canada.`;
+      } else if (count >= switzerland) {
+        return `The total is equivalent to ${(count / switzerland).toFixed(1)} times the population of Switzerland.`;
+      } else if (count >= zurich) {
+        return `The total is equivalent to ${(count / zurich).toFixed(1)} times the population of Zurich.`;
+      } else {
+        return `The total is equivalent to ${(count / lausanne).toFixed(1)} times the population of Lausanne.`;
+      }
+    }
+
+    function renderCalendar(seconds) {
+      calendarEl.innerHTML = '';
+      let unitType = '';
+
+      if (seconds <= secondsInMonth) {
+        unitType = 'Day';
+        calendarEl.style.gridTemplateColumns = 'repeat(7, 1fr)';
+        const fullUnits = Math.floor(seconds / secondsInDay);
+        const remainder = (seconds % secondsInDay) / secondsInDay;
+
+        for (let i = 1; i <= 31; i++) {
+          const cell = document.createElement('div');
+          cell.className = 'time-unit';
+          cell.innerText = "Day " + i;
+
+          if (i <= fullUnits) {
+            cell.classList.add('filled-full');
+          } else if (i === fullUnits + 1 && remainder > 0) {
+            cell.classList.add('filled-partial');
+            cell.style.background = `linear-gradient(to right, #b15e5e ${remainder * 100}%, #e0d6c3 ${remainder * 100}%)`;
+          }
+          calendarEl.appendChild(cell);
+        }
+      } else if (seconds <= secondsInYear) {
+        unitType = 'Month';
+        calendarEl.style.gridTemplateColumns = 'repeat(6, 1fr)';
+        const fullUnits = Math.floor(seconds / secondsInMonth);
+        const remainder = (seconds % secondsInMonth) / secondsInMonth;
+
+        for (let i = 1; i <= 12; i++) {
+          const cell = document.createElement('div');
+          cell.className = 'time-unit';
+          cell.innerText = "Month " + i;
+
+          if (i <= fullUnits) {
+            cell.classList.add('filled-full');
+          } else if (i === fullUnits + 1 && remainder > 0) {
+            cell.classList.add('filled-partial');
+            cell.style.background = `linear-gradient(to right, #b15e5e ${remainder * 100}%, #e0d6c3 ${remainder * 100}%)`;
+          }
+          calendarEl.appendChild(cell);
+        }
+      } else {
+        unitType = 'Year';
+        calendarEl.style.gridTemplateColumns = 'repeat(auto-fit, minmax(12vmin, 1fr))';
+        const fullUnits = Math.floor(seconds / secondsInYear);
+        const remainder = (seconds % secondsInYear) / secondsInYear;
+        const totalUnits = fullUnits + (remainder > 0 ? 1 : 0);
+
+        for (let i = 0; i < totalUnits; i++) {
+          const cell = document.createElement('div');
+          cell.className = 'time-unit';
+
+          if (i < fullUnits) {
+            cell.classList.add('filled-full');
+          } else if (i === fullUnits && remainder > 0) {
+            cell.classList.add('filled-partial');
+            cell.style.background = `linear-gradient(to right, #b15e5e ${remainder * 100}%, #e0d6c3 ${remainder * 100}%)`;
+          }
+
+          const animalsThisYear = Math.round((i < fullUnits ? 1 : remainder) * secondsInYear);
+          cell.innerHTML = `
+            <div>Year ${i + 1}</div>
+            <div style="font-size: 1.5vmin">${animalsThisYear.toLocaleString()} animals</div>
+            <div style="font-size: 1.3vmin"> approx.${(animalsThisYear / switzerland).toFixed(1)} times Switzerland population</div>
+          `;
+
+          calendarEl.appendChild(cell);
+        }
+      }
+
+      titleEl.innerText = `If one animal were killed every second, it would take ${formatDuration(seconds)}`;
+      summaryEl.innerText = formatPopulationComparison(totalAnimals);
+    }
+
+    const totalSeconds = totalAnimals; // 1 animal/second
+    renderCalendar(totalSeconds);
+  </script>
+</body>
+</html>

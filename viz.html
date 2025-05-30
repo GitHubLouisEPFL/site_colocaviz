@@ -5,10 +5,12 @@
     <meta charset="UTF-8">
     <title>Colocaviz home page</title>
     <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/animals.css">
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://unpkg.com/topojson-client@3"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.1.0/papaparse.min.js"></script>
+
 
 </head>
 
@@ -60,8 +62,8 @@
   <div class="map-text-container" id = "animals-slaughtered-container">
         <h1>Animal slaughtered</h1>
       <p >Click on a country to see the area harvested for each food product.</p>
-    <div class="maps-container" id ="maps-container-animal-slaugthered">
-    <div id="visualization-container-animal-slaugthered"></div>
+    <div class="maps-container" id ="maps-container-animals-slaughtered">
+    <div id="visualization-container-animals-slaughtered"></div>
   </div>
   <div class="sliderContainer" id="time-slider-container-animals-slaughtered"></div>
   </div>
@@ -93,7 +95,7 @@
             smallAreaFunction = null,
             width = 1000, 
             height = 500,
-            containerId = 'visualization-container-animal-slaugthered',
+            containerId = 'visualization-container-animals-slaughtered',
             element_to_visualize = 'producing animals/slaughtered',
             id_indicator = 'animals-slaughtered'
         );
