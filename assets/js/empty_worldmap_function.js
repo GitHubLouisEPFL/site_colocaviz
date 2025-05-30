@@ -1,38 +1,6 @@
 // Main modular functions for world map visualization
+let year_chosen = 2023; // Default year
 
-let chosenFoodName = null;
-let switzerlandFeature = null;
-
-let csvdata = null;
-let csvDataPromise = null;
-
-/**
- * Fetches global csv data with caching
- * @returns {Promise<Array>} Promise resolving csvdata
- */
-function getCSV() {
-    if (csvdata) {
-        return Promise.resolve(csvdata);
-    }
-    // Return existing promise if already fetching  
-    if (csvDataPromise) {
-        return csvDataPromise;
-    }
-
-    csvDataPromise = loadCSVData().then(data => {
-        csvdata = data;
-        console.log("CSV data loaded successfully");
-        return csvdata;
-    }).catch(error => {
-        console.error("Error loading CSV data:", error);
-        throw error;        
-    });
-
-    return csvDataPromise;
-};
-
-getCSV().then(data => {console.log("firstdownload")}).catch(error => {
-    console.error("Error in getCSV:", error);  });
 /**
  * Creates a time slider control
  * @param {Array} availableYears - Array of available years
@@ -317,79 +285,8 @@ function createTimeSlider(availableYears, currentYear, onYearChange, containerId
         }
     };
 }
-let lemanDataCache = null;
-let lemanDataPromise = null;
-/**
- * Fetches Leman SVG data with caching
- * @returns {Promise<Array>} Promise resolving to array of `d` path values.
- */
 
-function fetch_leman_svg() {
-    // Return cached data if available
-    if (lemanDataCache) {
-        return Promise.resolve(lemanDataCache);
-    }
-    
-    // Return existing promise if already fetching
-    if (lemanDataPromise) {
-        return lemanDataPromise;
-    }
-    https://github.com/com-480-data-visualization/com480-project-colocaviz/tree/13a44cb13c2e05ef4871acfcc794aedef8cec6ce/data
-    // Create new fetch promise
-    lemanDataPromise = fetch('https://raw.githubusercontent.com/GitHubLouisEPFL/site_colocaviz/refs/heads/main/svg_files/lac_leman.svg')
-        .then(res => res.text())
-        .then(svg => {
-            const matches = svg.match(/<path[^>]*d="([^"]+)"/g) || [];
-            const dValues = matches.map(m => m.match(/d="([^"]+)"/)[1]);
-            lemanDataCache = dValues; // Cache the result
-            return dValues;
-        })
-        .catch(error => {
-            console.error("Error fetching or processing the SVG:", error);
-            lemanDataPromise = null; // Reset promise on error to allow retry
-            throw error;
-        });
-    
-    return lemanDataPromise;
-}
-
-let parisDataCache = null;
-let parisDataPromise = null;
-/**
- * Fetches Paris SVG data with caching
- * @returns {Promise<Array>} Promise resolving to array of `d` path values.
- */
-
-function fetch_paris_svg() {
-    // Return cached data if available
-    if (parisDataCache) {
-        return Promise.resolve(parisDataCache);
-    }
-    
-    // Return existing promise if already fetching
-    if (parisDataPromise) {
-        return parisDataPromise;
-    }
-    https://github.com/com-480-data-visualization/com480-project-colocaviz/tree/13a44cb13c2e05ef4871acfcc794aedef8cec6ce/data
-    // Create new fetch promise
-    parisDataPromise = fetch('https://raw.githubusercontent.com/GitHubLouisEPFL/site_colocaviz/bbe178cd7725a4e7fcafb7954e484f83d92838ef/svg_files/paris_border.svg')
-        .then(res => res.text())
-        .then(svg => {
-            const matches = svg.match(/<path[^>]*d="([^"]+)"/g) || [];
-            const dValues = matches.map(m => m.match(/d="([^"]+)"/)[1]);
-            parisDataCache = dValues; // Cache the result
-            return dValues;
-        })
-        .catch(error => {
-            console.error("Error fetching or processing the SVG:", error);
-            parisDataPromise = null; // Reset promise on error to allow retry
-            throw error;
-        });
-    
-    return parisDataPromise;
-}
-
-let country_to_iso = {};
+//let country_to_iso = {};
 /**
  * Creates a world map visualization
  * @param {number} width - SVG width
@@ -734,7 +631,7 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
     
-    // Create container: Use wrapper object to manage the main group element
+    // Create container - CHANGED: Use wrapper object
     const gWrapper = { current: svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`) };
             
     // Store gradient reference for updates
@@ -772,7 +669,7 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
     // Function to render the visualization
     function render(data, feature, geodata) {
         console.log('Rendering small area visualization');
-        // Reset gWrapper to main container before clearing
+        // CHANGED: Reset gWrapper to main container before clearing
         gWrapper.current = svg.select('g');
         // Clear existing content
         gWrapper.current.selectAll("*").remove();
@@ -849,7 +746,7 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
             .attr('font-weight', 'bold')
             .text(`${data[year_chosen]} ${data.Unit} of ${chosenFoodName} harvested in ${year_chosen}`);
         
-        // Create gradient outside the function to avoid duplicates
+        // CHANGED: Create gradient outside the function to avoid duplicates
         const defs = svg.append("defs");
         const lg = defs.append("linearGradient")
             .attr("id", "mygrad")
@@ -870,7 +767,7 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
             
             const pathData = dValues[0];
             
-            // Calculate actual bounds of the path instead of assuming viewBox
+            // CHANGED: Calculate actual bounds of the path instead of assuming viewBox
             const tempSvg = d3.select('body').append('svg').style('visibility', 'hidden');
             const tempPath = tempSvg.append('path').attr('d', pathData);
             const bbox = tempPath.node().getBBox();
@@ -904,7 +801,7 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
                 
             console.log(`Rendering ${area_for_comparison} SVG with scale: ${scale}, bbox:`, bbox);
             
-            // Update the wrapper's current reference
+            // CHANGED: Update the wrapper's current reference
             gWrapper.current = Group;
             return Group;
         }
@@ -972,9 +869,7 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
  * @param {string} containerId - ID of the main container
  * @returns {Object} - Control object with update method
  */
-async function createareaharvestedVisualizationPage(smallAreaFunction = null, width = 1000, height = 500, containerId = 'visualization-container',
-    element_to_visualize = 'area harvested',
-    id_indicator='area-harvested') {
+async function createanimalslaugtherVisualizationPage(smallAreaFunction = null, width = 1000, height = 500, containerId = 'visualization-container', element_to_visualize = 'Area Harvested') {
     // Get container
     const container = document.getElementById(containerId);
     container.innerHTML = '';
@@ -983,9 +878,10 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
     container.style.display = 'flex';
     container.style.flexDirection = 'row';
     container.style.gap = '20px';
+    
     // Create map container
     const mapContainer = document.createElement('div');
-    mapContainer.id = 'map-container' + id_indicator;
+    mapContainer.id = 'map-container';
     mapContainer.style.flex = '1';
     mapContainer.style.position = 'relative';
     mapContainer.style.border = '1px solid #ccc';
@@ -994,7 +890,7 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
     
     // Create title for map
     const mapTitle = document.createElement('h3');
-    mapTitle.textContent = 'World Map' + id_indicator;
+    mapTitle.textContent = 'World Map';
     mapTitle.style.textAlign = "center";
     mapTitle.style.margin = '10px';
     mapTitle.style.fontWeight = 'bold';
@@ -1002,16 +898,17 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
     
     // Create actual map container
     const actualMapContainer = document.createElement('div');
-    actualMapContainer.id = 'actual-map-container' + id_indicator;
+    actualMapContainer.id = 'actual-map-container';
     actualMapContainer.style.position = 'absolute';
     actualMapContainer.style.top = '40px';
     actualMapContainer.style.bottom = '0';
     actualMapContainer.style.left = '0';
     actualMapContainer.style.right = '0';    
     mapContainer.appendChild(actualMapContainer); 
+
     // Create detail container
     const detailContainer = document.createElement('div');
-    detailContainer.id = 'detail-container'  + id_indicator;
+    detailContainer.id = 'detail-container';
     detailContainer.style.flex = '1';
     detailContainer.style.position = 'relative';
     detailContainer.style.border = '1px solid #ccc';
@@ -1020,7 +917,7 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
     
     // Create title for detail
     const detailTitle = document.createElement('h3');
-    detailTitle.textContent = 'Country Details'  + id_indicator;
+    detailTitle.textContent = 'Country Details';
     detailTitle.style.textAlign = "center";
     detailTitle.style.margin = '10px';
     detailTitle.style.fontWeight = 'bold';
@@ -1028,7 +925,7 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
     
     // Create actual detail container
     const actualDetailContainer = document.createElement('div');
-    actualDetailContainer.id = 'actual-detail-container'  + id_indicator;
+    actualDetailContainer.id = 'actual-detail-container';
     actualDetailContainer.style.position = 'absolute';
     actualDetailContainer.style.top = '40px';
     actualDetailContainer.style.bottom = '0';
@@ -1055,7 +952,7 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
         null, // no feature initially
         mapWidth,
         mapHeight,
-        'actual-detail-container'  + id_indicator
+        'actual-detail-container'
     );
     
     // Create the world map with callbacks
@@ -1063,7 +960,7 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
         mapWidth, 
         mapHeight, 
         countryWideJson, 
-        'actual-map-container'  + id_indicator, 
+        'actual-map-container', 
         // onCountrySelect callback
         (country, countryFeature, geoDataFromMap) => {
             selectedCountry = country;            
@@ -1082,7 +979,7 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
     return {
     update: () => {
         chosenFoodName = document.getElementById("chosen-food-name").textContent;
-        getFilteredCSV(chosenFoodName).then(data => {
+        getFilteredCSV(chosenFoodName,element_to_visualize).then(data => {
             const newCountryWideJson = createCountryWideJson(data);
             
             // Get available years from the data and create/update time slider

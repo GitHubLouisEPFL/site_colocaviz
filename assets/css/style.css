@@ -87,6 +87,40 @@ body.home-page {
     overflow-x: hidden;
 }
 
+/* Containers for the maps */
+
+
+.map-text-container {
+  max-width: 67.5rem;
+  margin: 1.25rem auto 3.125rem auto;
+  font-size: 1.1em;
+  line-height: 1.7;
+  padding: 1.875rem 2.5rem;
+  background-color: #fffaf3;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-soft);
+}
+
+.map-text-container p {
+  margin-bottom: 20px;
+  color: var(--text-dark);
+  text-align: center;
+}
+
+.map-text-container h2 {
+  color: var(--primary-color);
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.sliderContainer {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
 
 /* Side navigation */
 .menu {
@@ -273,36 +307,6 @@ body.home-page {
   font-weight: 400;
 }
 
-.area-harvested-container {
-  max-width: 1080px;
-  margin: 20px auto 50px auto;
-  font-size: 1.1em;
-  line-height: 1.7;
-  padding: 30px 40px;
-  background-color: #fffaf3;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-soft);
-}
-
-.area-harvested-container p {
-  margin-bottom: 20px;
-  color: var(--text-dark);
-  text-align: center;
-}
-
-.area-harvested-container h2 {
-  color: var(--primary-color);
-  margin-bottom: 15px;
-  text-align: center;
-}
-
-.sliderContainer {
-  display: flex;
-  align-items: center;
-  margin-top: 10px;
-  width : 80%;
-  margin-bottom: 10px;
-}
 
 @media (max-width: 1200px) {
   .container {
@@ -546,7 +550,7 @@ select, input[type="text"] {
     cursor: pointer;
 }
 
-/* ==================== PANIER ==================== */
+/* ==================== BASKET ==================== */
 body.basket-page {
     padding-top: 80px;
     font-family: 'Inter', sans-serif;
