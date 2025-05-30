@@ -869,7 +869,9 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
  * @param {string} containerId - ID of the main container
  * @returns {Object} - Control object with update method
  */
-async function createanimalslaugtherVisualizationPage(smallAreaFunction = null, width = 1000, height = 500, containerId = 'visualization-container', element_to_visualize = 'Area Harvested') {
+async function createanimalslaugtherVisualizationPage(smallAreaFunction = null, width = 1000, height = 500, containerId = 'visualization-container',
+    element_to_visualize = 'area harvested',
+    id_indicator='area-harvested') {
     // Get container
     const container = document.getElementById(containerId);
     container.innerHTML = '';
@@ -878,10 +880,9 @@ async function createanimalslaugtherVisualizationPage(smallAreaFunction = null, 
     container.style.display = 'flex';
     container.style.flexDirection = 'row';
     container.style.gap = '20px';
-    
     // Create map container
     const mapContainer = document.createElement('div');
-    mapContainer.id = 'map-container';
+    mapContainer.id = 'map-container' + id_indicator;
     mapContainer.style.flex = '1';
     mapContainer.style.position = 'relative';
     mapContainer.style.border = '1px solid #ccc';
@@ -898,17 +899,16 @@ async function createanimalslaugtherVisualizationPage(smallAreaFunction = null, 
     
     // Create actual map container
     const actualMapContainer = document.createElement('div');
-    actualMapContainer.id = 'actual-map-container';
+    actualMapContainer.id = 'actual-map-container'+ id_indicator;
     actualMapContainer.style.position = 'absolute';
     actualMapContainer.style.top = '40px';
     actualMapContainer.style.bottom = '0';
     actualMapContainer.style.left = '0';
     actualMapContainer.style.right = '0';    
     mapContainer.appendChild(actualMapContainer); 
-
     // Create detail container
     const detailContainer = document.createElement('div');
-    detailContainer.id = 'detail-container';
+    detailContainer.id = 'detail-container'  + id_indicator;
     detailContainer.style.flex = '1';
     detailContainer.style.position = 'relative';
     detailContainer.style.border = '1px solid #ccc';
@@ -925,7 +925,7 @@ async function createanimalslaugtherVisualizationPage(smallAreaFunction = null, 
     
     // Create actual detail container
     const actualDetailContainer = document.createElement('div');
-    actualDetailContainer.id = 'actual-detail-container';
+    actualDetailContainer.id = 'actual-detail-container'  + id_indicator;
     actualDetailContainer.style.position = 'absolute';
     actualDetailContainer.style.top = '40px';
     actualDetailContainer.style.bottom = '0';
@@ -952,7 +952,7 @@ async function createanimalslaugtherVisualizationPage(smallAreaFunction = null, 
         null, // no feature initially
         mapWidth,
         mapHeight,
-        'actual-detail-container'
+        'actual-detail-container'  + id_indicator
     );
     
     // Create the world map with callbacks
@@ -960,7 +960,7 @@ async function createanimalslaugtherVisualizationPage(smallAreaFunction = null, 
         mapWidth, 
         mapHeight, 
         countryWideJson, 
-        'actual-map-container', 
+        'actual-map-container'  + id_indicator, 
         // onCountrySelect callback
         (country, countryFeature, geoDataFromMap) => {
             selectedCountry = country;            

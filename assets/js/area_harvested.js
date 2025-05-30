@@ -5,7 +5,7 @@ let switzerlandFeature = null;
 
 let csvdata = null;
 let csvDataPromise = null;
-
+const areaharvestedcsv =getFilteredbyelement(element_name = "area harvested");
 /**
  * Fetches global csv data with caching
  * @returns {Promise<Array>} Promise resolving csvdata
@@ -1082,11 +1082,14 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
     return {
     update: () => {
         chosenFoodName = document.getElementById("chosen-food-name").textContent;
-        getFilteredCSV(chosenFoodName).then(data => {
-            const newCountryWideJson = createCountryWideJson(data);
+        areaharvestedcsv.then(data => {
+            return filterByItem(data, item_name = chosenFoodName)}
+            )
+            .then(filteredData => {
+            const newCountryWideJson = createCountryWideJson(filteredData);
             
             // Get available years from the data and create/update time slider
-            const availableYears = getAvailableYears(data);
+            const availableYears = getAvailableYears(filteredData);
             
             if (timeSlider) {
                 // Update existing slider
@@ -1101,7 +1104,7 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
                         year_chosen = newYear;
                         
                         // Update the map with new year data
-                        const updatedCountryWideJson = createCountryWideJson(data);
+                        const updatedCountryWideJson = createCountryWideJson(filteredData);
                         if (map) {
                             map.update(updatedCountryWideJson);
                         }

@@ -16,10 +16,44 @@ function loadCSVData() {
       });
     });
 }
+function filterByElement(data, element_name = "area harvested") {
+    const filteredData = data.filter(item => item.Element === element_name);
+    console.log(`CSV data filtered for Element: ${element_name}`);
+    console.log(`Filtered ${filteredData.length} records from ${data.length} total records`);
+    return filteredData;
+}
 
+// Convenience function that combines both
+function getFilteredbyelement(element_name = "area harvested") {
+    let filteredcsv =getCSV().then(data => filterByElement(data, element_name)); 
+    return filteredcsv;
+};
 
+// Filter by item (checks both Item and food_commodity_typology fields)
+function filterByItem(data, item_name = null) {
+    if (!item_name) {
+        console.log('No item name provided, returning all data');
+        return data;
+    }
+    
+    let filteredData = data.filter(item => item.Item === item_name);
+    
+    // If no results found with Item field, try food_commodity_typology field
+    if (filteredData.length === 0) {
+        filteredData = data.filter(item => item.food_commodity_typology === item_name);
+    }
+    
+    console.log(`CSV data filtered for Item: ${item_name}`);
+    console.log(`Filtered ${filteredData.length} records from ${data.length} total records`);
+    return filteredData;
+}
 
-
+// Combined function (optional - uses both filters)
+function filterCSV(data, item_name = null, element_name = "area harvested") {
+    let result = filterByItem(data, item_name);
+    result = filterByElement(result, element_name);
+    return result;
+}
 // Separate filtering function
 function filterCSV(data, item_name = null, element_name = "area harvested") {
     let filteredData = data
@@ -36,11 +70,7 @@ function filterCSV(data, item_name = null, element_name = "area harvested") {
     return filteredData;
 };
 
-// Convenience function that combines both
-function getFilteredCSV(item_name = null, element_name = "area harvested") {
-    let filteredcsv =getCSV().then(data => filterCSV(data, item_name, element_name)); 
-    return filteredcsv;
-};
+
 
 
 /**
