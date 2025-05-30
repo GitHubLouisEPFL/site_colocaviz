@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <title>Colocaviz home page</title>
@@ -8,9 +9,7 @@
     <script src="https://unpkg.com/topojson-client@3"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.1.0/papaparse.min.js"></script>
-    <!-- Include our modular visualization code -->
-    <script src="index.js"></script>
-    <script src="area_harvested.js"></script>  
+
 </head>
 
 <body class="home-page">
@@ -19,11 +18,11 @@
 
     <header>
         <nav class="top-nav">
-          <a href="index.html">🏠 Home</a>
-          <a href="viz.html" class="active">🌍 Interactive Visualizations</a>
-          <a href="inventory.html">📝 Inventory</a>
-          <a href="comparateur.html">📊 Comparison</a>
-          <a href="basket.html">🛒 Basket</a>
+            <a href="index.html">🏠 Home</a>
+            <a href="viz.html" class="active">🌍 Interactive Visualizations</a>
+            <a href="inventory.html">📝 Inventory</a>
+            <a href="comparateur.html">📊 Comparison</a>
+            <a href="basket.html">🛒 Basket</a>
         </nav>
     </header>
 
@@ -49,21 +48,34 @@
 
     </div>
 
-    <div class="blabla" id="blabla">
-        <p style="color: red;">Warning !!! This is a draft website using dummy values!</p>
-        <p>The goal of this project is to highlight the environmental, social, and ethical impacts of different food products through engaging data visualizations.</p>
-        <p>The motivation is to raise awareness about the hidden impacts of food consumption...</p>
+    <div class="area-harvested-container" id="area-harvested-container">
+        <h1>Area harvested</h1>
+        <p>Click on a country to see the area harvested for each food product.</p>
+        <div class="container" id="container-area">
+            <div id="visualization-container"></div>
+        </div>
+        <div class="sliderContainer" id="time-slider-container"></div>
     </div>
-    <div class="container-map" id ="container-area">
-    <h1>Country Data Visualization</h1>
-    <div id="visualization-container"></div>
-  </div>
 
-    <script src="assets/js/treemap_water.js" defer></script>    
+    <script src="assets/js/treemap_water.js" defer></script>
     <script src="assets/js/treemap_carbon.js" defer></script>
     <script src="assets/js/scroll_menu.js" defer></script>
+    <!-- Include our modular visualization code -->
+    <script src="assets/js/index.js"></script>
+    <script src="assets/js/area_harvested.js"></script>
+    <script>
+        // Initialize visualization when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.viz = createVisualizationPage(
+                null, // Use default small area visualization
+                1000, // Width
+                500   // Height
+            );
 
+        });
+    </script>
 
 
 </body>
+
 </html>

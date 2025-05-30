@@ -273,7 +273,7 @@ body.home-page {
   font-weight: 400;
 }
 
-.blabla {
+.area-harvested-container {
   max-width: 1080px;
   margin: 20px auto 50px auto;
   font-size: 1.1em;
@@ -284,14 +284,24 @@ body.home-page {
   box-shadow: var(--shadow-soft);
 }
 
-.blabla p {
+.area-harvested-container p {
   margin-bottom: 20px;
   color: var(--text-dark);
+  text-align: center;
 }
 
-.blabla h2 {
+.area-harvested-container h2 {
   color: var(--primary-color);
   margin-bottom: 15px;
+  text-align: center;
+}
+
+.sliderContainer {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  width : 80%;
+  margin-bottom: 10px;
 }
 
 @media (max-width: 1200px) {

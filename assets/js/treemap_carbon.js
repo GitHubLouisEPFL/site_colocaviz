@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Initialiser l'affichage avec la racine
     drawCustomTreemap(globalRoot);
 
-    updateActiveElement(node.data.name);
+    //updateActiveElement(node.data.name);
 
   });
 
@@ -431,6 +431,9 @@ document.addEventListener("DOMContentLoaded", function () {
           const path = d.ancestors().reverse().map(n => n.data.name);
           path.push(d.data.name); // Ajouter le nœud actuel au chemin
           updateWaterTreemap(path, "carbon");
+          window.viz.then(viz => {
+            viz.update();
+          });
         })
         // Ajouter ces gestionnaires d'événements
         .on("mouseenter", (event, d) => {
@@ -587,6 +590,9 @@ document.addEventListener("DOMContentLoaded", function () {
         // Créer le chemin basé sur les noms des ancêtres
         const path = d.ancestors().reverse().map(n => n.data.name);
         updateWaterTreemap(path, "carbon");
+        window.viz.then(viz => {
+        viz.update();
+      });
       });
     
     crumb.append("rect")
