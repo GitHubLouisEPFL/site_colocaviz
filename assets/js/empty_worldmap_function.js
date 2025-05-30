@@ -11,17 +11,34 @@ let year_chosen = 2023; // Default year
  * @param {Object} geoData - Geographic data (countries, countryNames, etc.)
  * @returns {Object} - Control object with update and clear methods
  */
-function createSmallAreaVisualization(countryData, countryFeature, width, height, containerId, geoData = null) {
+function createSmallAreaVisualization_animals_slaughtered(countryData, countryFeature, width, height, containerId, geoData = null) {
     const container = document.getElementById(containerId);
     container.innerHTML = '';
-    console.log('Creating small area visualization');
-    
+    // Create map container
+    // Create future needed elements
+     const slaughtered_only = document.getElementById(containerId);
+    slaughtered_only.id = 'container_for_animals_slaughtered';
+    slaughtered_only.className  = 'container_for_animals_slaughtered';
+    const titlediv = document.createElement('div');
+    titlediv.id = 'title';
+    titlediv.className  = 'title';
+    slaughtered_only.appendChild(titlediv);
+    const calendardiv = document.createElement('div');
+    calendardiv.id = 'calendar';
+    calendardiv.className  = 'calendar';
+    slaughtered_only.appendChild(calendardiv);
+    const summarydiv = document.createElement('div');
+    summarydiv.id = 'summary';
+    summarydiv.className  = 'summary';
+    slaughtered_only.appendChild(summarydiv);
     // Create SVG
     const svg = d3.select(container)
         .append('svg')
         .attr('width', width)
         .attr('height', height)
         .attr('class', 'small-area-visualization');
+    
+
     svg.append('rect')
         .attr('class', 'background')
         .attr('width', width)
@@ -32,52 +49,28 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
     
-    // Create container - CHANGED: Use wrapper object
+    // Create container: Use wrapper object to manage the main group element
     const gWrapper = { current: svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`) };
-            
-    // Store gradient reference for updates
-    let currentGradient = null;
-    
-    // Function to update gradient
-    function updateGradient(newColor, newPercentage) {
-        if (currentGradient) {
-            // Remove existing stops
-            currentGradient.selectAll("stop").remove();
-            
-            // Add new stops with updated values
-            currentGradient.append("stop")
-                .attr("offset", "0%")
-                .style("stop-color", newColor)
-                .style("stop-opacity", 1);
-            
-            currentGradient.append("stop")
-                .attr("offset", newPercentage + "%")
-                .style("stop-color", newColor)
-                .style("stop-opacity", 1);
-            
-            currentGradient.append("stop")
-                .attr("offset", newPercentage + "%")
-                .style("stop-color", "#e0e0e0")
-                .style("stop-opacity", 1);
-            
-            currentGradient.append("stop")
-                .attr("offset", "100%")
-                .style("stop-color", "#e0e0e0")
-                .style("stop-opacity", 1);
-        }
-    }
-   
-    // Function to render the visualization
+
     function render(data, feature, geodata) {
-        console.log('Rendering small area visualization');
-        // CHANGED: Reset gWrapper to main container before clearing
+        console.log(data, feature, geodata)
+        // Reset gWrapper to main container before clearing
         gWrapper.current = svg.select('g');
+        svg.selectAll('rect.background').remove();
         // Clear existing content
         gWrapper.current.selectAll("*").remove();
+
         svg.selectAll("defs").remove(); // Clear any existing defs
         
+    
         // Check if we have country data
         if (!data) {
+            gWrapper.current.append('rect')
+            .attr('class', 'background')
+            .attr('width', width)
+            .attr('height', height)
+            .attr('fill', '#ffffff');
+    
             gWrapper.current.append('text')
                 .attr('x', innerWidth / 2)
                 .attr('y', innerHeight / 2)
@@ -86,166 +79,146 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
                 .text('Select a country to view details');
             return;
         }
-        // Add main title
-        gWrapper.current.append('text')
-            .attr('x', innerWidth / 2)
-            .attr('y', -10)
-            .attr('text-anchor', 'middle')
-            .attr('font-weight', 'bold')
-            .attr('font-size', '16px')
-            .text(geodata["countryNames"][feature.id]);
-        
-        let area_for_comparison = "";    
-        let area_percentage = 0;
+        totalAnimals = data[year_chosen]; 
+        const calendarEl = document.getElementById('calendar');
+        const titleEl = document.getElementById('title');
+        const summaryEl = document.getElementById('summary');
 
-        if ( data[year_chosen] <= 10540) {   
-            area_for_comparison = "Paris";     
-            area_percentage = Math.round((data[year_chosen]/10540|| 0) * 100);
-            const number_of_times_lausanne = Math.round(data[year_chosen] / 55);
-            
-            gWrapper.current.append('text')
-                .attr('x', innerWidth / 2)
-                .attr('y', 5)
-                .attr('text-anchor', 'middle')
-                .attr('font-size', '12px')
-                .attr('fill', '#666')
-                .text(`${area_percentage}% of ${area_for_comparison} surface area and ${number_of_times_lausanne} times Lausanne surface area`);
-        }
-        
-        else if (data[year_chosen] <=  58100) {
-            area_for_comparison = "Leman Lake";
-            area_percentage = Math.round((data[year_chosen]/58100 || 0) * 100);
-            const number_of_times_paris = Math.round(data[year_chosen] / 10540);
-            gWrapper.current.append('text')
-                .attr('x', innerWidth / 2)
-                .attr('y', 5)
-                .attr('text-anchor', 'middle')
-                .attr('font-size', '12px')
-                .attr('fill', '#666')
-                .text(`${area_percentage}% of ${area_for_comparison} surface area and ${number_of_times_paris} times Paris surface area`)
-         }
-        else {
-            // switzerland id is 756
-            area_for_comparison = "Switzerland";
-            area_percentage = Math.round((data[year_chosen]/4128500 || 0) * 100);
-            const number_of_times = Math.round(data[year_chosen] / 58100);
-            gWrapper.current.append('text')
-                .attr('x', innerWidth / 2)
-                .attr('y', 5)
-                .attr('text-anchor', 'middle')
-                .attr('font-size', '12px')
-                .attr('fill', '#666')
-                .text(`${area_percentage}% of ${area_for_comparison} surface area and ${number_of_times} times Leman lake surface area`);
+        const secondsInMinute = 60;
+        const secondsInHour = 60 * secondsInMinute;
+        const secondsInDay = 24 * secondsInHour;
+        const secondsInMonth = 30 * secondsInDay;
+        const secondsInYear = 365 * secondsInDay;
+
+        const lausanne = 140619;
+        const zurich = 423193;
+        const switzerland = 8888000;
+        const canada = 40100000;
+
+        function formatDuration(seconds) {
+        let remaining = seconds;
+        const y = Math.floor(remaining / secondsInYear);
+        remaining %= secondsInYear;
+        const mo = Math.floor(remaining / secondsInMonth);
+        remaining %= secondsInMonth;
+        const d = Math.floor(remaining / secondsInDay);
+        remaining %= secondsInDay;
+        const h = Math.floor(remaining / secondsInHour);
+        remaining %= secondsInHour;
+        const m = Math.floor(remaining / secondsInMinute);
+        remaining %= secondsInMinute;
+        const s = Math.floor(remaining);
+
+        const parts = [];
+        if (y > 0) parts.push(`${y} year${y > 1 ? 's' : ''}`);
+        if (mo > 0) parts.push(`${mo} month${mo > 1 ? 's' : ''}`);
+        if (d > 0) parts.push(`${d} day${d > 1 ? 's' : ''}`);
+        if (h > 0) parts.push(`${h} hour${h > 1 ? 's' : ''}`);
+        if (m > 0) parts.push(`${m} minute${m > 1 ? 's' : ''}`);
+        if (s > 0) parts.push(`${s} second${s > 1 ? 's' : ''}`);
+
+        return parts.join(', ');
         }
 
-        // Add data label
-        gWrapper.current.append('text')
-            .attr('x', innerWidth / 2)
-            .attr('y', 30)
-            .attr('text-anchor', 'middle')
-            .attr('font-size', '14px')
-            .attr('font-weight', 'bold')
-            .text(`${data[year_chosen]} ${data.Unit} of ${chosenFoodName} harvested in ${year_chosen}`);
-        
-        // Create gradient outside the function to avoid duplicates
-        const defs = svg.append("defs");
-        const lg = defs.append("linearGradient")
-            .attr("id", "mygrad")
-            .attr("x1", "0%")
-            .attr("x2", "100%")
-            .attr("y1", "0%")
-            .attr("y2", "0%");
-        
-        // Store the gradient reference
-        currentGradient = lg;
-        
-         // Fetch and render svgs for leman lake, paris, and ginevra
-         function createcountrysvgandfill(data, area_percentage, dValues, gWrapper, area_for_comparison) {
-            if (!dValues || dValues.length === 0) {
-                console.error(`No ${area_for_comparison} SVG data available`);
-                return null;
-            }            
-            
-            const pathData = dValues[0];
-            
-            //  Calculate actual bounds of the path instead of assuming viewBox
-            const tempSvg = d3.select('body').append('svg').style('visibility', 'hidden');
-            const tempPath = tempSvg.append('path').attr('d', pathData);
-            const bbox = tempPath.node().getBBox();
-            tempSvg.remove();
-            
-            // Use actual path dimensions
-            const pathWidth = bbox.width;
-            const pathHeight = bbox.height;
-        
-            // Set the size we want to show the area within
-            const targetWidth = innerWidth * 0.6;  // Use 60% of available width
-            const targetHeight = (innerHeight - 60) * 0.8; // Account for titles
-            const scale = Math.min(targetWidth / pathWidth, targetHeight / pathHeight);
-        
-            // Create center group
-            const Group = gWrapper.current.append('g')
-                .attr('class', `${area_for_comparison.toLowerCase().replace(' ', '-')}-group`)
-                .attr('transform', `translate(${innerWidth / 2}, ${(innerHeight + 40) / 2}) scale(${scale}) translate(${-bbox.x - pathWidth/2}, ${-bbox.y - pathHeight/2})`);
-            
-            // Set up gradient with current data
-            updateGradient(data.fillColor, area_percentage);
-        
-            // Add path with gradient fill
-            Group.append('path')
-                .attr('d', pathData)
-                .attr('fill', `url(#mygrad)`)
-                .attr('stroke', 'black')
-                .attr('stroke-width', 4 / scale);
-            
-            //  Update the wrapper's current reference
-            gWrapper.current = Group;
-            return Group;
+        function formatPopulationComparison(count) {
+        if (count >= canada) {
+            return `The total is equivalent to ${(count / canada).toFixed(1)} times the population of Canada.`;
+        } else if (count >= switzerland) {
+            return `The total is equivalent to ${(count / switzerland).toFixed(1)} times the population of Switzerland.`;
+        } else if (count >= zurich) {
+            return `The total is equivalent to ${(count / zurich).toFixed(1)} times the population of Zurich.`;
+        } else {
+            return `The total is equivalent to ${(count / lausanne).toFixed(1)} times the population of Lausanne.`;
         }
-            
-        // Now fetch and render Paris - only when render is called
-        if (area_for_comparison == "Paris") {
-            fetch_paris_svg().then(dValues => {
-                createcountrysvgandfill(data, area_percentage, dValues, gWrapper, area_for_comparison);
-            }).catch(error => {
-                console.error("Error fetching Paris SVG data:", error);
-            });
         }
-        else if (area_for_comparison == "Leman Lake") {
-            fetch_leman_svg().then(dValues => {
-                createcountrysvgandfill(data, area_percentage, dValues, gWrapper, area_for_comparison);
-            }).catch(error => {
-                console.error("Error fetching Leman Lake SVG data:", error);
-            });
-        }
-        else if (area_for_comparison == "Switzerland") {
-            // Create center group for Switzerland
-            const projection = d3.geoMercator().fitSize([400, 400], switzerlandFeature);
-            const pathGenerator = d3.geoPath().projection(projection);
 
-            const switzerlandGroup = gWrapper.current.append('g')
-                .attr('class', 'switzerland-group')
-                .attr('transform', `translate(${innerWidth / 2 - 200}, ${(innerHeight + 40) / 2 - 200})`);
-            
-            // Set up gradient with current data
-            updateGradient(data.fillColor, area_percentage);
-            
-            // Draw Switzerland path
-            switzerlandGroup.append('path')
-                .datum(switzerlandFeature)
-                .attr('d', pathGenerator)
-                .attr('fill', 'url(#mygrad)')
-                .attr('stroke', 'black')                
-                .attr('stroke-width', 4);
+        function renderCalendar(seconds) {
+        calendarEl.innerHTML = '';
+        let unitType = '';
+
+        if (seconds <= secondsInMonth) {
+            unitType = 'Day';
+            calendarEl.style.gridTemplateColumns = 'repeat(7, 1fr)';
+            const fullUnits = Math.floor(seconds / secondsInDay);
+            const remainder = (seconds % secondsInDay) / secondsInDay;
+
+            for (let i = 1; i <= 31; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'time-unit';
+            cell.innerText = "Day " + i;
+
+            if (i <= fullUnits) {
+                cell.classList.add('filled-full');
+            } else if (i === fullUnits + 1 && remainder > 0) {
+                cell.classList.add('filled-partial');
+                cell.style.background = `linear-gradient(to right, #b15e5e ${remainder * 100}%, #e0d6c3 ${remainder * 100}%)`;
+            }
+            calendarEl.appendChild(cell);
+            }
+        } else if (seconds <= secondsInYear) {
+            unitType = 'Month';
+            calendarEl.style.gridTemplateColumns = 'repeat(6, 1fr)';
+            const fullUnits = Math.floor(seconds / secondsInMonth);
+            const remainder = (seconds % secondsInMonth) / secondsInMonth;
+
+            for (let i = 1; i <= 12; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'time-unit';
+            cell.innerText = "Month " + i;
+
+            if (i <= fullUnits) {
+                cell.classList.add('filled-full');
+            } else if (i === fullUnits + 1 && remainder > 0) {
+                cell.classList.add('filled-partial');
+                cell.style.background = `linear-gradient(to right, #b15e5e ${remainder * 100}%, #e0d6c3 ${remainder * 100}%)`;
+            }
+            calendarEl.appendChild(cell);
+            }
+        } else {
+            unitType = 'Year';
+            calendarEl.style.gridTemplateColumns = 'repeat(auto-fit, minmax(12vmin, 1fr))';
+            const fullUnits = Math.floor(seconds / secondsInYear);
+            const remainder = (seconds % secondsInYear) / secondsInYear;
+            const totalUnits = fullUnits + (remainder > 0 ? 1 : 0);
+
+            for (let i = 0; i < totalUnits; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'time-unit';
+
+            if (i < fullUnits) {
+                cell.classList.add('filled-full');
+            } else if (i === fullUnits && remainder > 0) {
+                cell.classList.add('filled-partial');
+                cell.style.background = `linear-gradient(to right, #b15e5e ${remainder * 100}%, #e0d6c3 ${remainder * 100}%)`;
+            }
+
+            const animalsThisYear = Math.round((i < fullUnits ? 1 : remainder) * secondsInYear);
+            cell.innerHTML = `
+                <div>Year ${i + 1}</div>
+                <div style="font-size: 1.5vmin">${animalsThisYear.toLocaleString()} animals</div>
+                <div style="font-size: 1.3vmin"> approx.${(animalsThisYear / switzerland).toFixed(1)} times Switzerland population</div>
+            `;
+
+            calendarEl.appendChild(cell);
+            }
+            }
+
+            titleEl.innerText = `If one animal were killed every second, it would take ${formatDuration(seconds)}`;
+            summaryEl.innerText = formatPopulationComparison(totalAnimals);
+            }
+
+            const totalSeconds = totalAnimals; // 1 animal/second
+            renderCalendar(totalSeconds);            
+
         }
-    }
-    
+
     // Initial render
     render(countryData, countryFeature, geoData);
     
     // Return control object
     return {
         update: (newCountryData, newCountryFeature, newGeoData) => {
+            console.log('Updating small area visualization with new data', newCountryData, newCountryFeature, newGeoData);
             if (newGeoData) {
                 geoData = newGeoData;
             }
@@ -346,7 +319,7 @@ async function createanimalslaughteredVisualizationPage(smallAreaFunction = null
     // Create the detail visualization first (will be updated once geo data loads)
     const mapWidth = width / 2 - 30;
     const mapHeight = height - 60;
-    const detailViz = createSmallAreaVisualization(
+    const detailViz = createSmallAreaVisualization_animals_slaughtered(
         null,
         null, // no feature initially
         mapWidth,
