@@ -14,308 +14,308 @@ let year_chosen = 2023; // Default year
  * @param {Function} onDataLoaded - Callback when geographic data is loaded (optional)
  * @returns {Object} - Control object with update and clear methods
  */
-function createWorldMap(width, height, countryWideJson, containerId, onCountrySelect = null, onDataLoaded = null) {
-    const container = document.getElementById(containerId);
-    container.innerHTML = '';
+// function createWorldMap(width, height, countryWideJson, containerId, onCountrySelect = null, onDataLoaded = null) {
+//     const container = document.getElementById(containerId);
+//     container.innerHTML = '';
 
-    const svg = d3.select(container)
-        .append('svg')
-        .attr('width', width)
-        .attr('height', height)
-        .attr('class', 'world-map');
+//     const svg = d3.select(container)
+//         .append('svg')
+//         .attr('width', width)
+//         .attr('height', height)
+//         .attr('class', 'world-map');
 
-    // Create loader element
-    const loader = document.createElement('div');
-    loader.textContent = 'Loading map data...';
-    loader.style.position = 'absolute';
-    loader.style.top = '50%';
-    loader.style.left = '50%';
-    loader.style.transform = 'translate(-50%, -50%)';
-    container.appendChild(loader);
+//     // Create loader element
+//     const loader = document.createElement('div');
+//     loader.textContent = 'Loading map data...';
+//     loader.style.position = 'absolute';
+//     loader.style.top = '50%';
+//     loader.style.left = '50%';
+//     loader.style.transform = 'translate(-50%, -50%)';
+//     container.appendChild(loader);
 
-    const g = svg.append('g'); // container group for zoom and map elements
+//     const g = svg.append('g'); // container group for zoom and map elements
 
-    // Add background rect once
-    g.append('rect')
-        .attr('class', 'background')
-        .attr('width', width)
-        .attr('height', height)
-        .attr('fill', '#ffffff');
+//     // Add background rect once
+//     g.append('rect')
+//         .attr('class', 'background')
+//         .attr('width', width)
+//         .attr('height', height)
+//         .attr('fill', '#ffffff');
 
-    let countryNames = {};
-    let countries;
-    let pathGenerator;
-    let hasData = false;
+//     let countryNames = {};
+//     let countries;
+//     let pathGenerator;
+//     let hasData = false;
 
-    // --- Functions to render the map ---
+//     // --- Functions to render the map ---
 
-    // Render no-data map
-    const renderNoDataMap = () => {
-        hasData = false;
-        // Clear existing map elements
-        g.selectAll('.country').remove();
-        g.selectAll('.no-data-element').remove();
-        svg.selectAll('.legend').remove();
+//     // Render no-data map
+//     const renderNoDataMap = () => {
+//         hasData = false;
+//         // Clear existing map elements
+//         g.selectAll('.country').remove();
+//         g.selectAll('.no-data-element').remove();
+//         svg.selectAll('.legend').remove();
 
-        // Add gray countries
-        g.selectAll('path.no-data-path')
-            .data(countries.features)
-            .enter()
-            .append('path')
-            .attr('class', 'country no-data-element no-data-path')
-            .attr('d', pathGenerator)
-            .attr('fill', '#cccccc')
-            .attr('stroke', '#333')
-            .attr('stroke-width', 0.5)
-            .style('cursor', 'default')
-            .append('title')
-            .text(d => countryNames[d.id] || 'Unknown');
+//         // Add gray countries
+//         g.selectAll('path.no-data-path')
+//             .data(countries.features)
+//             .enter()
+//             .append('path')
+//             .attr('class', 'country no-data-element no-data-path')
+//             .attr('d', pathGenerator)
+//             .attr('fill', '#cccccc')
+//             .attr('stroke', '#333')
+//             .attr('stroke-width', 0.5)
+//             .style('cursor', 'default')
+//             .append('title')
+//             .text(d => countryNames[d.id] || 'Unknown');
 
-        // Add "No data" text
-        const noDataText = g.append('text')
-            .attr('class', 'no-data-element no-data-text')
-            .attr('x', width / 2)
-            .attr('y', height / 2)
-            .attr('text-anchor', 'middle')
-            .attr('font-size', '18px')
-            .attr('font-weight', 'bold')
-            .attr('fill', '#666')
-            .text('No data available for the selected element');
+//         // Add "No data" text
+//         const noDataText = g.append('text')
+//             .attr('class', 'no-data-element no-data-text')
+//             .attr('x', width / 2)
+//             .attr('y', height / 2)
+//             .attr('text-anchor', 'middle')
+//             .attr('font-size', '18px')
+//             .attr('font-weight', 'bold')
+//             .attr('fill', '#666')
+//             .text('No data available for the selected element');
 
-        // Add background rect behind text for readability
-        const bbox = noDataText.node().getBBox();
-        g.insert('rect', '.no-data-text')
-            .attr('class', 'no-data-element no-data-background')
-            .attr('x', bbox.x - 10)
-            .attr('y', bbox.y - 5)
-            .attr('width', bbox.width + 20)
-            .attr('height', bbox.height + 10)
-            .attr('fill', 'rgba(255, 255, 255, 0.8)')
-            .attr('stroke', '#ccc')
-            .attr('stroke-width', 1)
-            .attr('rx', 5);
+//         // Add background rect behind text for readability
+//         const bbox = noDataText.node().getBBox();
+//         g.insert('rect', '.no-data-text')
+//             .attr('class', 'no-data-element no-data-background')
+//             .attr('x', bbox.x - 10)
+//             .attr('y', bbox.y - 5)
+//             .attr('width', bbox.width + 20)
+//             .attr('height', bbox.height + 10)
+//             .attr('fill', 'rgba(255, 255, 255, 0.8)')
+//             .attr('stroke', '#ccc')
+//             .attr('stroke-width', 1)
+//             .attr('rx', 5);
 
-    };
+//     };
 
-    // Render data map (colored countries)
-    const renderDataMap = (resolvedCountryWideJson) => {
-        hasData = true;
-        // Clear previous map and legend
-        g.selectAll('.country').remove();
-        g.selectAll('.no-data-element').remove();
-        svg.selectAll('.legend').remove();
+//     // Render data map (colored countries)
+//     const renderDataMap = (resolvedCountryWideJson) => {
+//         hasData = true;
+//         // Clear previous map and legend
+//         g.selectAll('.country').remove();
+//         g.selectAll('.no-data-element').remove();
+//         svg.selectAll('.legend').remove();
 
-        // Calculate min and max for legend (example assumes year_chosen variable exists)
-        const values = Object.values(resolvedCountryWideJson)
-            .map(d => d[year_chosen])
-            .filter(v => v !== null && v !== undefined && v > 0);
+//         // Calculate min and max for legend (example assumes year_chosen variable exists)
+//         const values = Object.values(resolvedCountryWideJson)
+//             .map(d => d[year_chosen])
+//             .filter(v => v !== null && v !== undefined && v > 0);
 
-        if (values.length === 0) {
-            renderNoDataMap();
-            return;
-        }
+//         if (values.length === 0) {
+//             renderNoDataMap();
+//             return;
+//         }
 
-        const minValue = Math.min(...values);
-        const maxValue = Math.max(...values);
+//         const minValue = Math.min(...values);
+//         const maxValue = Math.max(...values);
 
-        // Color scale - adjust domain & range to your data
-        const colorScale = d3.scaleLinear()
-            .domain([0, 0.5, 1])
-            .range(['#A8E6CF', '#FFFACD', '#CC3232']);
+//         // Color scale - adjust domain & range to your data
+//         const colorScale = d3.scaleLinear()
+//             .domain([0, 0.5, 1])
+//             .range(['#A8E6CF', '#FFFACD', '#CC3232']);
 
-        // Draw countries with data
-        g.selectAll('path')
-            .data(countries.features)
-            .enter()
-            .append('path')
-            .attr('class', 'country')
-            .attr('d', pathGenerator)
-            .attr('fill', d => {
-                const name = countryNames[d.id]?.toLowerCase();
-                return resolvedCountryWideJson[name]?.fillColor || '#ccc';
-            })
-            .attr('stroke', d => {
-                const name = countryNames[d.id]?.toLowerCase();
-                return resolvedCountryWideJson[name]?.outlineColor || '#333';
-            })
-            .attr('stroke-width', d => {
-                const name = countryNames[d.id]?.toLowerCase();
-                return resolvedCountryWideJson[name]?.outlineWidth || 0.5;
-            })
-            .style('cursor', d => {
-                const name = countryNames[d.id]?.toLowerCase();
-                return resolvedCountryWideJson[name] ? 'pointer' : 'default';
-            })
-            .on('click', function(event, d) {
-                const name = countryNames[d.id]?.toLowerCase();
-                if (onCountrySelect && resolvedCountryWideJson[name]) {
-                    const countryFeature = countries.features.find(f => f.id === d.id);
-                    onCountrySelect(resolvedCountryWideJson[name], countryFeature, {
-                        countries: countries,
-                        countryNames: countryNames,
-                        pathGenerator: pathGenerator,
-                        projection: projection
-                    });
-                }
-            })
-            .append('title')
-            .text(d => {
-                const name = countryNames[d.id]?.toLowerCase();
-                return resolvedCountryWideJson[name]?.hoverText || countryNames[d.id] || 'Unknown';
-            });
+//         // Draw countries with data
+//         g.selectAll('path')
+//             .data(countries.features)
+//             .enter()
+//             .append('path')
+//             .attr('class', 'country')
+//             .attr('d', pathGenerator)
+//             .attr('fill', d => {
+//                 const name = countryNames[d.id]?.toLowerCase();
+//                 return resolvedCountryWideJson[name]?.fillColor || '#ccc';
+//             })
+//             .attr('stroke', d => {
+//                 const name = countryNames[d.id]?.toLowerCase();
+//                 return resolvedCountryWideJson[name]?.outlineColor || '#333';
+//             })
+//             .attr('stroke-width', d => {
+//                 const name = countryNames[d.id]?.toLowerCase();
+//                 return resolvedCountryWideJson[name]?.outlineWidth || 0.5;
+//             })
+//             .style('cursor', d => {
+//                 const name = countryNames[d.id]?.toLowerCase();
+//                 return resolvedCountryWideJson[name] ? 'pointer' : 'default';
+//             })
+//             .on('click', function(event, d) {
+//                 const name = countryNames[d.id]?.toLowerCase();
+//                 if (onCountrySelect && resolvedCountryWideJson[name]) {
+//                     const countryFeature = countries.features.find(f => f.id === d.id);
+//                     onCountrySelect(resolvedCountryWideJson[name], countryFeature, {
+//                         countries: countries,
+//                         countryNames: countryNames,
+//                         pathGenerator: pathGenerator,
+//                         projection: projection
+//                     });
+//                 }
+//             })
+//             .append('title')
+//             .text(d => {
+//                 const name = countryNames[d.id]?.toLowerCase();
+//                 return resolvedCountryWideJson[name]?.hoverText || countryNames[d.id] || 'Unknown';
+//             });
             
 
-        // Add legend
-        const addLegend = (svg, colorScale, min, max) => {
-            const legendWidth = 250;
-            const legendHeight = 15;
-            const legendX = 20;
-            const legendY = height - 50;
+//         // Add legend
+//         const addLegend = (svg, colorScale, min, max) => {
+//             const legendWidth = 250;
+//             const legendHeight = 15;
+//             const legendX = 20;
+//             const legendY = height - 50;
 
-            const legend = svg.append('g')
-                .attr('class', 'legend')
-                .attr('transform', `translate(${legendX}, ${legendY})`);
+//             const legend = svg.append('g')
+//                 .attr('class', 'legend')
+//                 .attr('transform', `translate(${legendX}, ${legendY})`);
 
-            const defs = svg.select('defs').empty() ? svg.append('defs') : svg.select('defs');
-            const gradient = defs.append('linearGradient')
-                .attr('id', 'legend-gradient');
+//             const defs = svg.select('defs').empty() ? svg.append('defs') : svg.select('defs');
+//             const gradient = defs.append('linearGradient')
+//                 .attr('id', 'legend-gradient');
 
-            const numStops = 10;
-            for (let i = 0; i <= numStops; i++) {
-                const ratio = i / numStops;
-                const logValue = min * Math.pow(max / min, ratio);
+//             const numStops = 10;
+//             for (let i = 0; i <= numStops; i++) {
+//                 const ratio = i / numStops;
+//                 const logValue = min * Math.pow(max / min, ratio);
 
-                const offset = 1;
-                const safeValue = Math.max(logValue + offset, offset);
-                const safeMin = Math.max(min + offset, offset);
-                const safeMax = Math.max(max + offset, offset);
+//                 const offset = 1;
+//                 const safeValue = Math.max(logValue + offset, offset);
+//                 const safeMin = Math.max(min + offset, offset);
+//                 const safeMax = Math.max(max + offset, offset);
 
-                const logVal = Math.log(safeValue);
-                const logMin = Math.log(safeMin);
-                const logMax = Math.log(safeMax);
+//                 const logVal = Math.log(safeValue);
+//                 const logMin = Math.log(safeMin);
+//                 const logMax = Math.log(safeMax);
 
-                const normalizedValue = Math.max(0, Math.min(1, (logVal - logMin) / (logMax - logMin)));
-                const color = colorScale(normalizedValue);
+//                 const normalizedValue = Math.max(0, Math.min(1, (logVal - logMin) / (logMax - logMin)));
+//                 const color = colorScale(normalizedValue);
 
-                gradient.append('stop')
-                    .attr('offset', `${ratio * 100}%`)
-                    .attr('stop-color', color);
-            }
+//                 gradient.append('stop')
+//                     .attr('offset', `${ratio * 100}%`)
+//                     .attr('stop-color', color);
+//             }
 
-            legend.append('rect')
-                .attr('width', legendWidth)
-                .attr('height', legendHeight)
-                .style('fill', 'url(#legend-gradient)')
-                .style('stroke', '#000')
-                .style('stroke-width', 0.5);
+//             legend.append('rect')
+//                 .attr('width', legendWidth)
+//                 .attr('height', legendHeight)
+//                 .style('fill', 'url(#legend-gradient)')
+//                 .style('stroke', '#000')
+//                 .style('stroke-width', 0.5);
 
-            const scale = d3.scaleLog()
-                .domain([min, max])
-                .range([0, legendWidth]);
+//             const scale = d3.scaleLog()
+//                 .domain([min, max])
+//                 .range([0, legendWidth]);
 
-            const axis = d3.axisBottom(scale)
-                .ticks(4, '.1s');
+//             const axis = d3.axisBottom(scale)
+//                 .ticks(4, '.1s');
 
-            legend.append('g')
-                .attr('transform', `translate(0, ${legendHeight})`)
-                .style('font-size', '10px')
-                .call(axis);
+//             legend.append('g')
+//                 .attr('transform', `translate(0, ${legendHeight})`)
+//                 .style('font-size', '10px')
+//                 .call(axis);
 
-            legend.append('text')
-                .attr('x', legendWidth / 2)
-                .attr('y', -5)
-                .attr('text-anchor', 'middle')
-                .style('font-size', '12px')
-                .style('font-weight', 'bold')
-                .text(`${chosenFoodName} Number of animals slaugthered in ${year_chosen}`);
-        };
+//             legend.append('text')
+//                 .attr('x', legendWidth / 2)
+//                 .attr('y', -5)
+//                 .attr('text-anchor', 'middle')
+//                 .style('font-size', '12px')
+//                 .style('font-weight', 'bold')
+//                 .text(`${chosenFoodName} Number of animals slaugthered in ${year_chosen}`);
+//         };
 
-        addLegend(svg, colorScale, minValue, maxValue);
-    };
+//         addLegend(svg, colorScale, minValue, maxValue);
+//     };
 
-    // Setup projection and pathGenerator after loading data
-    let projection;
+//     // Setup projection and pathGenerator after loading data
+//     let projection;
 
-    Promise.all([
-        d3.tsv('https://unpkg.com/world-atlas@1.1.4/world/50m.tsv'),
-        d3.json('https://unpkg.com/world-atlas@1.1.4/world/50m.json')
-    ]).then(([tsvData, topoJSONdata]) => {
-        container.removeChild(loader);
+//     Promise.all([
+//         d3.tsv('https://unpkg.com/world-atlas@1.1.4/world/50m.tsv'),
+//         d3.json('https://unpkg.com/world-atlas@1.1.4/world/50m.json')
+//     ]).then(([tsvData, topoJSONdata]) => {
+//         container.removeChild(loader);
 
-        countryNames = tsvData.reduce((acc, d) => {
-            acc[d.iso_n3] = d.name;
-            return acc;
-        }, {});
-        // Convert TopoJSON to GeoJSON
-        country_to_iso = tsvData.reduce((acc, d) => {  
-            acc[d.name.toLowerCase()] = d.iso_n3;
-            return acc;
-        }, {});
+//         countryNames = tsvData.reduce((acc, d) => {
+//             acc[d.iso_n3] = d.name;
+//             return acc;
+//         }, {});
+//         // Convert TopoJSON to GeoJSON
+//         country_to_iso = tsvData.reduce((acc, d) => {  
+//             acc[d.name.toLowerCase()] = d.iso_n3;
+//             return acc;
+//         }, {});
         
 
-        countries = topojson.feature(topoJSONdata, topoJSONdata.objects.countries);
+//         countries = topojson.feature(topoJSONdata, topoJSONdata.objects.countries);
 
-        projection = d3.geoNaturalEarth1()
-            .fitSize([width, height], countries);
-        pathGenerator = d3.geoPath().projection(projection);
+//         projection = d3.geoNaturalEarth1()
+//             .fitSize([width, height], countries);
+//         pathGenerator = d3.geoPath().projection(projection);
         
-        switzerlandFeature = countries.features.find(f => f.id === '756');
-        // Add zoom behavior
-        const zoomHandler = d3.zoom()
-            .scaleExtent([0.5, 10])
-            .translateExtent([[-width * 2, -height * 2], [width * 2, height * 2]])
-            .on('zoom', (event) => {
-                g.attr('transform', event.transform);
-                g.selectAll('.country')
-                    .attr('stroke-width', 0.5 / event.transform.k);
-            });
+//         switzerlandFeature = countries.features.find(f => f.id === '756');
+//         // Add zoom behavior
+//         const zoomHandler = d3.zoom()
+//             .scaleExtent([0.5, 10])
+//             .translateExtent([[-width * 2, -height * 2], [width * 2, height * 2]])
+//             .on('zoom', (event) => {
+//                 g.attr('transform', event.transform);
+//                 g.selectAll('.country')
+//                     .attr('stroke-width', 0.5 / event.transform.k);
+//             });
 
-        svg.call(zoomHandler);
+//         svg.call(zoomHandler);
 
-        // Render initial map based on passed data or fallback
-        if (!countryWideJson) {
-            renderNoDataMap();
-        } else if (typeof countryWideJson.then === 'function') {
-            countryWideJson.then(resolved => {
-                if (!resolved || Object.keys(resolved).length === 0) {
-                    renderNoDataMap();
-                } else {
-                    renderDataMap(resolved);
-                }
-            }).catch(() => {
-                renderNoDataMap();
-            });
-        } else {
-            renderDataMap(countryWideJson);
-        }
+//         // Render initial map based on passed data or fallback
+//         if (!countryWideJson) {
+//             renderNoDataMap();
+//         } else if (typeof countryWideJson.then === 'function') {
+//             countryWideJson.then(resolved => {
+//                 if (!resolved || Object.keys(resolved).length === 0) {
+//                     renderNoDataMap();
+//                 } else {
+//                     renderDataMap(resolved);
+//                 }
+//             }).catch(() => {
+//                 renderNoDataMap();
+//             });
+//         } else {
+//             renderDataMap(countryWideJson);
+//         }
 
-        if (onDataLoaded) {
-            onDataLoaded({
-                countries,
-                countryNames,
-                pathGenerator,
-                projection
-            });
-        }
-    });
-    return {
-        update: (newCountryWideJson) => {
-            if (!newCountryWideJson && hasData) {
-                console.warn('No new country-wide JSON provided, rendering no-data map');
-                renderNoDataMap();
-            } else if (newCountryWideJson ) {
-            console.log('Rendering data map with new country-wide JSON');
-            renderDataMap(newCountryWideJson);
-            }
-             else {
-                return; // No update needed
-            }
-            },
-        clear: () => {
-        container.innerHTML = '';
-        }
-        };
-        }
+//         if (onDataLoaded) {
+//             onDataLoaded({
+//                 countries,
+//                 countryNames,
+//                 pathGenerator,
+//                 projection
+//             });
+//         }
+//     });
+//     return {
+//         update: (newCountryWideJson) => {
+//             if (!newCountryWideJson && hasData) {
+//                 console.warn('No new country-wide JSON provided, rendering no-data map');
+//                 renderNoDataMap();
+//             } else if (newCountryWideJson ) {
+//             console.log('Rendering data map with new country-wide JSON');
+//             renderDataMap(newCountryWideJson);
+//             }
+//              else {
+//                 return; // No update needed
+//             }
+//             },
+//         clear: () => {
+//         container.innerHTML = '';
+//         }
+//         };
+//         }
 
 /**
  * Creates a small area visualization for a selected country
@@ -463,7 +463,7 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
             .attr('font-weight', 'bold')
             .text(`${data[year_chosen]} ${data.Unit} of ${chosenFoodName} harvested in ${year_chosen}`);
         
-        // CHANGED: Create gradient outside the function to avoid duplicates
+        // Create gradient outside the function to avoid duplicates
         const defs = svg.append("defs");
         const lg = defs.append("linearGradient")
             .attr("id", "mygrad")
@@ -484,7 +484,7 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
             
             const pathData = dValues[0];
             
-            // CHANGED: Calculate actual bounds of the path instead of assuming viewBox
+            //  Calculate actual bounds of the path instead of assuming viewBox
             const tempSvg = d3.select('body').append('svg').style('visibility', 'hidden');
             const tempPath = tempSvg.append('path').attr('d', pathData);
             const bbox = tempPath.node().getBBox();
@@ -690,7 +690,7 @@ async function createanimalslaughteredVisualizationPage(smallAreaFunction = null
         }
     );
     
-    document.getElementById(id_indicator + "-container").style.visibility = "hidden";
+    document.getElementById(id_indicator + "-container").hidden = true;
         
     // Return control object
     return {
@@ -702,13 +702,13 @@ async function createanimalslaughteredVisualizationPage(smallAreaFunction = null
             )
             .then(filteredData => {
             if (!filteredData || filteredData.length === 0) {
-                document.getElementById(id_indicator +"-container").style.visibility = "hidden";
+                document.getElementById(id_indicator +"-container").hidden = true;
                 return;
             }
-            document.getElementById(id_indicator + "-container").style.visibility = "visible";
+            document.getElementById(id_indicator + "-container").hidden= false;
 
             const newCountryWideJson = createCountryWideJson(filteredData);
-            
+            console.log('New country-wide JSON:', newCountryWideJson);
             // Get available years from the data and create/update time slider
             const availableYears = getAvailableYears(filteredData);
             

@@ -435,7 +435,7 @@ document.addEventListener("DOMContentLoaded", function () {
           if (d.data.has_production) {
           window.viz.then(viz => {
             for (let i = 0; i < elements.length; i++) {
-                elements[i].style.visibility = 'visible';
+                elements[i].hidden = false;
               }
             viz.update();
             // return window.viz_slaughtered;
@@ -445,7 +445,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             else {
               for (let i = 0; i < elements.length; i++) {
-                elements[i].style.visibility = 'hidden';
+                elements[i].hidden = true;
               }
             }
         })
