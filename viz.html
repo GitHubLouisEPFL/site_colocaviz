@@ -57,13 +57,13 @@
   <div class="sliderContainer" id="time-slider-container"></div>
   </div>
 
-  <div class="map-text-container" id = "animal-slaugthered-container">
+  <div class="map-text-container" id = "animals-slaughtered-container">
         <h1>Animal slaughtered</h1>
       <p >Click on a country to see the area harvested for each food product.</p>
     <div class="maps-container" id ="maps-container-animal-slaugthered">
     <div id="visualization-container-animal-slaugthered"></div>
   </div>
-  <div class="sliderContainer" id="time-slider-container-animal-slaugthered"></div>
+  <div class="sliderContainer" id="time-slider-container-animals-slaughtered"></div>
   </div>
 
     <script src="assets/js/treemap_water.js" defer></script>    
@@ -71,25 +71,37 @@
     <script src="assets/js/scroll_menu.js" defer></script>
     <!-- Include our modular visualization code -->
     <script src="assets/js/world_map_settings.js"></script>
-    <script src="assets/js/area_harvested.js"></script>
+    
     <script src="assets/js/empty_worldmap_function.js"></script>
-       
+    <script src="assets/js/area_harvested.js"></script>
     <script>
-      // Initialize visualization when the page loads
-      document.addEventListener('DOMContentLoaded', () => {
-        window.viz = createareaharvestedVisualizationPage(
-          null, // Use default small area visualization
-          1000, // Width
-          500,   // Height
-        containerId = 'visualization-container-area');
+    //Initialize visualization when the page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      window.viz = createareaharvestedVisualizationPage(
+            smallAreaFunction = null,
+            width = 1000, 
+            height = 500,
+            containerId = 'visualization-container-area',
+            element_to_visualize = 'area harvested',
+            id_indicator = 'area-harvested'
+        );
+    });
+    document.addEventListener('DOMContentLoaded', () => {
+    window.viz_slaughtered = new Promise((resolve) => {
+      
+        const vizObject = createanimalslaughteredVisualizationPage(
+            smallAreaFunction = null,
+            width = 1000, 
+            height = 500,
+            containerId = 'visualization-container-animal-slaugthered',
+            element_to_visualize = 'producing animals/slaughtered',
+            id_indicator = 'animals-slaughtered'
+        );
+        resolve(vizObject);
+          });
       });
-      document.addEventListener('DOMContentLoaded', () => {
-        window.viz_slaughtered = createanimalslaugtherVisualizationPage(smallAreaFunction = null,
-        width = 1000, height = 500, 
-        containerId = 'visualization-container-animal-slaugthered', 
-        element_to_visualize = 'producing animals/slaughtered');
-      }); 
-    </script>
+    
+  </script>
 
 </body>
 

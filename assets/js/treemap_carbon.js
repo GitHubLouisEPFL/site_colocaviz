@@ -431,10 +431,25 @@ document.addEventListener("DOMContentLoaded", function () {
           const path = d.ancestors().reverse().map(n => n.data.name);
           path.push(d.data.name); // Ajouter le nœud actuel au chemin
           updateWaterTreemap(path, "carbon");
+          elements = document.getElementsByClassName("map-text-container");
+          if (d.data.has_production) {
           window.viz.then(viz => {
+            for (let i = 0; i < elements.length; i++) {
+                elements[i].hidden = false;
+              }
             viz.update();
-          });
+            return window.viz_slaughtered;
+            }).then(viz_slaughtered => {
+                viz_slaughtered.update();
+             });
+            }
+            else {
+              for (let i = 0; i < elements.length; i++) {
+                elements[i].hidden = true;
+              }
+            }
         })
+
         // Ajouter ces gestionnaires d'événements
         .on("mouseenter", (event, d) => {
           // Mettre en évidence cette cellule
@@ -590,9 +605,23 @@ document.addEventListener("DOMContentLoaded", function () {
         // Créer le chemin basé sur les noms des ancêtres
         const path = d.ancestors().reverse().map(n => n.data.name);
         updateWaterTreemap(path, "carbon");
+        if (d.data.has_production) {
         window.viz.then(viz => {
-        viz.update();
-      });
+          for (let i = 0; i < elements.length; i++) {
+              elements[i].hidden = false;
+            }
+          viz.update();
+          return window.viz_slaughtered;
+          })
+          .then(viz_slaughtered => {
+              viz_slaughtered.update();
+          })
+          ;}
+          else {
+            for (let i = 0; i < elements.length; i++) {
+              elements[i].hidden = true;
+            }
+          }
       });
     
     crumb.append("rect")

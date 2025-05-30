@@ -427,9 +427,24 @@ document.addEventListener("DOMContentLoaded", function () {
           const path = d.ancestors().reverse().map(n => n.data.name);
           path.push(d.data.name); // Ajouter le nœud actuel au chemin
           updateCarbonTreemap(path, "water");
-          window.viz.then(viz => {
-            viz.update();
-          });
+          if (d.data.has_production) {
+            window.viz.then(viz => {
+              for (let i = 0; i < elements.length; i++) {
+                  elements[i].hidden = false;
+                }
+              viz.update();
+              return window.viz_slaughtered;
+              })
+              .then(viz_slaughtered => {
+                  viz_slaughtered.update();
+              })
+              ;}
+              else {
+                for (let i = 0; i < elements.length; i++) {
+                  elements[i].hidden = true;
+                }
+              }
+          
         })
         // Ajouter ces gestionnaires d'événements
         .on("mouseenter", (event, d) => {
@@ -586,9 +601,23 @@ document.addEventListener("DOMContentLoaded", function () {
         // Créer le chemin basé sur les noms des ancêtres
         const path = d.ancestors().reverse().map(n => n.data.name);
         updateCarbonTreemap(path, "water");
+        if (d.data.has_production) {
         window.viz.then(viz => {
+          for (let i = 0; i < elements.length; i++) {
+              elements[i].hidden = false;
+            }
           viz.update();
-        });
+          return window.viz_slaughtered;
+          })
+          .then(viz_slaughtered => {
+              viz_slaughtered.update();
+          })
+          ;}
+          else {
+            for (let i = 0; i < elements.length; i++) {
+              elements[i].hidden = true;
+            }
+          }
       });
     
     crumb.append("rect")
