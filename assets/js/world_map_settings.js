@@ -1,7 +1,7 @@
 let csvData = [];
 
 function loadCSVData() {
-  return fetch('https://raw.githubusercontent.com/com-480-data-visualization/com480-project-colocaviz/refs/heads/main/data/merged_data.csv')
+  return fetch('https://raw.githubusercontent.com/com-480-data-visualization/com480-project-colocaviz/refs/heads/main/Milestones 1&2/data/merged_data.csv')
     .then(response => response.text())
     .then(csvText => {
       return new Promise((resolve) => {
