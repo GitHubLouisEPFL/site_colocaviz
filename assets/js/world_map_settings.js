@@ -164,12 +164,9 @@ function createTimeSlider(availableYears, currentYear, onYearChange, containerId
     sliderContainer.id = 'sliderContainer'; 
     sliderContainer.style.cssText = `
         display: flex;
+        margin-top: 0.5rem;
         flex-direction: column;
         align-items: center;
-        background: linear-gradient(135deg, #F6F1E7 0%, #EDE6DB 100%);
-        border: 2px solid rgba(139, 94, 60, 0.2);
-        border-radius: 12px;
-        box-shadow: 0 8px 30px rgba(139, 94, 60, 0.15);
         font-family: 'Inter', sans-serif;
         transition: all 0.3s ease;
     `;
@@ -189,61 +186,14 @@ function createTimeSlider(availableYears, currentYear, onYearChange, containerId
     `;
     sliderContainer.appendChild(patternOverlay);
     
-    // Title with decorative elements
-    const titleContainer = document.createElement('div');
-    titleContainer.className = 'title-container';
-    titleContainer.style.cssText = `
-        display: flex;
-        align-items: center;
-        margin-bottom: 20px;
-        position: relative;
-        z-index: 1;
-    `;
-    
-    const decorLeft = document.createElement('div');
-    decorLeft.className = 'decor-left';
-    decorLeft.style.cssText = `
-        width: 30px;
-        height: 2px;
-        background: linear-gradient(to right, transparent, #8B5E3C);
-        margin-right: 15px;
-    `;
-    
-    const title = document.createElement('div');
-    title.className = 'slider-title';
-    title.textContent = 'Time Period';
-    title.style.cssText = `
-        font-weight: 700;
-        font-size: 20px;
-        color: #3B2F2F;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        white-space: nowrap;
-    `;
-    
-    const decorRight = document.createElement('div');
-    decorRight.className = 'decor-right';
-    decorRight.style.cssText = `
-        width: 30px;
-        height: 2px;
-        background: linear-gradient(to left, transparent, #8B5E3C);
-        margin-left: 15px;
-    `;
-    
-    titleContainer.appendChild(decorLeft);
-    titleContainer.appendChild(title);
-    titleContainer.appendChild(decorRight);
-    sliderContainer.appendChild(titleContainer);
-    
     // Year display (large and prominent)
     const yearDisplay = document.createElement('div');
     yearDisplay.textContent = currentYear;
     yearDisplay.style.cssText = `
-        font-size: 32px;
+        font-size: 1.5rem;
         font-weight: 800;
         color: #8B5E3C;
         text-shadow: 0 2px 4px rgba(139, 94, 60, 0.1);
-        margin-bottom: 15px;
         position: relative;
         z-index: 1;
         transition: all 0.3s ease;
@@ -256,7 +206,7 @@ function createTimeSlider(availableYears, currentYear, onYearChange, containerId
     sliderWrapper.style.cssText = `
         width: 100%;
         padding: 0 10px;
-        margin: 10px 0 15px 0;
+        margin: 0 0 0.2rem 0;
         position: relative;
         z-index: 1;
     `;
