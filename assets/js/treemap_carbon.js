@@ -565,7 +565,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .attr("dy", "2em")
         .style("font-size", "12px")
         .style("opacity", 0)
-        .text(node.data.has_production ? " " : "") // add here something if you want to display something for the final leaf nodes
+        .text(node.data.has_production ? "✔" : "") // add here something if you want to display something for the final leaf nodes
         .transition().duration(500)
         .style("opacity", node.data.has_production ? 1 : 0);
     }

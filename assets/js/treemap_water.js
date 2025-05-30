@@ -552,10 +552,22 @@ document.addEventListener("DOMContentLoaded", function () {
         .text(node.data.ownValue)
         .transition().duration(500)
         .style("opacity", 1);
+
+              
+      // Production data indicator for leaf nodes, for now we don't write anything, but we let the space for it
+      textGroup.append("text")
+        .attr("class", "label production")
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "middle")
+        .attr("dy", "3.25em")
+        .style("font-size", "12px")
+        .style("opacity", 0)
+        .text(node.data.has_production ? "✔" : "") // add here something if you want to display something for the final leaf nodes
+        .transition().duration(500)
+        .style("opacity", node.data.has_production ? 1 : 0);
+
       
     }
-
-    updateActiveElement(node.data.name);
   } 
   
   function drawBreadcrumb(ancestors) {
