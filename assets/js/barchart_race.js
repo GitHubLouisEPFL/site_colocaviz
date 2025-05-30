@@ -221,18 +221,18 @@ export class RacingBarChart {
         const startBtn = document.createElement('button');
         startBtn.id = this.getElementId('start-btn');
         startBtn.className = 'start-btn';
-        startBtn.textContent = '▶ Start';
+        startBtn.textContent = '▶';
 
         const pauseBtn = document.createElement('button');
         pauseBtn.id = this.getElementId('pause-btn');
         pauseBtn.className = 'pause-btn';
-        pauseBtn.textContent = '⏸ Pause';
+        pauseBtn.textContent = '⏸';
         pauseBtn.disabled = true;
 
         const resetBtn = document.createElement('button');
         resetBtn.id = this.getElementId('reset-btn');
         resetBtn.className = 'reset-btn';
-        resetBtn.textContent = '⏹ Reset';
+        resetBtn.textContent = '⏹';
 
 
         // Create the slider input

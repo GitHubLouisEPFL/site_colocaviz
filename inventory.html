@@ -302,7 +302,7 @@
             const resultDiv = document.getElementById("results");
             let html = `<div class="result-name">${getEmoji(name)} ${name}</div><div style="margin-bottom: 1rem;"></div>`;
 
-            html += `<h2 style="margin: 10px;">🌱 Environmental Impact of 1kg (1L)</h2>`;
+            html += `<h2 style="margin: 10px;">🌱 Environmental Footprint per 1kg (1L)</h2>`;
             if (carbonMatch) {
                 const carbonPct = Math.round((carbonMatch.value / maxCarbon) * 100);
                 html += `<div class="result-item">
