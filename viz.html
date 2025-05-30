@@ -27,7 +27,7 @@
         </nav>
     </header>
 
-    <div class="container">
+    <div class="container" id="footprint-container">
 
         <div class="footprint-container">
             <h2 class="footprint-title">Carbon footprint (in kg CO₂e / kg)</h2>
@@ -49,7 +49,7 @@
 
     </div>
 
-    <div class="blabla">
+    <div class="blabla" id="blabla">
         <p style="color: red;">Warning !!! This is a draft website using dummy values!</p>
         <p>The goal of this project is to highlight the environmental, social, and ethical impacts of different food products through engaging data visualizations.</p>
         <p>The motivation is to raise awareness about the hidden impacts of food consumption...</p>
@@ -61,21 +61,9 @@
 
     <script src="assets/js/treemap_water.js" defer></script>    
     <script src="assets/js/treemap_carbon.js" defer></script>
-    <script>
-    // Sample country data
-    
+    <script src="assets/js/scroll_menu.js" defer></script>
 
-    // Initialize visualization when the page loads
-    document.addEventListener('DOMContentLoaded', () => {
-      // Create the visualization with default settings
-      const viz = createVisualizationPage(
-        null, // Use default small area visualization
-        1000, // Width
-        500   // Height
-      );
 
-    });
-  </script>
 
 </body>
 </html>
