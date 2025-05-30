@@ -438,10 +438,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 elements[i].style.visibility = 'visible';
               }
             viz.update();
-            return window.viz_slaughtered;
-            }).then(viz_slaughtered => {
-                viz_slaughtered.update();
-            });}
+            // return window.viz_slaughtered;
+            // }).then(viz_slaughtered => {
+            //     viz_slaughtered.update();
+             });
+            }
             else {
               for (let i = 0; i < elements.length; i++) {
                 elements[i].style.visibility = 'hidden';
@@ -609,10 +610,12 @@ document.addEventListener("DOMContentLoaded", function () {
               elements[i].style.visibility = 'visible';
             }
           viz.update();
-          return window.viz_slaughtered;
-          }).then(viz_slaughtered => {
-              viz_slaughtered.update();
-          });}
+          // return window.viz_slaughtered;
+          })
+          // .then(viz_slaughtered => {
+          //     viz_slaughtered.update();
+          // })
+          ;}
           else {
             for (let i = 0; i < elements.length; i++) {
               elements[i].style.visibility = 'hidden';

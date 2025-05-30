@@ -71,23 +71,13 @@
     <script src="assets/js/scroll_menu.js" defer></script>
     <!-- Include our modular visualization code -->
     <script src="assets/js/world_map_settings.js"></script>
-    <script src="assets/js/area_harvested.js"></script>
     <script src="assets/js/empty_worldmap_function.js"></script>
        
     
     <script>
-    // Initialize visualization when the page loads
+    //Initialize visualization when the page loads
     document.addEventListener('DOMContentLoaded', () => {
-      window.viz = createareaharvestedVisualizationPage(
-        null, // Use default small area visualization
-        1000, // Width
-        500,   // Height
-      containerId = 'visualization-container-area');
-    });
-    document.addEventListener('DOMContentLoaded', () => {
-    window.viz_slaughtered = new Promise((resolve) => {
-      
-        const vizObject = createVisualizationPage(
+      window.viz = createanimalslaughteredVisualizationPage(
             smallAreaFunction = null,
             width = 1000, 
             height = 500,
@@ -95,8 +85,20 @@
             element_to_visualize = 'producing animals/slaughtered',
             id_indicator = 'animals-slaughtered'
         );
-        resolve(vizObject);
-          });
+    // });
+    // document.addEventListener('DOMContentLoaded', () => {
+    // window.viz_slaughtered = new Promise((resolve) => {
+      
+    //     const vizObject = createanimalslaughteredVisualizationPage(
+    //         smallAreaFunction = null,
+    //         width = 1000, 
+    //         height = 500,
+    //         containerId = 'visualization-container-animal-slaugthered',
+    //         element_to_visualize = 'producing animals/slaughtered',
+    //         id_indicator = 'animals-slaughtered'
+    //     );
+    //     resolve(vizObject);
+    //       });
       });
     
   </script>

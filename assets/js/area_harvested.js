@@ -3,36 +3,7 @@
 let chosenFoodName = null;
 let switzerlandFeature = null;
 
-let csvdata = null;
-let csvDataPromise = null;
 const areaharvestedcsv =getFilteredbyelement(element_name = "area harvested");
-/**
- * Fetches global csv data with caching
- * @returns {Promise<Array>} Promise resolving csvdata
- */
-function getCSV() {
-    if (csvdata) {
-        return Promise.resolve(csvdata);
-    }
-    // Return existing promise if already fetching  
-    if (csvDataPromise) {
-        return csvDataPromise;
-    }
-
-    csvDataPromise = loadCSVData().then(data => {
-        csvdata = data;
-        console.log("CSV data loaded successfully");
-        return csvdata;
-    }).catch(error => {
-        console.error("Error loading CSV data:", error);
-        throw error;        
-    });
-
-    return csvDataPromise;
-};
-
-getCSV().then(data => {console.log("firstdownload")}).catch(error => {
-    console.error("Error in getCSV:", error);  });
 
 let lemanDataCache = null;
 let lemanDataPromise = null;
@@ -747,7 +718,7 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
     actualDetailContainer.style.left = '0';
     actualDetailContainer.style.right = '0';
     detailContainer.appendChild(actualDetailContainer);
-
+    
     // Initialize time slider variable (declare it here, outside the return object)
     let timeSlider = null;
     
@@ -770,6 +741,7 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
         'actual-detail-container'  + id_indicator
     );
     
+    document.getElementById("area-harvested-container").style.visibility = "hidden";
     // Create the world map with callbacks
     const map = createWorldMap(        
         mapWidth, 
@@ -799,12 +771,11 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
             )
             .then(filteredData => {
             if (!filteredData || filteredData.length === 0) {
-                countryWideJson = null;
-                if (map) {
-                    map.update(countryWideJson);
-                }
+                document.getElementById("area-harvested-container").style.visibility = "hidden";
                 return;
             }
+            console.log("snif")
+            document.getElementById("area-harvested-container").style.visibility = "visible";
             const newCountryWideJson = createCountryWideJson(filteredData);
             
             // Get available years from the data and create/update time slider

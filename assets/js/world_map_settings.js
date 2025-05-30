@@ -396,193 +396,33 @@ function createTimeSlider(availableYears, currentYear, onYearChange, containerId
     };
 }
 
+
+let csvdata = null;
+let csvDataPromise = null;
 /**
- * Creates the complete visualization page with world map and country detail
- * @param {Object} countryJson - Raw country data
- * @param {Function} smallAreaFunction - Optional custom visualization function
- * @param {number} width - Overall container width
- * @param {number} height - Overall container height
- * @param {string} containerId - ID of the main container
- * @returns {Object} - Control object with update method
+ * Fetches global csv data with caching
+ * @returns {Promise<Array>} Promise resolving csvdata
  */
-async function createVisualizationPage(smallAreaFunction = null, width = 1000, height = 500, containerId = 'visualization-container',
-    element_to_visualize = 'area harvested',
-    id_indicator='animal-slaugthered') {
-    
-    const elementcsv =getFilteredbyelement(element_name = element_to_visualize);
-     console.log('Filtered dataehfcur for element:', elementcsv);
-    // Get container
-    const container = document.getElementById(containerId);
-    container.innerHTML = '';
-    container.style.width = `${width}px`;
-    container.style.height = `${height}px`;
-    container.style.display = 'flex';
-    container.style.flexDirection = 'row';
-    container.style.gap = '20px';
-    // Create map container
-    const mapContainer = document.createElement('div');
-    mapContainer.id = 'map-container' + id_indicator;
-    mapContainer.style.flex = '1';
-    mapContainer.style.position = 'relative';
-    mapContainer.style.border = '1px solid #ccc';
-    mapContainer.style.borderRadius = '4px';
-    container.appendChild(mapContainer);
-    
-    // Create title for map
-    const mapTitle = document.createElement('h3');
-    mapTitle.textContent = 'World Map';
-    mapTitle.style.textAlign = "center";
-    mapTitle.style.margin = '10px';
-    mapTitle.style.fontWeight = 'bold';
-    mapContainer.appendChild(mapTitle);
-    
-    // Create actual map container
-    const actualMapContainer = document.createElement('div');
-    actualMapContainer.id = 'actual-map-container'+ id_indicator;
-    actualMapContainer.style.position = 'absolute';
-    actualMapContainer.style.top = '40px';
-    actualMapContainer.style.bottom = '0';
-    actualMapContainer.style.left = '0';
-    actualMapContainer.style.right = '0';    
-    mapContainer.appendChild(actualMapContainer); 
-    // Create detail container
-    const detailContainer = document.createElement('div');
-    detailContainer.id = 'detail-container'  + id_indicator;
-    detailContainer.style.flex = '1';
-    detailContainer.style.position = 'relative';
-    detailContainer.style.border = '1px solid #ccc';
-    detailContainer.style.borderRadius = '4px';
-    container.appendChild(detailContainer);
-    
-    // Create title for detail
-    const detailTitle = document.createElement('h3');
-    detailTitle.textContent = 'Country Details';
-    detailTitle.style.textAlign = "center";
-    detailTitle.style.margin = '10px';
-    detailTitle.style.fontWeight = 'bold';
-    detailContainer.appendChild(detailTitle);
-    
-    // Create actual detail container
-    const actualDetailContainer = document.createElement('div');
-    actualDetailContainer.id = 'actual-detail-container'  + id_indicator;
-    actualDetailContainer.style.position = 'absolute';
-    actualDetailContainer.style.top = '40px';
-    actualDetailContainer.style.bottom = '0';
-    actualDetailContainer.style.left = '0';
-    actualDetailContainer.style.right = '0';
-    detailContainer.appendChild(actualDetailContainer);
-
-    // Initialize time slider variable (declare it here, outside the return object)
-    let timeSlider_animal = null;
-    
-    // Process the country JSON to add styling
-
-    countryWideJson = null;
-    let selectedCountry = null;
-    // Current selected country and geographic data
-    let geoData = null;
-    
-    // Create the detail visualization first (will be updated once geo data loads)
-    const mapWidth = width / 2 - 30;
-    const mapHeight = height - 60;
-    document.getElementById(id_indicator + "-container").style.visibility = "hidden";
-    const detailViz = createSmallAreaVisualization(
-        null,
-        null, // no feature initially
-        mapWidth,
-        mapHeight,
-        'actual-detail-container'  + id_indicator
-    );
-    
-    // Create the world map with callbacks
-    const map = createWorldMap(        
-        mapWidth, 
-        mapHeight, 
-        countryWideJson, 
-        'actual-map-container'  + id_indicator, 
-        // onCountrySelect callback
-        (country, countryFeature, geoDataFromMap) => {
-            selectedCountry = country;            
-            // Update detail visualization with country data, feature, and geo data
-            detailViz.update(selectedCountry, countryFeature, geoDataFromMap);
-            
-        },
-        // onDataLoaded callback  
-        (loadedGeoData) => {
-            geoData = loadedGeoData;
-            console.log('Geographic data loaded and available for detail viz');
-        }
-    );
-        
-    // Return control object
-    return {
-    update: () => {
-        chosenFoodName = document.getElementById("chosen-food-name").textContent;
-        elementcsv.then(data => {
-            console.log(filterByItem(data, item_name = chosenFoodName));
-            return filterByItem(data, item_name = chosenFoodName)}
-            )
-            .then(filteredData => {
-            if (!filteredData || filteredData.length === 0) {
-                document.getElementById(id_indicator + "-container").style.visibility = "hidden";
-                return;
-            }
-
-            document.getElementById(id_indicator + "-container").style.visibility = "visible";
-            console.log('Filtered dataehfcur fyr:', filteredData);
-            const newCountryWideJson = createCountryWideJson(filteredData);
-            
-            // Get available years from the data and create/update time slider
-            const availableYears = getAvailableYears(filteredData);
-            
-            if (timeSlider_animal) {
-                // Update existing slider
-                timeSlider_animal.update(availableYears, year_chosen);
-            } else if (availableYears.length > 0) {
-                // Create new slider
-                timeSlider_animal = createTimeSlider(
-                    availableYears,
-                    year_chosen,
-                    (newYear) => {
-                        // Callback when year changes
-                        year_chosen = newYear;
-                        
-                        // Update the map with new year data
-                        const updatedCountryWideJson = createCountryWideJson(filteredData);
-                        if (map) {
-                            map.update(updatedCountryWideJson);
-                        }
-                        if (selectedCountry && geoData) {
-                            detailViz.update(
-                                selectedCountry,
-                                geoData.countries.features.find(f => f.id === country_to_iso[selectedCountry.Area]),
-                                geoData
-                            );}
-                    },
-                    'time-slider-container'
-                );
-            }
-            
-            if (map) {  // Check if map is ready
-                map.update(newCountryWideJson);
-            }
-            // Reset selected country
-            selectedCountry = null;
-            if (detailViz && geoData) {
-                detailViz.update(null, null, geoData);
-            }
-        }).catch(error => {
-            console.error("Error updating visualization:", error);
-        });
-    },
-    selectCountry: (countryCode) => {
-        if (countryWideJson[countryCode] && geoData) {
-            selectedCountry = countryWideJson[countryCode];
-            
-            // Find the geographic feature for this country
-            const countryFeature = geoData.countries.features.find(f => f.id === countryCode);
-            detailViz.update(selectedCountry, countryFeature, geoData);
-        }
+function getCSV() {
+    if (csvdata) {
+        return Promise.resolve(csvdata);
     }
-    };
-}
+    // Return existing promise if already fetching  
+    if (csvDataPromise) {
+        return csvDataPromise;
+    }
+
+    csvDataPromise = loadCSVData().then(data => {
+        csvdata = data;
+        console.log("CSV data loaded successfully");
+        return csvdata;
+    }).catch(error => {
+        console.error("Error loading CSV data:", error);
+        throw error;        
+    });
+
+    return csvDataPromise;
+};
+
+getCSV().then(data => {console.log("firstdownload")}).catch(error => {
+    console.error("Error in getCSV:", error);  });
