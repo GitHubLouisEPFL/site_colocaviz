@@ -604,10 +604,11 @@ document.addEventListener("DOMContentLoaded", function () {
         drawCustomTreemap(d);
         // Créer le chemin basé sur les noms des ancêtres
         const path = d.ancestors().reverse().map(n => n.data.name);
-        updateWaterTreemap(path, "carbon");if (d.data.has_production) {
+        updateWaterTreemap(path, "carbon");
+        if (d.data.has_production) {
         window.viz.then(viz => {
           for (let i = 0; i < elements.length; i++) {
-              elements[i].style.visibility = 'visible';
+              elements[i].hidden = false;
             }
           viz.update();
           return window.viz_slaughtered;
@@ -618,7 +619,7 @@ document.addEventListener("DOMContentLoaded", function () {
           ;}
           else {
             for (let i = 0; i < elements.length; i++) {
-              elements[i].style.visibility = 'hidden';
+              elements[i].hidden = true;
             }
           }
       });

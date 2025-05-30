@@ -373,7 +373,7 @@ async function createanimalslaughteredVisualizationPage(smallAreaFunction = null
             console.log('Geographic data loaded and available for detail viz');
         }
     );
-    
+    document.getElementById(id_indicator + "-container").style.visibility = "visible";
     document.getElementById(id_indicator + "-container").hidden = true;
         
     // Return control object

@@ -430,8 +430,9 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
         'actual-detail-container'  + id_indicator
     );
     
-    document.getElementById("area-harvested-container").hidden = true;
+    document.getElementById("area-harvested-container").style.visibility = "visible";
     // Create the world map with callbacks
+    document.getElementById("area-harvested-container").hidden = true;
     const map = createWorldMap(        
         mapWidth, 
         mapHeight, 
@@ -459,11 +460,11 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
             return filterByItem(data, item_name = chosenFoodName)}
             )
             .then(filteredData => {
+                console.log("Filtered data for area harvested :", filteredData);
             if (!filteredData || filteredData.length === 0) {
                 document.getElementById("area-harvested-container").hidden = true;
                 return;
             }
-            console.log("snif")
             document.getElementById("area-harvested-container").hidden = false;
             const newCountryWideJson = createCountryWideJson(filteredData);
             

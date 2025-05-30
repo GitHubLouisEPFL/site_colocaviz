@@ -31,12 +31,7 @@ function getFilteredbyelement(element_name = "area harvested") {
 // Filter by item (checks both Item and food_commodity_typology fields)
 function filterByItem(data, item_name = null) {
     
-    let filteredData = data.filter(item => item.Item === item_name);
-    
-    // If no results found with Item field, try food_commodity_typology field
-    if (filteredData.length === 0) {
-        filteredData = data.filter(item => item.food_commodity_typology === item_name);
-    }
+    const filteredData = data.filter(item => item.Item === item_name);
     
     console.log(`CSV data filtered for Item: ${item_name}`);
     console.log(`Filtered ${filteredData.length} records from ${data.length} total records`);
