@@ -67,7 +67,6 @@ function createTimeSlider(availableYears, currentYear, onYearChange, containerId
         currentIndex = 0;
         currentYear = sortedYears[0];
     }
-    console.log("sadd")
     // --- Create Slider Container ---
     const sliderContainer = document.createElement('div');
     sliderContainer.id = 'sliderContainer'; 
@@ -687,10 +686,8 @@ function createWorldMap(width, height, countryWideJson, containerId, onCountrySe
     return {
         update: (newCountryWideJson) => {
             if (!newCountryWideJson && hasData) {
-                console.warn('No new country-wide JSON provided, rendering no-data map');
                 renderNoDataMap();
             } else if (newCountryWideJson ) {
-            console.log('Rendering data map with new country-wide JSON');
             renderDataMap(newCountryWideJson);
             }
              else {
@@ -771,7 +768,6 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
    
     // Function to render the visualization
     function render(data, feature, geodata) {
-        console.log('Rendering small area visualization');
         // Reset gWrapper to main container before clearing
         gWrapper.current = svg.select('g');
         // Clear existing content
@@ -902,8 +898,6 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
                 .attr('stroke', 'black')
                 .attr('stroke-width', 4 / scale);
                 
-            console.log(`Rendering ${area_for_comparison} SVG with scale: ${scale}, bbox:`, bbox);
-            
             // Update the wrapper's current reference
             gWrapper.current = Group;
             return Group;
@@ -1086,6 +1080,13 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
             return filterByItem(data, item_name = chosenFoodName)}
             )
             .then(filteredData => {
+            if (!filteredData || filteredData.length === 0) {
+                countryWideJson = null;
+                if (map) {
+                    map.update(countryWideJson);
+                }
+                return;
+            }
             const newCountryWideJson = createCountryWideJson(filteredData);
             
             // Get available years from the data and create/update time slider

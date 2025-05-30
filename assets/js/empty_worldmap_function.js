@@ -510,7 +510,7 @@ function createWorldMap(width, height, countryWideJson, containerId, onCountrySe
                 .attr('text-anchor', 'middle')
                 .style('font-size', '12px')
                 .style('font-weight', 'bold')
-                .text(`${chosenFoodName} Area Harvested (hectares)`);
+                .text(`${chosenFoodName} Number of animals slaugthered in ${year_chosen}`);
         };
 
         addLegend(svg, colorScale, minValue, maxValue);
@@ -773,8 +773,6 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
             const bbox = tempPath.node().getBBox();
             tempSvg.remove();
             
-            console.log(`${area_for_comparison} bbox:`, bbox);
-            
             // Use actual path dimensions
             const pathWidth = bbox.width;
             const pathHeight = bbox.height;
@@ -798,10 +796,8 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
                 .attr('fill', `url(#mygrad)`)
                 .attr('stroke', 'black')
                 .attr('stroke-width', 4 / scale);
-                
-            console.log(`Rendering ${area_for_comparison} SVG with scale: ${scale}, bbox:`, bbox);
             
-            // CHANGED: Update the wrapper's current reference
+            //  Update the wrapper's current reference
             gWrapper.current = Group;
             return Group;
         }
@@ -871,7 +867,10 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
  */
 async function createanimalslaugtherVisualizationPage(smallAreaFunction = null, width = 1000, height = 500, containerId = 'visualization-container',
     element_to_visualize = 'area harvested',
-    id_indicator='area-harvested') {
+    id_indicator='animal-slaugthered') {
+    
+    const elementcsv =getFilteredbyelement(element_name = element_to_visualize);
+     console.log('Filtered dataehfcur for element:', elementcsv);
     // Get container
     const container = document.getElementById(containerId);
     container.innerHTML = '';
@@ -979,11 +978,23 @@ async function createanimalslaugtherVisualizationPage(smallAreaFunction = null, 
     return {
     update: () => {
         chosenFoodName = document.getElementById("chosen-food-name").textContent;
-        getFilteredCSV(chosenFoodName,element_to_visualize).then(data => {
-            const newCountryWideJson = createCountryWideJson(data);
+        elementcsv.then(data => {
+            console.log(filterByItem(data, item_name = chosenFoodName));
+            return filterByItem(data, item_name = chosenFoodName)}
+            )
+            .then(filteredData => {
+            if (!filteredData || filteredData.length === 0) {
+            countryWideJson = null;
+            if (map) {
+                map.update(countryWideJson);
+            }
+            return;
+        }
+            console.log('Filtered dataehfcur fyr:', filteredData);
+            const newCountryWideJson = createCountryWideJson(filteredData);
             
             // Get available years from the data and create/update time slider
-            const availableYears = getAvailableYears(data);
+            const availableYears = getAvailableYears(filteredData);
             
             if (timeSlider) {
                 // Update existing slider
@@ -998,7 +1009,7 @@ async function createanimalslaugtherVisualizationPage(smallAreaFunction = null, 
                         year_chosen = newYear;
                         
                         // Update the map with new year data
-                        const updatedCountryWideJson = createCountryWideJson(data);
+                        const updatedCountryWideJson = createCountryWideJson(filteredData);
                         if (map) {
                             map.update(updatedCountryWideJson);
                         }

@@ -432,9 +432,11 @@ document.addEventListener("DOMContentLoaded", function () {
           path.push(d.data.name); // Ajouter le nœud actuel au chemin
           updateWaterTreemap(path, "carbon");
           window.viz.then(viz => {
-            viz.update();
+          viz.update(); 
+          window.viz_slaughtered.update();
           });
         })
+
         // Ajouter ces gestionnaires d'événements
         .on("mouseenter", (event, d) => {
           // Mettre en évidence cette cellule
@@ -591,8 +593,9 @@ document.addEventListener("DOMContentLoaded", function () {
         const path = d.ancestors().reverse().map(n => n.data.name);
         updateWaterTreemap(path, "carbon");
         window.viz.then(viz => {
-        viz.update();
-      });
+        viz.update(); 
+        window.viz_slaughtered.update();
+          });
       });
     
     crumb.append("rect")

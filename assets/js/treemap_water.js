@@ -428,8 +428,9 @@ document.addEventListener("DOMContentLoaded", function () {
           path.push(d.data.name); // Ajouter le nœud actuel au chemin
           updateCarbonTreemap(path, "water");
           window.viz.then(viz => {
-            viz.update();
+          viz.update();
           });
+          
         })
         // Ajouter ces gestionnaires d'événements
         .on("mouseenter", (event, d) => {
@@ -586,9 +587,9 @@ document.addEventListener("DOMContentLoaded", function () {
         // Créer le chemin basé sur les noms des ancêtres
         const path = d.ancestors().reverse().map(n => n.data.name);
         updateCarbonTreemap(path, "water");
-        window.viz.then(viz => {
-          viz.update();
-        });
+        //window.viz.then(viz => {
+        //  viz.update();
+        //});
       });
     
     crumb.append("rect")
