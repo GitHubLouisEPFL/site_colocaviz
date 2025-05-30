@@ -6,7 +6,7 @@ const observerOptions = {
     threshold: 0.5,
 };
 
-const sections = document.querySelectorAll('#chosen-food-name , #blabla');
+const sections = document.querySelectorAll('#chosen-food-name, #area-harvested-container, #animal-slaugthered-container');
 const menuLinks = document.querySelectorAll('.menu a');
 
 const observer = new IntersectionObserver((entries) => {
