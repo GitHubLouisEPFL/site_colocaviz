@@ -590,14 +590,14 @@ function createWorldMap(width, height, countryWideJson, containerId, onCountrySe
                 .attr('transform', `translate(0, ${legendHeight})`)
                 .style('font-size', '10px')
                 .call(axis);
-
+            console.log("whhich",resolvedCountryWideJson,resolvedCountryWideJson[Element])
             legend.append('text')
                 .attr('x', legendWidth / 2)
                 .attr('y', -5)
                 .attr('text-anchor', 'middle')
                 .style('font-size', '12px')
                 .style('font-weight', 'bold')
-                .text(`${chosenFoodName} Area Harvested (hectares)`);
+                .text(`${chosenFoodName}  in ${year_chosen}`);
         };
 
         addLegend(svg, colorScale, minValue, maxValue);
