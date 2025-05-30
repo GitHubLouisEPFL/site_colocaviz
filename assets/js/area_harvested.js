@@ -1,14 +1,16 @@
 // Main modular functions for world map visualization
 
-let csvdata = null;
-let csvDataPromise = null;
 let chosenFoodName = null;
 let switzerlandFeature = null;
+
+let csvdata = null;
+let csvDataPromise = null;
+
 /**
- * Fetches global svg data with caching
+ * Fetches global csv data with caching
  * @returns {Promise<Array>} Promise resolving csvdata
  */
-const getCSV = function getCSV() {
+function getCSV() {
     if (csvdata) {
         return Promise.resolve(csvdata);
     }
@@ -31,13 +33,6 @@ const getCSV = function getCSV() {
 
 getCSV().then(data => {console.log("firstdownload")}).catch(error => {
     console.error("Error in getCSV:", error);  });
-
-let year_chosen = 2023; // Default year
-/**
- * Sets the year for filtering data
- * @param {number} year - The year to set
- * */
-
 /**
  * Creates a time slider control
  * @param {Array} availableYears - Array of available years
@@ -1060,7 +1055,7 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
         null, // no feature initially
         mapWidth,
         mapHeight,
-        'actual-detail-container'
+        'actual-detail-container'  + id_indicator
     );
     
     // Create the world map with callbacks
@@ -1068,7 +1063,7 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
         mapWidth, 
         mapHeight, 
         countryWideJson, 
-        'actual-map-container', 
+        'actual-map-container'  + id_indicator, 
         // onCountrySelect callback
         (country, countryFeature, geoDataFromMap) => {
             selectedCountry = country;            

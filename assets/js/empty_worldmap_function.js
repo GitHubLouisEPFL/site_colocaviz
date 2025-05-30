@@ -1,40 +1,5 @@
 // Main modular functions for world map visualization
-
-let csvdata = null;
-let csvDataPromise = null;
-let chosenFoodName = null;
-let switzerlandFeature = null;
-/**
- * Fetches global svg data with caching
- * @returns {Promise<Array>} Promise resolving csvdata
- */
-const getCSV = function getCSV() {
-    if (csvdata) {
-        return Promise.resolve(csvdata);
-    }
-    // Return existing promise if already fetching  
-    if (csvDataPromise) {
-        return csvDataPromise;
-    }
-
-    csvDataPromise = loadCSVData().then(data => {
-        csvdata = data;
-        console.log("CSV data loaded successfully");
-        return csvdata;
-    }).catch(error => {
-        console.error("Error loading CSV data:", error);
-        throw error;        
-    });
-
-    return csvDataPromise;
-};
-
-
 let year_chosen = 2023; // Default year
-/**
- * Sets the year for filtering data
- * @param {number} year - The year to set
- * */
 
 /**
  * Creates a time slider control
@@ -320,79 +285,8 @@ function createTimeSlider(availableYears, currentYear, onYearChange, containerId
         }
     };
 }
-let lemanDataCache = null;
-let lemanDataPromise = null;
-/**
- * Fetches Leman SVG data with caching
- * @returns {Promise<Array>} Promise resolving to array of `d` path values.
- */
 
-function fetch_leman_svg() {
-    // Return cached data if available
-    if (lemanDataCache) {
-        return Promise.resolve(lemanDataCache);
-    }
-    
-    // Return existing promise if already fetching
-    if (lemanDataPromise) {
-        return lemanDataPromise;
-    }
-    https://github.com/com-480-data-visualization/com480-project-colocaviz/tree/13a44cb13c2e05ef4871acfcc794aedef8cec6ce/data
-    // Create new fetch promise
-    lemanDataPromise = fetch('https://raw.githubusercontent.com/GitHubLouisEPFL/site_colocaviz/refs/heads/main/svg_files/lac_leman.svg')
-        .then(res => res.text())
-        .then(svg => {
-            const matches = svg.match(/<path[^>]*d="([^"]+)"/g) || [];
-            const dValues = matches.map(m => m.match(/d="([^"]+)"/)[1]);
-            lemanDataCache = dValues; // Cache the result
-            return dValues;
-        })
-        .catch(error => {
-            console.error("Error fetching or processing the SVG:", error);
-            lemanDataPromise = null; // Reset promise on error to allow retry
-            throw error;
-        });
-    
-    return lemanDataPromise;
-}
-
-let parisDataCache = null;
-let parisDataPromise = null;
-/**
- * Fetches Paris SVG data with caching
- * @returns {Promise<Array>} Promise resolving to array of `d` path values.
- */
-
-function fetch_paris_svg() {
-    // Return cached data if available
-    if (parisDataCache) {
-        return Promise.resolve(parisDataCache);
-    }
-    
-    // Return existing promise if already fetching
-    if (parisDataPromise) {
-        return parisDataPromise;
-    }
-    https://github.com/com-480-data-visualization/com480-project-colocaviz/tree/13a44cb13c2e05ef4871acfcc794aedef8cec6ce/data
-    // Create new fetch promise
-    parisDataPromise = fetch('https://raw.githubusercontent.com/GitHubLouisEPFL/site_colocaviz/bbe178cd7725a4e7fcafb7954e484f83d92838ef/svg_files/paris_border.svg')
-        .then(res => res.text())
-        .then(svg => {
-            const matches = svg.match(/<path[^>]*d="([^"]+)"/g) || [];
-            const dValues = matches.map(m => m.match(/d="([^"]+)"/)[1]);
-            parisDataCache = dValues; // Cache the result
-            return dValues;
-        })
-        .catch(error => {
-            console.error("Error fetching or processing the SVG:", error);
-            parisDataPromise = null; // Reset promise on error to allow retry
-            throw error;
-        });
-    
-    return parisDataPromise;
-}
-
-let country_to_iso = {};
+//let country_to_iso = {};
 /**
  * Creates a world map visualization
  * @param {number} width - SVG width
