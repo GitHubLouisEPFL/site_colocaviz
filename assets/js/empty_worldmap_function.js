@@ -736,7 +736,7 @@ async function createanimalslaughteredVisualizationPage(smallAreaFunction = null
                                 geoData
                             );}
                     },
-                    'time-slider-container'
+                    'time-slider-container-' + id_indicator
                 );
             }
             
