@@ -47,30 +47,48 @@
 
     </div>
 
-    <div class="area-harvested-container" id = "area-harvested-container">
+    <div class="map-text-container" id = "area-harvested-container">
         <h1>Area harvested</h1>
       <p >Click on a country to see the area harvested for each food product.</p>
-    <div class="container" id ="container-area">
-    <div id="visualization-container"></div>
+    <div class="maps-container" id ="maps-container-area">
+    <div id="visualization-container-area"></div>
   </div>
   <div class="sliderContainer" id="time-slider-container"></div>
+  </div>
+
+  <div class="map-text-container" id = "animal-slaugthered-container">
+        <h1>Animal slaughtered</h1>
+      <p >Click on a country to see the area harvested for each food product.</p>
+    <div class="maps-container" id ="maps-container-animal-slaugthered">
+    <div id="visualization-container-animal-slaugthered"></div>
+  </div>
+  <div class="sliderContainer" id="time-slider-container-animal-slaugthered"></div>
   </div>
 
     <script src="assets/js/treemap_water.js" defer></script>    
     <script src="assets/js/treemap_carbon.js" defer></script>
     <!-- Include our modular visualization code -->
-    <script src="assets/js/index.js"></script>
+    <script src="assets/js/world_map_settings.js"></script>
+    <script src="assets/js/empty_worldmap_function.js"></script>
     <script src="assets/js/area_harvested.js"></script>
+    
     <script>
     // Initialize visualization when the page loads
     document.addEventListener('DOMContentLoaded', () => {
-      window.viz = createVisualizationPage(
+      window.viz = createareaharvestedVisualizationPage(
         null, // Use default small area visualization
         1000, // Width
-        500   // Height
-      );
-
+        500,   // Height
+      containerId = 'visualization-container-area');
     });
+    document.addEventListener('DOMContentLoaded', () => {
+      window.viz_slaughtered = createanimalslaugtherVisualizationPage(smallAreaFunction = null,
+       width = 1000, height = 500, 
+       containerId = 'visualization-container-animal-slaugthered', 
+       element_to_visualize = 'producing animals/slaughtered');
+    });
+
+    
   </script>
 
 </body>

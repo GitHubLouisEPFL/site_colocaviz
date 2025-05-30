@@ -29,8 +29,6 @@ const getCSV = function getCSV() {
     return csvDataPromise;
 };
 
-getCSV().then(data => {console.log("firstdownload")}).catch(error => {
-    console.error("Error in getCSV:", error);  });
 
 let year_chosen = 2023; // Default year
 /**
@@ -739,7 +737,7 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
     
-    // Create container: Use wrapper object to manage the main group element
+    // Create container - CHANGED: Use wrapper object
     const gWrapper = { current: svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`) };
             
     // Store gradient reference for updates
@@ -777,7 +775,7 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
     // Function to render the visualization
     function render(data, feature, geodata) {
         console.log('Rendering small area visualization');
-        // Reset gWrapper to main container before clearing
+        // CHANGED: Reset gWrapper to main container before clearing
         gWrapper.current = svg.select('g');
         // Clear existing content
         gWrapper.current.selectAll("*").remove();
@@ -854,7 +852,7 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
             .attr('font-weight', 'bold')
             .text(`${data[year_chosen]} ${data.Unit} of ${chosenFoodName} harvested in ${year_chosen}`);
         
-        // Create gradient outside the function to avoid duplicates
+        // CHANGED: Create gradient outside the function to avoid duplicates
         const defs = svg.append("defs");
         const lg = defs.append("linearGradient")
             .attr("id", "mygrad")
@@ -875,7 +873,7 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
             
             const pathData = dValues[0];
             
-            // Calculate actual bounds of the path instead of assuming viewBox
+            // CHANGED: Calculate actual bounds of the path instead of assuming viewBox
             const tempSvg = d3.select('body').append('svg').style('visibility', 'hidden');
             const tempPath = tempSvg.append('path').attr('d', pathData);
             const bbox = tempPath.node().getBBox();
@@ -909,7 +907,7 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
                 
             console.log(`Rendering ${area_for_comparison} SVG with scale: ${scale}, bbox:`, bbox);
             
-            // Update the wrapper's current reference
+            // CHANGED: Update the wrapper's current reference
             gWrapper.current = Group;
             return Group;
         }
@@ -977,9 +975,7 @@ function createSmallAreaVisualization(countryData, countryFeature, width, height
  * @param {string} containerId - ID of the main container
  * @returns {Object} - Control object with update method
  */
-async function createareaharvestedVisualizationPage(smallAreaFunction = null, width = 1000, height = 500, containerId = 'visualization-container',
-    element_to_visualize = 'area harvested',
-    id_indicator='area-harvested') {
+async function createanimalslaugtherVisualizationPage(smallAreaFunction = null, width = 1000, height = 500, containerId = 'visualization-container', element_to_visualize = 'Area Harvested') {
     // Get container
     const container = document.getElementById(containerId);
     container.innerHTML = '';
@@ -988,9 +984,10 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
     container.style.display = 'flex';
     container.style.flexDirection = 'row';
     container.style.gap = '20px';
+    
     // Create map container
     const mapContainer = document.createElement('div');
-    mapContainer.id = 'map-container' + id_indicator;
+    mapContainer.id = 'map-container';
     mapContainer.style.flex = '1';
     mapContainer.style.position = 'relative';
     mapContainer.style.border = '1px solid #ccc';
@@ -999,7 +996,7 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
     
     // Create title for map
     const mapTitle = document.createElement('h3');
-    mapTitle.textContent = 'World Map' + id_indicator;
+    mapTitle.textContent = 'World Map';
     mapTitle.style.textAlign = "center";
     mapTitle.style.margin = '10px';
     mapTitle.style.fontWeight = 'bold';
@@ -1007,16 +1004,17 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
     
     // Create actual map container
     const actualMapContainer = document.createElement('div');
-    actualMapContainer.id = 'actual-map-container' + id_indicator;
+    actualMapContainer.id = 'actual-map-container';
     actualMapContainer.style.position = 'absolute';
     actualMapContainer.style.top = '40px';
     actualMapContainer.style.bottom = '0';
     actualMapContainer.style.left = '0';
     actualMapContainer.style.right = '0';    
     mapContainer.appendChild(actualMapContainer); 
+
     // Create detail container
     const detailContainer = document.createElement('div');
-    detailContainer.id = 'detail-container'  + id_indicator;
+    detailContainer.id = 'detail-container';
     detailContainer.style.flex = '1';
     detailContainer.style.position = 'relative';
     detailContainer.style.border = '1px solid #ccc';
@@ -1025,7 +1023,7 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
     
     // Create title for detail
     const detailTitle = document.createElement('h3');
-    detailTitle.textContent = 'Country Details'  + id_indicator;
+    detailTitle.textContent = 'Country Details';
     detailTitle.style.textAlign = "center";
     detailTitle.style.margin = '10px';
     detailTitle.style.fontWeight = 'bold';
@@ -1033,7 +1031,7 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
     
     // Create actual detail container
     const actualDetailContainer = document.createElement('div');
-    actualDetailContainer.id = 'actual-detail-container'  + id_indicator;
+    actualDetailContainer.id = 'actual-detail-container';
     actualDetailContainer.style.position = 'absolute';
     actualDetailContainer.style.top = '40px';
     actualDetailContainer.style.bottom = '0';
@@ -1087,7 +1085,7 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
     return {
     update: () => {
         chosenFoodName = document.getElementById("chosen-food-name").textContent;
-        getFilteredCSV(chosenFoodName).then(data => {
+        getFilteredCSV(chosenFoodName,element_to_visualize).then(data => {
             const newCountryWideJson = createCountryWideJson(data);
             
             // Get available years from the data and create/update time slider
