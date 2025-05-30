@@ -11,11 +11,13 @@
           "children": [
             {
               "name": "beef bone free meat",
-              "value": 25.75
+              "value": 25.75,
+              "has_production": true
             },
             {
               "name": "beef meat with bone",
-              "value": 17.96
+              "value": 17.96,
+              "has_production": true
             }
           ]
         },
@@ -25,27 +27,33 @@
           "children": [
             {
               "name": "cream",
-              "value": 5.45
+              "value": 5.45,
+              "has_production": true
             },
             {
               "name": "mascarpone",
-              "value": 5.7
+              "value": 5.7,
+              "has_production": false
             },
             {
               "name": "mozzarella",
-              "value": 8.2
+              "value": 8.2,
+              "has_production": false
             },
             {
               "name": "parmigiano reggiano",
-              "value": 12.54
+              "value": 12.54,
+              "has_production": false
             },
             {
               "name": "ricotta",
-              "value": 3.4
+              "value": 3.4,
+              "has_production": false
             },
             {
               "name": "stracchino",
-              "value": 4.92
+              "value": 4.92,
+              "has_production": false
             }
           ]
         },
@@ -55,15 +63,18 @@
           "children": [
             {
               "name": "butter",
-              "value": 8.48
+              "value": 8.48,
+              "has_production": true
             },
             {
               "name": "cow milk",
-              "value": 1.3
+              "value": 1.3,
+              "has_production": false
             },
             {
               "name": "yogurt white",
-              "value": 1.69
+              "value": 1.69,
+              "has_production": false
             }
           ]
         },
@@ -73,7 +84,8 @@
           "children": [
             {
               "name": "mealworm",
-              "value": 2.84
+              "value": 2.84,
+              "has_production": false
             }
           ]
         },
@@ -83,7 +95,8 @@
           "children": [
             {
               "name": "hen eggs",
-              "value": 3.2
+              "value": 3.2,
+              "has_production": true
             }
           ]
         },
@@ -93,23 +106,28 @@
           "children": [
             {
               "name": "carp",
-              "value": 1.76
+              "value": 1.76,
+              "has_production": false
             },
             {
               "name": "cod",
-              "value": 3.08
+              "value": 3.08,
+              "has_production": false
             },
             {
               "name": "salmon",
-              "value": 3.37
+              "value": 3.37,
+              "has_production": false
             },
             {
               "name": "trout",
-              "value": 4.2
+              "value": 4.2,
+              "has_production": false
             },
             {
               "name": "turbot",
-              "value": 14.51
+              "value": 14.51,
+              "has_production": false
             }
           ]
         },
@@ -119,11 +137,13 @@
           "children": [
             {
               "name": "lamb bone free meat",
-              "value": 25.23
+              "value": 25.23,
+              "has_production": true
             },
             {
               "name": "lamb meat with bone",
-              "value": 16.7
+              "value": 16.7,
+              "has_production": true
             }
           ]
         },
@@ -133,15 +153,18 @@
           "children": [
             {
               "name": "bacon",
-              "value": 4.03
+              "value": 4.03,
+              "has_production": false
             },
             {
               "name": "pork bone free meat",
-              "value": 5.72
+              "value": 5.72,
+              "has_production": false
             },
             {
               "name": "pork meat with bone",
-              "value": 3.44
+              "value": 3.44,
+              "has_production": true
             }
           ]
         },
@@ -151,11 +174,13 @@
           "children": [
             {
               "name": "chicken bone free meat",
-              "value": 3.68
+              "value": 3.68,
+              "has_production": true
             },
             {
               "name": "chicken meat with bone",
-              "value": 2.82
+              "value": 2.82,
+              "has_production": true
             }
           ]
         }
@@ -163,7 +188,7 @@
     },
     {
       "name": "crops",
-      "value": 0.53,
+      "value": 0.56,
       "children": [
         {
           "name": "coffee",
@@ -171,7 +196,8 @@
           "children": [
             {
               "name": "coffee green",
-              "value": 0.49
+              "value": 0.49,
+              "has_production": true
             }
           ]
         },
@@ -181,11 +207,13 @@
           "children": [
             {
               "name": "date",
-              "value": 0.6
+              "value": 0.6,
+              "has_production": true
             },
             {
               "name": "raisin",
-              "value": 0.81
+              "value": 0.81,
+              "has_production": false
             }
           ]
         },
@@ -195,149 +223,189 @@
           "children": [
             {
               "name": "apple",
-              "value": 0.25
+              "value": 0.25,
+              "has_production": true
             },
             {
               "name": "apricot",
-              "value": 0.3
+              "value": 0.3,
+              "has_production": true
             },
             {
               "name": "avocado",
-              "value": 0.54
+              "value": 0.54,
+              "has_production": true
             },
             {
               "name": "banana",
-              "value": 0.34
+              "value": 0.34,
+              "has_production": true
             },
             {
               "name": "blackberry",
-              "value": 0.42
+              "value": 0.42,
+              "has_production": false
             },
             {
               "name": "blueberry",
-              "value": 0.78
+              "value": 0.78,
+              "has_production": true
             },
             {
               "name": "clementine",
-              "value": 0.41
+              "value": 0.41,
+              "has_production": false
             },
             {
               "name": "cranberry",
-              "value": 0.87
+              "value": 0.87,
+              "has_production": false
             },
             {
               "name": "currant",
-              "value": 0.64
+              "value": 0.64,
+              "has_production": true
             },
             {
               "name": "fig",
-              "value": 0.26
+              "value": 0.26,
+              "has_production": true
             },
             {
               "name": "gooseberry",
-              "value": 0.84
+              "value": 0.84,
+              "has_production": true
             },
             {
               "name": "grape",
-              "value": 0.31
+              "value": 0.31,
+              "has_production": true
             },
             {
               "name": "guava",
-              "value": 0.28
+              "value": 0.28,
+              "has_production": false
             },
             {
               "name": "kiwi",
-              "value": 0.49
+              "value": 0.49,
+              "has_production": true
             },
             {
               "name": "lemon",
-              "value": 0.22
+              "value": 0.22,
+              "has_production": true
             },
             {
               "name": "lime",
-              "value": 0.22
+              "value": 0.22,
+              "has_production": false
             },
             {
               "name": "mandarin",
-              "value": 0.45
+              "value": 0.45,
+              "has_production": false
             },
             {
               "name": "mango",
-              "value": 0.31
+              "value": 0.31,
+              "has_production": true
             },
             {
               "name": "olive",
-              "value": 0.64
+              "value": 0.64,
+              "has_production": true
             },
             {
               "name": "orange",
-              "value": 0.3
+              "value": 0.3,
+              "has_production": true
             },
             {
               "name": "peach",
-              "value": 0.39
+              "value": 0.39,
+              "has_production": false
             },
             {
               "name": "pear",
-              "value": 0.27
+              "value": 0.27,
+              "has_production": true
             },
             {
               "name": "pineapple",
-              "value": 0.28
+              "value": 0.28,
+              "has_production": true
             },
             {
               "name": "plum",
-              "value": 0.26
+              "value": 0.26,
+              "has_production": true
             },
             {
               "name": "raspberry",
-              "value": 0.63
+              "value": 0.63,
+              "has_production": true
             },
             {
               "name": "strawberry",
-              "value": 0.61
+              "value": 0.61,
+              "has_production": true
             },
             {
               "name": "tangerin",
-              "value": 0.38
+              "value": 0.38,
+              "has_production": false
             },
             {
               "name": "watermelon",
-              "value": 0.52
+              "value": 0.52,
+              "has_production": true
             }
           ]
         },
         {
           "name": "grains",
-          "value": 0.62,
+          "value": 0.81,
           "children": [
             {
               "name": "barley",
-              "value": 0.48
+              "value": 0.48,
+              "has_production": true
             },
             {
               "name": "maize",
-              "value": 0.48
+              "value": 0.48,
+              "has_production": true
             },
             {
               "name": "millet",
-              "value": 0.85
+              "value": 0.85,
+              "has_production": true
             },
             {
               "name": "oat",
-              "value": 0.67
+              "value": 0.67,
+              "has_production": true
+            },
+            {
+              "name": "rice",
+              "value": 2.19,
+              "has_production": true
             },
             {
               "name": "rye",
-              "value": 0.38
+              "value": 0.38,
+              "has_production": true
             },
             {
               "name": "sorghum",
-              "value": 0.88
+              "value": 0.88,
+              "has_production": true
             },
             {
               "name": "wheat",
-              "value": 0.57
+              "value": 0.57,
+              "has_production": true
             }
           ]
         },
@@ -347,27 +415,33 @@
           "children": [
             {
               "name": "beans",
-              "value": 0.43
+              "value": 0.43,
+              "has_production": true
             },
             {
               "name": "chickpea",
-              "value": 0.77
+              "value": 0.77,
+              "has_production": true
             },
             {
               "name": "cowpea",
-              "value": 0.48
+              "value": 0.48,
+              "has_production": true
             },
             {
               "name": "lentil",
-              "value": 1.03
+              "value": 1.03,
+              "has_production": true
             },
             {
               "name": "pea",
-              "value": 0.45
+              "value": 0.45,
+              "has_production": true
             },
             {
               "name": "soybean",
-              "value": 0.56
+              "value": 0.56,
+              "has_production": false
             }
           ]
         },
@@ -377,27 +451,33 @@
           "children": [
             {
               "name": "chestnut",
-              "value": 0.44
+              "value": 0.44,
+              "has_production": true
             },
             {
               "name": "hazelnut",
-              "value": 1.11
+              "value": 1.11,
+              "has_production": true
             },
             {
               "name": "mixed nut",
-              "value": 0.47
+              "value": 0.47,
+              "has_production": false
             },
             {
               "name": "palm nut",
-              "value": 0.8
+              "value": 0.8,
+              "has_production": true
             },
             {
               "name": "peanut",
-              "value": 0.83
+              "value": 0.83,
+              "has_production": true
             },
             {
               "name": "pistachio",
-              "value": 1.6
+              "value": 1.6,
+              "has_production": true
             }
           ]
         },
@@ -407,15 +487,18 @@
           "children": [
             {
               "name": "rape seed",
-              "value": 0.78
+              "value": 0.78,
+              "has_production": true
             },
             {
               "name": "sesam seed",
-              "value": 0.88
+              "value": 0.88,
+              "has_production": false
             },
             {
               "name": "sunflower seed",
-              "value": 1.16
+              "value": 1.16,
+              "has_production": true
             }
           ]
         },
@@ -425,11 +508,13 @@
           "children": [
             {
               "name": "chilly",
-              "value": 0.8
+              "value": 0.8,
+              "has_production": true
             },
             {
               "name": "ginger",
-              "value": 0.88
+              "value": 0.88,
+              "has_production": true
             }
           ]
         },
@@ -439,11 +524,13 @@
           "children": [
             {
               "name": "potato",
-              "value": 0.24
+              "value": 0.24,
+              "has_production": true
             },
             {
               "name": "sweet potato",
-              "value": 0.27
+              "value": 0.27,
+              "has_production": true
             }
           ]
         },
@@ -453,71 +540,88 @@
           "children": [
             {
               "name": "artichoke",
-              "value": 0.33
+              "value": 0.33,
+              "has_production": true
             },
             {
               "name": "asparagus",
-              "value": 0.83
+              "value": 0.83,
+              "has_production": true
             },
             {
               "name": "broccoli",
-              "value": 0.57
+              "value": 0.57,
+              "has_production": false
             },
             {
               "name": "cabbage",
-              "value": 0.23
+              "value": 0.23,
+              "has_production": true
             },
             {
               "name": "carrot",
-              "value": 0.23
+              "value": 0.23,
+              "has_production": false
             },
             {
               "name": "cauliflower",
-              "value": 0.31
+              "value": 0.31,
+              "has_production": false
             },
             {
               "name": "cucumber",
-              "value": 0.27
+              "value": 0.27,
+              "has_production": false
             },
             {
               "name": "eggplant",
-              "value": 0.19
+              "value": 0.19,
+              "has_production": true
             },
             {
               "name": "garlic",
-              "value": 0.71
+              "value": 0.71,
+              "has_production": true
             },
             {
               "name": "lettuce",
-              "value": 0.41
+              "value": 0.41,
+              "has_production": true
             },
             {
               "name": "onion",
-              "value": 0.22
+              "value": 0.22,
+              "has_production": true
             },
             {
               "name": "pepper",
-              "value": 0.65
+              "value": 0.65,
+              "has_production": true
             },
             {
               "name": "pumpkin",
-              "value": 0.24
+              "value": 0.24,
+              "has_production": true
             },
             {
               "name": "spinach",
-              "value": 0.34
+              "value": 0.34,
+              "has_production": true
             },
             {
               "name": "tomato",
-              "value": 0.45
+              "value": 0.45,
+              "has_production": true
             },
             {
               "name": "turnip",
-              "value": 0.35
+              "value": 0.35,
+              "has_production": false
             },
             {
               "name": "zucchini",
-              "value": 0.7
+              "value": 0.7,
+              "has_production": false
             }
           ]
         }
@@ -533,11 +637,13 @@
           "children": [
             {
               "name": "chocolate or cream filled cookie",
-              "value": 1.53
+              "value": 1.53,
+              "has_production": false
             },
             {
               "name": "simple cookie",
-              "value": 1.39
+              "value": 1.39,
+              "has_production": false
             }
           ]
         },
@@ -547,19 +653,23 @@
           "children": [
             {
               "name": "bread multicereal",
-              "value": 0.7
+              "value": 0.7,
+              "has_production": false
             },
             {
               "name": "bread plain",
-              "value": 0.89
+              "value": 0.89,
+              "has_production": false
             },
             {
               "name": "bread whole",
-              "value": 0.77
+              "value": 0.77,
+              "has_production": false
             },
             {
               "name": "crispbread",
-              "value": 1.35
+              "value": 1.35,
+              "has_production": false
             }
           ]
         },
@@ -569,15 +679,18 @@
           "children": [
             {
               "name": "flavored cracker",
-              "value": 0.93
+              "value": 0.93,
+              "has_production": false
             },
             {
               "name": "plain cracker",
-              "value": 1.35
+              "value": 1.35,
+              "has_production": false
             },
             {
               "name": "wholegrain cracker",
-              "value": 0.97
+              "value": 0.97,
+              "has_production": false
             }
           ]
         },
@@ -587,19 +700,23 @@
           "children": [
             {
               "name": "beer",
-              "value": 0.69
+              "value": 0.69,
+              "has_production": true
             },
             {
               "name": "orange juice",
-              "value": 0.46
+              "value": 0.46,
+              "has_production": false
             },
             {
               "name": "pineapple juice",
-              "value": 2.78
+              "value": 2.78,
+              "has_production": false
             },
             {
               "name": "wine",
-              "value": 0.66
+              "value": 0.66,
+              "has_production": true
             }
           ]
         },
@@ -609,7 +726,8 @@
           "children": [
             {
               "name": "oat meal",
-              "value": 0.87
+              "value": 0.87,
+              "has_production": false
             }
           ]
         },
@@ -619,27 +737,33 @@
           "children": [
             {
               "name": "olive oil",
-              "value": 3.27
+              "value": 3.27,
+              "has_production": true
             },
             {
               "name": "palm oil",
-              "value": 2.43
+              "value": 2.43,
+              "has_production": true
             },
             {
               "name": "peanut oil",
-              "value": 2.9
+              "value": 2.9,
+              "has_production": true
             },
             {
               "name": "rapeseed oil",
-              "value": 1.79
+              "value": 1.79,
+              "has_production": true
             },
             {
               "name": "soybean oil",
-              "value": 1.79
+              "value": 1.79,
+              "has_production": false
             },
             {
               "name": "sunflower oil",
-              "value": 0.98
+              "value": 0.98,
+              "has_production": true
             }
           ]
         },
@@ -649,11 +773,13 @@
           "children": [
             {
               "name": "egg pasta",
-              "value": 3.15
+              "value": 3.15,
+              "has_production": false
             },
             {
               "name": "pasta",
-              "value": 1.21
+              "value": 1.21,
+              "has_production": false
             }
           ]
         },
@@ -663,11 +789,13 @@
           "children": [
             {
               "name": "margarine",
-              "value": 1.39
+              "value": 1.39,
+              "has_production": true
             },
             {
               "name": "soy milk",
-              "value": 0.78
+              "value": 0.78,
+              "has_production": false
             }
           ]
         },
@@ -677,23 +805,28 @@
           "children": [
             {
               "name": "ketchup",
-              "value": 1.46
+              "value": 1.46,
+              "has_production": false
             },
             {
               "name": "pesto",
-              "value": 2.71
+              "value": 2.71,
+              "has_production": false
             },
             {
               "name": "pesto without garlic",
-              "value": 2.72
+              "value": 2.72,
+              "has_production": false
             },
             {
               "name": "tomato & basil",
-              "value": 1.14
+              "value": 1.14,
+              "has_production": false
             },
             {
               "name": "tomato arrabbiata",
-              "value": 1.24
+              "value": 1.24,
+              "has_production": false
             }
           ]
         },
@@ -703,11 +836,13 @@
           "children": [
             {
               "name": "beet sugar",
-              "value": 0.94
+              "value": 0.94,
+              "has_production": true
             },
             {
               "name": "cane sugar",
-              "value": 0.62
+              "value": 0.62,
+              "has_production": true
             }
           ]
         },
@@ -717,11 +852,13 @@
           "children": [
             {
               "name": "cakes and croissant",
-              "value": 2.14
+              "value": 2.14,
+              "has_production": false
             },
             {
               "name": "cocoa cakes and croissant",
-              "value": 1.94
+              "value": 1.94,
+              "has_production": false
             }
           ]
         },
@@ -731,15 +868,18 @@
           "children": [
             {
               "name": "corn canned",
-              "value": 1.35
+              "value": 1.35,
+              "has_production": false
             },
             {
               "name": "tomato peeled",
-              "value": 1.3
+              "value": 1.3,
+              "has_production": false
             },
             {
               "name": "tomato puree",
-              "value": 1.03
+              "value": 1.03,
+              "has_production": false
             }
           ]
         },
@@ -749,15 +889,18 @@
           "children": [
             {
               "name": "quorne",
-              "value": 2.5
+              "value": 2.5,
+              "has_production": false
             },
             {
               "name": "soy burger",
-              "value": 1.48
+              "value": 1.48,
+              "has_production": false
             },
             {
               "name": "tofu",
-              "value": 2.27
+              "value": 2.27,
+              "has_production": false
             }
           ]
         },
@@ -767,7 +910,8 @@
           "children": [
             {
               "name": "yeast compressed",
-              "value": 0.82
+              "value": 0.82,
+              "has_production": false
             }
           ]
         }

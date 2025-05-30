@@ -28,6 +28,7 @@ document.addEventListener("DOMContentLoaded", function () {
         name: node.data.name,
         value: node.ownValue,
         ownValue: node.ownValue,
+        has_production: node.data.has_production || false, // Add has_production field
         depth: depth,
         parent: parent
       };
@@ -476,7 +477,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .attr("class", "label name")
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "middle")
-        .attr("dy", "-0.5em")
+        .attr("dy", d => d.data.has_production ? "-1em" : "-0.5em") // Adjust position if production data available
         .style("opacity", 0)
         .text(d => d.data.name)
         .transition().duration(500)
@@ -487,11 +488,22 @@ document.addEventListener("DOMContentLoaded", function () {
         .attr("class", "label value")
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "middle")
-        .attr("dy", "0.7em")
+        .attr("dy", d => d.data.has_production ? "0em" : "0.7em") // Adjust position if production data available
         .style("opacity", 0)
         .text(d => d.data.ownValue)
         .transition().duration(500)
         .style("opacity", 1);
+      
+      // Production data indicator (only if has_production is true)
+      textGroup.append("text")
+        .attr("class", "label production")
+        .attr("text-anchor", "middle")
+        // .attr("dominant-baseline", "middle")
+        .attr("dy", "1.5em")
+        .style("font-size", "0.5em") // Slightly smaller font
+        .text(d => d.data.has_production ? "✔" : "")
+        .transition().duration(500)
+        .style("opacity", d => d.data.has_production ? 1 : 0);
       
       // Ajustement de la taille du texte
       adjustTextSize(cell);
@@ -523,7 +535,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .attr("class", "label name")
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "middle")
-        .attr("dy", "-0.5em")
+        .attr("dy", node.data.has_production ? "-1em" : "-0.5em")
         .style("font-size", "24px")
         .style("opacity", 0)
         .text(node.data.name)
@@ -535,12 +547,24 @@ document.addEventListener("DOMContentLoaded", function () {
         .attr("class", "label value")
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "middle")
-        .attr("dy", "1em")
+        .attr("dy", node.data.has_production ? "0.2em" : "1em")
         .style("font-size", "20px")
         .style("opacity", 0)
         .text(node.data.ownValue)
         .transition().duration(500)
         .style("opacity", 1);
+      
+      // Production data indicator for leaf nodes, for now we don't write anything, but we let the space for it
+      textGroup.append("text")
+        .attr("class", "label production")
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "middle")
+        .attr("dy", "2em")
+        .style("font-size", "12px")
+        .style("opacity", 0)
+        .text(node.data.has_production ? " " : "") // add here something if you want to display something for the final leaf nodes
+        .transition().duration(500)
+        .style("opacity", node.data.has_production ? 1 : 0);
     }
 
     updateActiveElement(node.data.name);
@@ -586,6 +610,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const textGroup = d3.select(this);
       const nameNode = textGroup.select("text.name").node();
       const valueNode = textGroup.select("text.value").node();
+      const productionNode = textGroup.select("text.production").node();
       const rectWidth = Math.max(0, d.x1 - d.x0);
       const rectHeight = Math.max(0, d.y1 - d.y0);
       
@@ -596,14 +621,24 @@ document.addEventListener("DOMContentLoaded", function () {
       
       let nameWidth = nameNode.getBBox().width;
       let valueWidth = valueNode.getBBox().width;
+      let productionWidth = productionNode ? productionNode.getBBox().width : 0;
       let totalHeight = nameNode.getBBox().height + valueNode.getBBox().height;
       
-      while ((Math.max(nameWidth, valueWidth) > rectWidth - 6 || totalHeight > availableHeight) && fontSize > 3) {
+      // Add production text height if it exists
+      if (productionNode && d.data.has_production) {
+        totalHeight += productionNode.getBBox().height;
+      }
+      
+      while ((Math.max(nameWidth, valueWidth, productionWidth) > rectWidth - 6 || totalHeight > availableHeight) && fontSize > 3) {
         fontSize -= 1;
         textGroup.selectAll("text").style("font-size", fontSize + "px");
         nameWidth = nameNode.getBBox().width;
         valueWidth = valueNode.getBBox().width;
+        productionWidth = productionNode ? productionNode.getBBox().width : 0;
         totalHeight = nameNode.getBBox().height + valueNode.getBBox().height;
+        if (productionNode && d.data.has_production) {
+          totalHeight += productionNode.getBBox().height;
+        }
       }
       
       // Fonction pour tronquer le texte
@@ -624,6 +659,11 @@ document.addEventListener("DOMContentLoaded", function () {
       // Tronquer la valeur si nécessaire
       if (valueNode.getBBox().width > rectWidth - 6) {
         truncateText(String(d.data.ownValue), valueNode, rectWidth - 6);
+      }
+      
+      // Tronquer le texte de production si nécessaire
+      if (productionNode && d.data.has_production && productionNode.getBBox().width > rectWidth - 6) {
+        truncateText("✔", productionNode, rectWidth - 6);
       }
     });
   }
