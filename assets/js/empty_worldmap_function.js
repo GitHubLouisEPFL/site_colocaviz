@@ -650,7 +650,7 @@ async function createanimalslaugtherVisualizationPage(smallAreaFunction = null, 
     detailContainer.appendChild(actualDetailContainer);
 
     // Initialize time slider variable (declare it here, outside the return object)
-    let timeSlider = null;
+    let timeSlider_animal = null;
     
     // Process the country JSON to add styling
 
@@ -706,12 +706,12 @@ async function createanimalslaugtherVisualizationPage(smallAreaFunction = null, 
             // Get available years from the data and create/update time slider
             const availableYears = getAvailableYears(filteredData);
             
-            if (timeSlider) {
+            if (timeSlider_animal) {
                 // Update existing slider
-                timeSlider.update(availableYears, year_chosen);
+                timeSlider_animal.update(availableYears, year_chosen);
             } else if (availableYears.length > 0) {
                 // Create new slider
-                timeSlider = createTimeSlider(
+                timeSlider_animal = createTimeSlider(
                     availableYears,
                     year_chosen,
                     (newYear) => {

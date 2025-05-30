@@ -431,12 +431,13 @@ document.addEventListener("DOMContentLoaded", function () {
           const path = d.ancestors().reverse().map(n => n.data.name);
           path.push(d.data.name); // Ajouter le nœud actuel au chemin
           updateWaterTreemap(path, "carbon");
+          if (d.data.has_production) {
           window.viz.then(viz => {
             viz.update();
             return window.viz_slaughtered;
             }).then(viz_slaughtered => {
                 viz_slaughtered.update();
-            });
+            });}
         })
 
         // Ajouter ces gestionnaires d'événements
