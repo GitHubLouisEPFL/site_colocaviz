@@ -983,13 +983,6 @@ async function createanimalslaugtherVisualizationPage(smallAreaFunction = null, 
             return filterByItem(data, item_name = chosenFoodName)}
             )
             .then(filteredData => {
-            if (!filteredData || filteredData.length === 0) {
-            countryWideJson = null;
-            if (map) {
-                map.update(countryWideJson);
-            }
-            return;
-        }
             console.log('Filtered dataehfcur fyr:', filteredData);
             const newCountryWideJson = createCountryWideJson(filteredData);
             

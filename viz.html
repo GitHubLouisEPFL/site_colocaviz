@@ -85,12 +85,18 @@
       containerId = 'visualization-container-area');
     });
     document.addEventListener('DOMContentLoaded', () => {
-      window.viz_slaughtered = createanimalslaugtherVisualizationPage(smallAreaFunction = null,
-       width = 1000, height = 500, 
-       containerId = 'visualization-container-animal-slaugthered', 
-       element_to_visualize = 'producing animals/slaughtered',
-      id_indicator = 'animals-slaughtered');
-    });
+    window.viz_slaughtered = new Promise((resolve) => {
+        const vizObject = createanimalslaugtherVisualizationPage(
+            smallAreaFunction = null,
+            width = 1000, 
+            height = 500,
+            containerId = 'visualization-container-animal-slaugthered',
+            element_to_visualize = 'producing animals/slaughtered',
+            id_indicator = 'animals-slaughtered'
+        );
+        resolve(vizObject);
+          });
+      });
     
   </script>
 
