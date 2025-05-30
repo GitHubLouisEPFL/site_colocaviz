@@ -994,7 +994,7 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
     
     // Create title for map
     const mapTitle = document.createElement('h3');
-    mapTitle.textContent = 'World Map' + id_indicator;
+    mapTitle.textContent = 'World Map';
     mapTitle.style.textAlign = "center";
     mapTitle.style.margin = '10px';
     mapTitle.style.fontWeight = 'bold';
@@ -1002,7 +1002,7 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
     
     // Create actual map container
     const actualMapContainer = document.createElement('div');
-    actualMapContainer.id = 'actual-map-container' + id_indicator;
+    actualMapContainer.id = 'actual-map-container'+ id_indicator;
     actualMapContainer.style.position = 'absolute';
     actualMapContainer.style.top = '40px';
     actualMapContainer.style.bottom = '0';
@@ -1020,7 +1020,7 @@ async function createareaharvestedVisualizationPage(smallAreaFunction = null, wi
     
     // Create title for detail
     const detailTitle = document.createElement('h3');
-    detailTitle.textContent = 'Country Details'  + id_indicator;
+    detailTitle.textContent = 'Country Details';
     detailTitle.style.textAlign = "center";
     detailTitle.style.margin = '10px';
     detailTitle.style.fontWeight = 'bold';
