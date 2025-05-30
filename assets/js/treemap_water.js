@@ -496,7 +496,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .attr("text-anchor", "middle")
         // .attr("dominant-baseline", "middle")
         .attr("dy", "2em")
-        .style("font-size", "0.2em") // Slightly smaller font
+        .style("font-size", "0.5em") // Slightly smaller font
         .text(d => d.data.has_production ? "✔" : "")
         .transition().duration(500)
         .style("opacity", d => d.data.has_production ? 1 : 0);
@@ -551,8 +551,6 @@ document.addEventListener("DOMContentLoaded", function () {
         .style("opacity", 1);
       
     }
-
-    updateActiveElement(node.data.name);
   } 
   
   function drawBreadcrumb(ancestors) {
