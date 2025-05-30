@@ -57,7 +57,7 @@
   <div class="sliderContainer" id="time-slider-container"></div>
   </div>
 
-  <div class="map-text-container" id = "animal-slaugthered-container">
+  <div class="map-text-container" id = "animals-slaughtered-container">
         <h1>Animal slaughtered</h1>
       <p >Click on a country to see the area harvested for each food product.</p>
     <div class="maps-container" id ="maps-container-animal-slaugthered">
@@ -86,7 +86,8 @@
     });
     document.addEventListener('DOMContentLoaded', () => {
     window.viz_slaughtered = new Promise((resolve) => {
-        const vizObject = createanimalslaugtherVisualizationPage(
+      
+        const vizObject = createVisualizationPage(
             smallAreaFunction = null,
             width = 1000, 
             height = 500,
